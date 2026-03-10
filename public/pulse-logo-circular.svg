@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Background radial gradient for warm depth -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#2C271F" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#12100D" stop-opacity="1"/>
+    </radialGradient>
+
+    <!-- Green glow gradient for core -->
+    <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#30C476" stop-opacity="0.5"/>
+      <stop offset="40%" stop-color="#12693A" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#12100D" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Core dot gradient -->
+    <radialGradient id="dotGrad" cx="38%" cy="32%" r="60%">
+      <stop offset="0%" stop-color="#6EEEA8"/>
+      <stop offset="100%" stop-color="#30C476"/>
+    </radialGradient>
+
+    <!-- Ring glow filters -->
+    <filter id="ringGlow1" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="ringGlow2" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="coreFilter" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="dotFilter" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <!-- Circular mask -->
+    <mask id="circleMask">
+      <circle cx="512" cy="512" r="512" fill="white"/>
+    </mask>
+  </defs>
+
+  <!-- Apply circular mask to entire design -->
+  <g mask="url(#circleMask)">
+    <!-- Circular background -->
+    <circle cx="512" cy="512" r="512" fill="#12100D"/>
+    
+    <!-- Warm center bloom -->
+    <circle cx="512" cy="512" r="512" fill="url(#bgGlow)"/>
+
+    <!-- Ring 4 — outermost, barely visible -->
+    <circle cx="512" cy="512" r="268"
+      fill="none"
+      stroke="#30C476"
+      stroke-width="2"
+      stroke-opacity="0.15"
+      stroke-dasharray="1638 60"
+      stroke-dashoffset="-820"
+    />
+
+    <!-- Ring 3 -->
+    <circle cx="512" cy="512" r="192"
+      fill="none"
+      stroke="#30C476"
+      stroke-width="3"
+      stroke-opacity="0.37"
+      stroke-dasharray="1172 42"
+      stroke-dashoffset="-590"
+      filter="url(#ringGlow2)"
+    />
+
+    <!-- Ring 2 -->
+    <circle cx="512" cy="512" r="118"
+      fill="none"
+      stroke="#30C476"
+      stroke-width="4.5"
+      stroke-opacity="0.7"
+      stroke-dasharray="714 26"
+      stroke-dashoffset="-358"
+      filter="url(#ringGlow1)"
+    />
+
+    <!-- Ring 1 — innermost, boldest -->
+    <circle cx="512" cy="512" r="52"
+      fill="none"
+      stroke="#30C476"
+      stroke-width="6"
+      stroke-opacity="1"
+      stroke-dasharray="308 18"
+      stroke-dashoffset="-155"
+      filter="url(#ringGlow1)"
+    />
+
+    <!-- Core atmospheric glow -->
+    <circle cx="512" cy="512" r="90" fill="url(#coreGlow)"/>
+
+    <!-- Core dot — dark ring separator -->
+    <circle cx="512" cy="512" r="26" fill="#1C1A16"/>
+    <!-- Green fill -->
+    <circle cx="512" cy="512" r="22" fill="url(#dotGrad)" filter="url(#dotFilter)"/>
+    <!-- Bright inner -->
+    <circle cx="512" cy="512" r="22" fill="#30C476"/>
+    <circle cx="512" cy="512" r="12" fill="#6EEEA8"/>
+    <!-- Specular highlight -->
+    <ellipse cx="506" cy="503" rx="6" ry="5" fill="rgba(220,255,235,0.78)"/>
+  </g>
+
+  <!-- Optional subtle border -->
+  <circle cx="512" cy="512" r="508" fill="none" stroke="rgba(128,120,106,0.08)" stroke-width="2"/>
+</svg>
