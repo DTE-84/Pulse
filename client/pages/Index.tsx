@@ -193,6 +193,29 @@ export default function Index() {
           </p>
         </div>
         
+        {/* Nova Insight Briefing */}
+        <div className="bg-primary/5 border border-primary/20 rounded-[2rem] p-6 relative overflow-hidden group transition-all hover:bg-primary/10">
+          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+            <Sparkles size={120} className="text-primary" />
+          </div>
+          <div className="flex items-start gap-4 relative z-10">
+            <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0 border border-primary/20 shadow-[0_0_20px_rgba(45,237,156,0.2)]">
+               <div className="w-5 h-5 rounded-full bg-primary shadow-[0_0_15px_rgba(45,237,156,1)]" />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Live Briefing</span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded-full">
+                  {stats?.novaTone || 'Balanced'} Protocol
+                </span>
+              </div>
+              <p className="text-sm md:text-base text-white font-medium leading-relaxed max-w-3xl italic">
+                "{stats?.novaInsight || "I'm currently stabilizing your behavioral baseline. No critical deviations detected in your spending rhythm."}"
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <Link to="/nova" className="w-full sm:w-auto">
             <button className="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-5 py-3 rounded-full text-[10px] font-black transition-all group shadow-lg uppercase tracking-widest">
@@ -221,10 +244,10 @@ export default function Index() {
           colorClass="bg-primary"
         />
         <StatCard 
-          label="Predicted End" 
-          value={`$${stats?.predictedEndOfMonthBalance?.toLocaleString()}`} 
-          trend="up" 
-          trendValue="Advanced AI Forecast" 
+          label="Monthly Baseline" 
+          value={`$${stats?.baselineSpend || 2500}`} 
+          trend={stats?.monthlyExpenses > (stats?.baselineSpend || 2500) ? "up" : "down"} 
+          trendValue={`${Math.abs(Math.round(((stats?.monthlyExpenses || 0) / (stats?.baselineSpend || 1)) * 100 - 100))}%`} 
           colorClass="bg-blue-400"
         />
         <StatCard 
@@ -239,7 +262,7 @@ export default function Index() {
           value="14d" 
           trend="up" 
           trendValue="2d" 
-          colorClass="bg-blue-400"
+          colorClass="bg-primary"
           icon={Flame}
         />
       </div>
@@ -252,8 +275,8 @@ export default function Index() {
             title={trigger.name}
             subtitle={trigger.description || "Identified behavioral trajectory"}
             icon={Zap}
-            colorClass="text-primary"
-            chartColor="#2DED9C"
+            colorClass={trigger.status === 'Critical' ? 'text-red-400' : 'text-primary'}
+            chartColor={trigger.status === 'Critical' ? '#ef4444' : '#2DED9C'}
             stats={[
               { label: "Detected", value: trigger.status || "Active" },
               { label: "Impact", value: `$${trigger.impact || '0'}` },

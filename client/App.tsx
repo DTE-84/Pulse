@@ -1,11 +1,13 @@
-import "./global.css";
-
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+
+import "./global.css";
+
+// Page Imports
 import Index from "./pages/Index";
 import NovaChat from "./pages/NovaChat";
 import SpendingPage from "./pages/Spending";
@@ -25,10 +27,13 @@ const App = () => (
       <Toaster />
       <Sonner />
       <AuthProvider>
-        <BrowserRouter>
+        {/* 1. Added basename using Vite's environment variable */}
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
           <Routes>
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
+            
+            {/* 2. Main App Shell with Layout */}
             <Route path="*" element={
               <Layout>
                 <Routes>
