@@ -5,7 +5,7 @@ import path from "path";
 import { createServer } from "./server";
 
 export default defineConfig({
-  base: "/PULSE-AI NOVA FINANCE APP", // <-- edit ONLY if you need a trailing slash
+  base: "/Pulse/", // <-- corrected base path to match GitHub repo name
   plugins: [
     react(),
     {
