@@ -6,8 +6,12 @@ import { createServer } from "./server";
 
 
 
+
+
+
 export default defineConfig({
   plugins: [react()],
+  base: '/Pulse/',
   resolve: {
     alias: {
      
@@ -30,17 +34,21 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "dist/spa",
+    outDir: "dist",
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        main: path.resolve(__dirname, "client/index.html"),
+        main: path.resolve(__dirname, "index.html"),
       },
+      /* 
       output: {
         entryFileNames: "[name].js",
         chunkFileNames: "[name].js",
         assetFileNames: "[name][extname]",
       },
+      */
     },
-  },
-});
+      },
+    },
+ 
+);
