@@ -16,13 +16,38 @@
 
 ---
 
+## 🏗️ Financial User Behavior Pipeline: Tracking Impulse Triggers
+### From Raw Bank Logs to Impulse Spending Metrics using Python, PostgreSQL, and Jest
+
+```mermaid
+graph LR
+    A[Raw Bank CSVs / App Logs] -->|Extract| B(Python & Pandas)
+    B -->|Clean & Transform| C{PostgreSQL DB}
+    C -->|Star Schema Load| D[(Fact & Dim Tables)]
+    D -->|Validate| E[Jest Integration Tests]
+    D -->|Analyze| F[SQL Trigger Analytics]
+    
+    style B fill:#306998,stroke:#FFD43B,color:#fff
+    style C fill:#336791,stroke:#fff,color:#fff
+    style E fill:#C21325,stroke:#fff,color:#fff
+```
+
+### Architecture Decisions: The "Why"
+- **Python (Pandas)**: Bank statement data and user logs are notoriously messy. I utilized Pandas for its superior data-wrangling capabilities to standardize date formats, handle missing merchant data, and apply initial categorization (e.g., flagging late-night purchases as potential impulse triggers).
+- **Postgres (Star Schema)**: To extract behavioral insights, I designed a relational Star Schema. By separating the data into a Fact table (Transactions) and Dimension tables (Users, Merchants, Emotional Triggers), the AI and analytics engine can rapidly slice spending habits by mood, time of day, and category.
+- **Jest (Testing)**: When dealing with personal finance data, accuracy is critical. I integrated Jest to run child-process integration tests that validate the Python ETL pipeline, proving that the code is production-ready, testable, and mathematically accurate (e.g., ensuring debits/credits are correctly routed).
+
+---
+
 ## 🛠️ Technical Architecture
 
 | Component | Technology | Engineering Principle |
 | :--- | :--- | :--- |
+| **Data Ingestion** | Python 3.12, Pandas | Grouped Imputation & Ordinal Mapping |
+| **Warehouse** | PostgreSQL, Star Schema | Relational Integrity & Query Optimization |
 | **Frontend** | React 19, TypeScript, Vite | Zero-Latency Component Logic |
 | **Backend** | Node.js, Express, RESTful API | Modular Micro-Service Integration |
-| **Aesthetics** | Lux Forest Protocol (Obsidian/Kinetic Green) | High-Blur Glassmorphism & Motion Logic |
+| **Validation** | Jest, Python Unittest | End-to-End Automated Reliability |
 | **Intelligence** | Nova Analytical Engine (Gemini Pro) | Advanced Pattern Recognition |
 
 ---
