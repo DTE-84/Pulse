@@ -46,7 +46,7 @@ const Sidebar = () => {
             {/* LOGO CONTAINER */}
             <div className="relative z-10 w-12 h-12 rounded-full bg-black border border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(45,237,156,0.15)]">
               <img 
-                src="/pulse-logo-circular.svg" 
+                src="pulse-logo-circular.svg" 
                 alt="Nova" 
                 className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(45,237,156,0.6)]" 
               />
@@ -154,7 +154,7 @@ export const Layout = ({ children }: LayoutProps) => {
             <div className="relative w-10 h-10 flex items-center justify-center">
               <div className="absolute inset-0 bg-primary/20 rounded-full animate-pulse" />
               <div className="relative z-10 w-8 h-8 rounded-xl bg-black border border-primary/20 flex items-center justify-center">
-                <img src="/pulse-logo-circular.svg" alt="Nova" className="w-5 h-5 object-contain" />
+                <img src="pulse-logo-circular.svg" alt="Nova" className="w-5 h-5 object-contain" />
               </div>
             </div>
             <span className="font-black tracking-tighter uppercase text-lg text-white leading-none">Pulse</span>
