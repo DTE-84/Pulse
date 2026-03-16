@@ -1,20 +1,12 @@
-// vite.config.ts  (copy‑paste)
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { createServer } from "./server";
-
-
-
-
-
 
 export default defineConfig({
   plugins: [react()],
   base: '/Pulse/',
   resolve: {
     alias: {
-     
       "@": path.resolve(__dirname, "./client"),
     },
   },
@@ -34,21 +26,12 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "dist",
+    outDir: "dist/spa",
     emptyOutDir: true,
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, "index.html"),
       },
-      /* 
-      output: {
-        entryFileNames: "[name].js",
-        chunkFileNames: "[name].js",
-        assetFileNames: "[name][extname]",
-      },
-      */
     },
-      },
-    },
- 
-);
+  },
+});
