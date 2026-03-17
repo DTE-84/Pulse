@@ -1,0 +1,21 @@
+date,amount,category,risk_category
+2023-10-01,1200.00,Rent,Essential
+2023-10-02,45.50,Groceries,Essential
+2023-10-03,12.99,Netflix,Lifestyle
+2023-10-04,150.00,Dining Out,Lifestyle
+2023-10-05,250.00,New Headphones,Impulse
+2023-10-06,30.00,Gas,Essential
+2023-10-07,85.00,Concert Ticket,Lifestyle
+2023-10-08,12.00,Coffee,Lifestyle
+2023-10-09,500.00,Car Repair,Critical
+2023-10-10,100.00,Utility Bill,Essential
+2023-10-11,25.00,Book,Lifestyle
+2023-10-12,200.00,Weekend Trip,Lifestyle
+2023-10-13,40.00,Gym,Essential
+2023-10-14,300.00,Gaming Console,Impulse
+2023-10-15,60.00,Internet,Essential
+2023-10-16,15.00,Lunch,Lifestyle
+2023-10-17,90.00,Phone Bill,Essential
+2023-10-18,110.00,Shoes,Impulse
+2023-10-19,20.00,Uber,Lifestyle
+2023-10-20,50.00,Gift,Lifestyle

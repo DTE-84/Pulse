@@ -1,27 +1,73 @@
 import { RequestHandler } from "express";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const handleStats: RequestHandler = (req, res) => {
   // In a real app, we'd get the user from the request session/token
-  // For this polish, we'll assume a default or use the request body if available
   const user = (req as any).user || {
     baselineSpend: 2500,
     novaTone: "Balanced",
     intentions: ["Wealth Accrual"]
   };
 
-  const totalBalance = 12450.80;
+  const dbPath = path.resolve(__dirname, "../db/pulse_ingest.csv");
   
+  let totalBalance = 12450.80;
+  let currentMonthSpend = 0;
+  let dailyVelocity = 0;
+  let behavioralScore = 0;
+  let transactionCount = 0;
+
+  try {
+    if (fs.existsSync(dbPath)) {
+      const data = fs.readFileSync(dbPath, "utf-8");
+      const rows = data.split("\n").slice(1).filter(row => row.trim() !== "");
+      
+      rows.forEach(row => {
+        const columns = row.split(",");
+        // CSV: date,amount,category,risk_category,behavioral_ordinal,rolling_velocity
+        const amount = parseFloat(columns[1]);
+        const ordinal = parseFloat(columns[4]);
+        
+        if (!isNaN(amount)) currentMonthSpend += amount;
+        if (!isNaN(ordinal)) {
+            behavioralScore += ordinal;
+            transactionCount++;
+        }
+      });
+      
+      if (transactionCount > 0) {
+        behavioralScore = behavioralScore / transactionCount;
+      }
+    } else {
+        // Fallback if no data
+        currentMonthSpend = 2150.00; 
+        behavioralScore = 2; // Balanced
+    }
+  } catch (err) {
+    console.error("Error reading pulse_ingest.csv:", err);
+    currentMonthSpend = 2150.00;
+  }
+
+  // Determine Nova Tone based on behavioral score
+  // 1=Essential (Safe), 2=Lifestyle (Balanced), 3=Impulse (Risk), 4=Critical (High Risk)
+  if (behavioralScore > 2.5) user.novaTone = "Aggressive";
+  else if (behavioralScore < 1.5) user.novaTone = "Conservative"; // Or "Empathetic"
+  else user.novaTone = "Balanced";
+
+
   const now = new Date();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const dayOfMonth = now.getDate();
   const daysRemaining = daysInMonth - dayOfMonth;
   
-  // Simulated current spend - in real app would come from DB/Plaid
-  const currentMonthSpend = 2150.00;
-  const dailyVelocity = currentMonthSpend / dayOfMonth;
+  dailyVelocity = currentMonthSpend / (dayOfMonth || 1); // Avoid div by 0
   const projectedAdditionalSpend = dailyVelocity * daysRemaining;
-  
-  const predictedBalance = totalBalance - (projectedAdditionalSpend > 0 ? projectedAdditionalSpend : 0);
+  const predictedBalance = totalBalance - currentMonthSpend - (projectedAdditionalSpend > 0 ? projectedAdditionalSpend : 0);
 
   // Generate dynamic triggers based on Nova Tone
   let triggers = [];
@@ -33,7 +79,7 @@ export const handleStats: RequestHandler = (req, res) => {
       { id: 2, name: "Capital Leak", impact: 120, status: "Active", insight: "Subscription bloat detected. Pruning required for Wealth Accrual." }
     ];
     insight = "Nova (Aggressive): You're drifting from your baseline. Tighten the perimeter or your end-of-month target is compromised.";
-  } else if (user.novaTone === "Empathetic") {
+  } else if (user.novaTone === "Conservative") { // Map back to Empathetic logic for now
     triggers = [
       { id: 1, name: "Self-Care Surge", impact: 85, status: "Monitored", insight: "Small uptick in comfort spending. Is this a stress response?" },
       { id: 2, name: "Rhythm Shift", impact: 40, status: "Active", insight: "Your morning pattern has changed. Let's find your balance again." }

@@ -42,38 +42,43 @@ const chartData = [
 ];
 
 const StatCard = ({ label, value, trend, trendValue, icon: Icon, colorClass }: any) => (
-  <div className="bg-[#12110F] border border-white/5 rounded-2xl p-6 relative overflow-hidden group hover:bg-[#1A1917] transition-all">
-    <div className={cn("absolute top-0 left-0 w-1 h-full opacity-50", colorClass)} />
+  <div className="bg-[#0A0907] border border-white/[0.03] rounded-3xl p-6 relative overflow-hidden group hover:bg-[#11100D] transition-all hover:border-white/10 shadow-2xl">
+    <div className={cn("absolute top-0 left-0 w-1.5 h-full opacity-30 group-hover:opacity-100 transition-opacity", colorClass)} />
     <div className="flex justify-between items-start mb-4">
-      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">{label}</span>
-      {Icon && <Icon className="w-4 h-4 text-primary opacity-50" />}
+      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.25em]">{label}</span>
+      {Icon && <Icon className="w-4 h-4 text-primary opacity-30 group-hover:opacity-100 transition-all" />}
     </div>
-    <div className="text-3xl font-bold mb-3 tracking-tight">{value}</div>
-    <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-tight">
-      <span className={cn(trend === "up" ? "text-red-400" : "text-primary", "flex items-center gap-0.5")}>
-        {trend === "up" ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
+    <div className="text-3xl font-black mb-3 tracking-tighter text-white">{value}</div>
+    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+      <span className={cn(trend === "up" ? "text-red-400" : "text-primary", "flex items-center gap-0.5 bg-white/5 px-2 py-0.5 rounded-full")}>
+        {trend === "up" ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
         {trendValue}
       </span>
-      <span className="text-muted-foreground/60">vs last month</span>
+      <span className="text-muted-foreground/40 italic">vs Period Baseline</span>
     </div>
+    {/* Subtle Inner Glow */}
+    <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
   </div>
 );
 
 const TriggerCard = ({ title, subtitle, icon: Icon, stats, chartColor, aiTip, colorClass }: any) => (
-  <div className="bg-[#12110F] border border-white/5 rounded-[2.5rem] p-8 flex flex-col h-full group hover:border-white/10 transition-all hover:bg-[#151412] shadow-2xl">
-    <div className="flex justify-between items-start mb-8">
-      <div className="flex gap-5">
-        <div className={cn("w-14 h-14 rounded-3xl flex items-center justify-center bg-white/5 border border-white/5 shadow-inner transition-transform group-hover:scale-105", colorClass)}>
-          <Icon className="w-7 h-7" />
+  <div className="bg-[#0A0907] border border-white/[0.03] rounded-[3rem] p-8 flex flex-col h-full group hover:border-white/10 transition-all hover:bg-[#0E0D0B] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden">
+    {/* Scanline Overlay */}
+    <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,13,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%]" />
+    
+    <div className="flex justify-between items-start mb-10 relative z-10">
+      <div className="flex gap-6">
+        <div className={cn("w-16 h-16 rounded-[2rem] flex items-center justify-center bg-white/[0.02] border border-white/5 shadow-2xl transition-all group-hover:scale-105 group-hover:border-primary/20 group-hover:bg-primary/5", colorClass)}>
+          <Icon className="w-8 h-8" />
         </div>
         <div>
-          <h3 className="font-bold text-xl mb-1 text-white">{title}</h3>
-          <p className="text-xs text-muted-foreground font-medium leading-tight">{subtitle}</p>
+          <h3 className="font-black text-2xl mb-1 text-white tracking-tighter">{title}</h3>
+          <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest leading-tight opacity-70">{subtitle}</p>
         </div>
       </div>
-      <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground bg-white/5 px-2.5 py-1 rounded-full uppercase tracking-widest">
-        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-        Active
+      <div className="flex items-center gap-2 text-[9px] font-black text-primary bg-primary/10 px-3 py-1.5 rounded-full uppercase tracking-[0.2em] border border-primary/20">
+        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(45,237,156,1)]" />
+        Nova Active
       </div>
     </div>
 
@@ -149,7 +154,32 @@ const TriggerCard = ({ title, subtitle, icon: Icon, stats, chartColor, aiTip, co
 export default function Index() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [analyzing, setAnalyzing] = useState(false);
   const { user } = useAuth();
+  const { toast } = useToast();
+
+  const runAnalysis = () => {
+    setAnalyzing(true);
+    toast({
+      title: "Nova Deep Scan Initialized",
+      description: "Analyzing high-velocity behavioral trajectories...",
+    });
+    setTimeout(() => {
+      setAnalyzing(false);
+      toast({
+        title: "Analysis Complete",
+        description: "No immediate threats detected beyond the known capital breach.",
+      });
+    }, 3000);
+  };
+
+  const executeDemand = () => {
+    toast({
+      variant: "destructive",
+      title: "Protocol Executed",
+      description: "Demand for payment issued to Mahogany. Tracking for response.",
+    });
+  };
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -217,12 +247,14 @@ export default function Index() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <Link to="/nova" className="w-full sm:w-auto">
-            <button className="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-5 py-3 rounded-full text-[10px] font-black transition-all group shadow-lg uppercase tracking-widest">
-              <Play className="w-3 h-3 fill-red-400" />
-              Initialize AI Analysis
+            <button 
+              onClick={runAnalysis}
+              disabled={analyzing}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-5 py-3 rounded-full text-[10px] font-black transition-all group shadow-lg uppercase tracking-widest disabled:opacity-50"
+            >
+              {analyzing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3 fill-red-400" />}
+              {analyzing ? "Analyzing Telemetry..." : "Initialize AI Analysis"}
             </button>
-          </Link>
           <div className="flex gap-2 w-full sm:w-auto">
             <div className="flex-1 sm:flex-none text-center bg-white/5 border border-white/5 px-4 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest text-muted-foreground">
               Last 30d
@@ -244,18 +276,19 @@ export default function Index() {
           colorClass="bg-primary"
         />
         <StatCard 
+          label="Target Recovery" 
+          value="$10,000" 
+          trend="down" 
+          trendValue="Critical" 
+          colorClass="bg-red-500"
+          icon={AlertCircle}
+        />
+        <StatCard 
           label="Monthly Baseline" 
           value={`$${stats?.baselineSpend || 2500}`} 
           trend={stats?.monthlyExpenses > (stats?.baselineSpend || 2500) ? "up" : "down"} 
           trendValue={`${Math.abs(Math.round(((stats?.monthlyExpenses || 0) / (stats?.baselineSpend || 1)) * 100 - 100))}%`} 
           colorClass="bg-blue-400"
-        />
-        <StatCard 
-          label="Awareness" 
-          value="82%" 
-          trend="up" 
-          trendValue="5%" 
-          colorClass="bg-orange-400"
         />
         <StatCard 
           label="Mindful Streak" 
@@ -265,6 +298,43 @@ export default function Index() {
           colorClass="bg-primary"
           icon={Flame}
         />
+      </div>
+
+      {/* Asset Recovery Mission Section */}
+      <div className="bg-red-500/5 border border-red-500/20 rounded-[2.5rem] p-8 relative overflow-hidden group">
+        <div className="absolute top-0 right-0 p-8 opacity-5">
+           <AlertCircle size={100} className="text-red-500" />
+        </div>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-[10px] font-black uppercase tracking-widest bg-red-500/10 text-red-400 border-red-500/20">
+                Critical Asset Recovery
+              </Badge>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Target: Mahogany (10k)</span>
+            </div>
+            <h2 className="text-2xl font-black text-white tracking-tighter">Non-Performing Asset Management</h2>
+            <p className="text-sm text-muted-foreground font-medium max-w-xl">
+              Recovery protocol initialized for $10,000 capital breach. Status: <span className="text-red-400 font-bold">Delinquent</span>. 
+              Liquidity gap identified. Redirecting Nova analysis to prioritize high-velocity income generation.
+            </p>
+          </div>
+          <div className="w-full md:w-64 space-y-3">
+            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+              <span>Recovery Progress</span>
+              <span className="text-red-400">0% Collected</span>
+            </div>
+            <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+              <div className="h-full bg-red-500 w-[2%] shadow-[0_0_15px_rgba(239,68,68,0.5)]" />
+            </div>
+            <button 
+              onClick={executeDemand}
+              className="w-full bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+            >
+              Execute Demand Protocol
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Triggers Grid */}

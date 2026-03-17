@@ -1,0 +1,21 @@
+date,amount,category,risk_category,behavioral_ordinal,rolling_velocity
+2023-10-01,1200.0,Rent,Essential,1,
+2023-10-02,45.5,Groceries,Essential,1,
+2023-10-03,12.99,Netflix,Lifestyle,2,419.49666666666667
+2023-10-04,150.0,Dining Out,Lifestyle,2,69.49666666666667
+2023-10-05,250.0,New Headphones,Impulse,3,137.66333333333333
+2023-10-06,30.0,Gas,Essential,1,143.33333333333334
+2023-10-07,85.0,Concert Ticket,Lifestyle,2,121.66666666666667
+2023-10-08,12.0,Coffee,Lifestyle,2,42.333333333333336
+2023-10-09,500.0,Car Repair,Critical,4,199.0
+2023-10-10,100.0,Utility Bill,Essential,1,204.0
+2023-10-11,25.0,Book,Lifestyle,2,208.33333333333334
+2023-10-12,200.0,Weekend Trip,Lifestyle,2,108.33333333333333
+2023-10-13,40.0,Gym,Essential,1,88.33333333333333
+2023-10-14,300.0,Gaming Console,Impulse,3,180.0
+2023-10-15,60.0,Internet,Essential,1,133.33333333333334
+2023-10-16,15.0,Lunch,Lifestyle,2,125.0
+2023-10-17,90.0,Phone Bill,Essential,1,55.0
+2023-10-18,110.0,Shoes,Impulse,3,71.66666666666667
+2023-10-19,20.0,Uber,Lifestyle,2,73.33333333333333
+2023-10-20,50.0,Gift,Lifestyle,2,60.0

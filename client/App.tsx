@@ -16,6 +16,8 @@ import ReportsPage from "./pages/Reports";
 import AuthPage from "./pages/Auth";
 import OnboardingPage from "./pages/Onboarding";
 import SubscriptionPage from "./pages/Subscription";
+import SettingsPage from "./pages/Settings";
+import OutreachPage from "./pages/Outreach";
 import NotFound from "./pages/NotFound";
 import { Layout } from "./components/Layout";
 
@@ -41,6 +43,8 @@ const App = () => (
                   <Route path="/nova" element={<NovaChat />} />
                   <Route path="/spending" element={<SpendingPage />} />
                   <Route path="/growth" element={<GrowthPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/outreach" element={<OutreachPage />} />
                   <Route path="/triggers" element={<Index />} />
                   <Route path="/reports" element={<ReportsPage />} />
                   <Route path="/subscription" element={<SubscriptionPage />} />

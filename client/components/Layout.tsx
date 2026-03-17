@@ -14,8 +14,10 @@ import {
   LogOut,
   User,
   X,
-  Menu
-} from "lucide-react";
+  Menu,
+  Mail
+  } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 interface LayoutProps {
@@ -28,6 +30,7 @@ const menuItems = [
   { icon: Zap, label: "Triggers", href: "/triggers" },
   { icon: CreditCard, label: "Spending", href: "/spending" },
   { icon: TrendingUp, label: "Growth", href: "/growth" },
+  { icon: Settings, label: "Settings", href: "/settings" },
 ];
 
 const Sidebar = () => {
@@ -44,11 +47,19 @@ const Sidebar = () => {
             <div className="absolute inset-2 bg-primary/10 rounded-full animate-pulse [animation-duration:2s]" />
             
             {/* LOGO CONTAINER */}
-            <div className="relative z-10 w-12 h-12 rounded-full bg-black border border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(45,237,156,0.15)]">
-              <img 
-                src="pulse-logo-circular.svg" 
-                alt="Nova" 
-                className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(45,237,156,0.6)]" 
+            <div className="relative z-10 w-12 h-12 rounded-full bg-black border border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(45,237,156,0.15)] overflow-hidden">
+              <div 
+                className="w-full h-full bg-primary"
+                style={{
+                  maskImage: 'url(/pulse-logo-circular.svg)',
+                  WebkitMaskImage: 'url(/pulse-logo-circular.svg)',
+                  maskRepeat: 'no-repeat',
+                  WebkitMaskRepeat: 'no-repeat',
+                  maskPosition: 'center',
+                  WebkitMaskPosition: 'center',
+                  maskSize: 'contain',
+                  WebkitMaskSize: 'contain'
+                }}
               />
             </div>
 
@@ -153,8 +164,20 @@ export const Layout = ({ children }: LayoutProps) => {
           <div className="flex items-center gap-3">
             <div className="relative w-10 h-10 flex items-center justify-center">
               <div className="absolute inset-0 bg-primary/20 rounded-full animate-pulse" />
-              <div className="relative z-10 w-8 h-8 rounded-xl bg-black border border-primary/20 flex items-center justify-center">
-                <img src="pulse-logo-circular.svg" alt="Nova" className="w-5 h-5 object-contain" />
+            <div className="relative z-10 w-8 h-8 rounded-xl bg-black border border-primary/20 flex items-center justify-center overflow-hidden">
+                <div 
+                  className="w-full h-full bg-primary"
+                  style={{
+                    maskImage: 'url(/pulse-logo-circular.svg)',
+                    WebkitMaskImage: 'url(/pulse-logo-circular.svg)',
+                    maskRepeat: 'no-repeat',
+                    WebkitMaskRepeat: 'no-repeat',
+                    maskPosition: 'center',
+                    WebkitMaskPosition: 'center',
+                    maskSize: 'contain',
+                    WebkitMaskSize: 'contain'
+                  }}
+                />
               </div>
             </div>
             <span className="font-black tracking-tighter uppercase text-lg text-white leading-none">Pulse</span>

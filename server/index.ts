@@ -1,6 +1,9 @@
-﻿import "dotenv/config";
-import express from "express";
-import cors from "cors";
+import "dotenv/config";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const express = require("express");
+const cors = require("cors");
+
 import { handleDemo } from "./routes/demo";
 import { handleStats } from "./routes/stats";
 import { handleLogin, handleSignup, handleMe } from "./routes/auth";

@@ -4,8 +4,15 @@ import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET || "dte-high-fidelity-secret";
 
 // MOCK DATABASE FOR INITIAL STITCHING
-// In production, this will interface with your Postgres/Prisma layer
-const users: any[] = [];
+const users: any[] = [
+  {
+    id: "1",
+    email: "drewt@dte.solutions",
+    password: "password",
+    name: "Drew Ernst",
+    onboardingCompleted: true
+  }
+];
 
 export const handleLogin = (req: Request, res: Response) => {
   const { email, password } = req.body;

@@ -151,7 +151,7 @@ export default function AuthPage() {
                 <div className="absolute inset-0 bg-primary/20 rounded-full animate-pulse" />
                 <div className="relative z-10 w-14 h-14 rounded-2xl bg-black border border-primary/20 flex items-center justify-center shadow-2xl">
                   <img
-                    src="/public/pulse-logo-circular.svg"
+                    src="/pulse-logo-circular.svg"
                     alt="Nova"
                     className="w-8 h-8 object-contain"
                   />
