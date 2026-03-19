@@ -19,7 +19,11 @@
     "start": "node dist/server/node-build.mjs",
     "test": "vitest --run",
     "format.fix": "prettier --write .",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "dev:server:start": "pm2 start ecosystem.config.js",
+    "dev:server:stop": "pm2 stop pulse-api",
+    "dev:server:restart": "pm2 restart pulse-api",
+    "dev:server:logs": "pm2 logs pulse-api"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.1.4",
@@ -86,6 +90,7 @@
     "input-otp": "^1.4.2",
     "lucide-react": "^0.539.0",
     "next-themes": "^0.4.6",
+    "pm2": "^6.0.14",
     "postcss": "^8.5.8",
     "prettier": "^3.6.2",
     "react": "^19.0.0",
