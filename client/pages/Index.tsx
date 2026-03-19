@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+
 import { 
   ArrowDownRight, 
   ArrowUpRight, 
@@ -30,7 +31,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { statsAPI } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "sonner";
+
 
 const chartData = [
   { day: "M", value: 30 },
@@ -157,7 +158,7 @@ export default function Index() {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const { user } = useAuth();
-  const { toast } = useToast();
+  
 
   const runAnalysis = () => {
     setAnalyzing(true);

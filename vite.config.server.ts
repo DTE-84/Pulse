@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import path from "path";
 import react from "@vitejs/plugin-react-swc";
+
 import { useToast } from "@/hooks/use-toast";
 
 
@@ -12,12 +13,9 @@ export function MyComponent() {
 
 
 
-export function MyComponent() {
-  const { toast } = useToast(); // Initialize the hook
 
-
-
-// Server build configuration
+  return null;
+}
 export default defineConfig({
   build: {
     lib: {
@@ -68,4 +66,3 @@ export default defineConfig({
   },
   plugins: [react()],
 });
-
