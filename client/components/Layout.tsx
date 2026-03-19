@@ -19,6 +19,7 @@ import {
   } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -36,6 +37,7 @@ const menuItems = [
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   return (
     <aside className="hidden lg:flex flex-col w-72 h-screen bg-[#0A0907] border-r border-white/5 sticky top-0 overflow-hidden">
@@ -97,17 +99,20 @@ const Sidebar = () => {
 
       <div className="mt-auto p-8 border-t border-white/5 bg-black/20">
         <div
-          onClick={() => navigate("/auth")}
+          onClick={() => {
+            logout();
+            navigate("/auth");
+          }}
           className="flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-2xl cursor-pointer group hover:bg-white/[0.08] transition-all mb-8"
         >
           <div className="relative shrink-0">
             <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/20 group-hover:scale-110 transition-transform">
-               <div className="w-4 h-4 rounded-full bg-primary shadow-[0_0_10px_rgba(45,237,156,0.5)]" />
+               <LogOut className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
             </div>
           </div>
           <div className="flex-1 overflow-hidden">
-            <div className="text-xs font-black truncate text-white uppercase tracking-widest">Advanced Consultant</div>
-            <div className="text-[9px] text-primary/80 truncate font-bold uppercase tracking-tight">System Integrity Active</div>
+            <div className="text-xs font-black truncate text-white uppercase tracking-widest">Logout</div>
+            <div className="text-[9px] text-primary/80 truncate font-bold uppercase tracking-tight">Terminate Session</div>
           </div>
         </div>
 
@@ -154,6 +159,9 @@ const MobileNav = () => {
 };
 
 export const Layout = ({ children }: LayoutProps) => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
   return (
     <div className="flex min-h-screen bg-[#050505] text-white font-sans selection:bg-primary/30">
       <Sidebar />
@@ -183,9 +191,15 @@ export const Layout = ({ children }: LayoutProps) => {
             <span className="font-black tracking-tighter uppercase text-lg text-white leading-none">Pulse</span>
           </div>
           <div className="flex items-center gap-4">
-            <div className="w-9 h-9 rounded-full bg-white/5 border border-white/5 flex items-center justify-center">
-              <User className="w-4 h-4 text-primary" />
-            </div>
+            <button 
+              onClick={() => {
+                logout();
+                navigate("/auth");
+              }}
+              className="w-9 h-9 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-red-500/10 transition-colors"
+            >
+              <LogOut className="w-4 h-4 text-primary hover:text-red-400" />
+            </button>
           </div>
         </header>
 
