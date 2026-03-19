@@ -23,7 +23,7 @@ export const authAPI = {
   login: (data: any) => API.post('/api/auth/login', data),
   signup: (data: any) => API.post('/api/auth/signup', data),
   me: () => API.get('/api/auth/me'),
-  updateProfile: (data: any) => API.put('/api/auth/profile', data),
+  updateProfile: (data: any) => API.patch('/api/auth/update', data),
 };
 
 export const transactionsAPI = {

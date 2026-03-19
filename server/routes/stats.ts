@@ -16,7 +16,7 @@ export const handleStats: RequestHandler = (req, res) => {
 
   const dbPath = path.resolve(__dirname, "../db/pulse_ingest.csv");
   
-  let totalBalance = 12450.80;
+  let totalBalance = 0;
   let currentMonthSpend = 0;
   let dailyVelocity = 0;
   let behavioralScore = 0;
@@ -43,20 +43,19 @@ export const handleStats: RequestHandler = (req, res) => {
       if (transactionCount > 0) {
         behavioralScore = behavioralScore / transactionCount;
       }
+      totalBalance = 12450.80; // Only set balance if we have data
     } else {
-        // Fallback if no data
-        currentMonthSpend = 2150.00; 
-        behavioralScore = 2; // Balanced
+        // Empty state for demo
+        currentMonthSpend = 0; 
+        behavioralScore = 0; 
     }
   } catch (err) {
     console.error("Error reading pulse_ingest.csv:", err);
-    currentMonthSpend = 2150.00;
   }
 
   // Determine Nova Tone based on behavioral score
-  // 1=Essential (Safe), 2=Lifestyle (Balanced), 3=Impulse (Risk), 4=Critical (High Risk)
   if (behavioralScore > 2.5) user.novaTone = "Aggressive";
-  else if (behavioralScore < 1.5) user.novaTone = "Conservative"; // Or "Empathetic"
+  else if (behavioralScore > 0 && behavioralScore < 1.5) user.novaTone = "Conservative";
   else user.novaTone = "Balanced";
 
 

@@ -30,6 +30,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { statsAPI } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "sonner";
 
 const chartData = [
   { day: "M", value: 30 },

@@ -3,16 +3,36 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "dte-high-fidelity-secret";
 
-// MOCK DATABASE FOR INITIAL STITCHING
+// SYSTEM ARCHITECT ACCOUNT
 const users: any[] = [
   {
-    id: "1",
+    id: "dte-architect",
     email: "drewt@dte.solutions",
-    password: "password",
+    password: "password", // Change in production
     name: "Drew Ernst",
-    onboardingCompleted: true
+    onboardingCompleted: false
   }
 ];
+
+export const handleMe = (req: Request, res: Response) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ message: "Authentication token missing." });
+
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded: any = jwt.verify(token, JWT_SECRET);
+    const user = users.find(u => u.id === decoded.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User entity not found." });
+    }
+
+    // Return essential user info without sensitive details like password
+    res.json({ id: user.id, email: user.email, name: user.name, onboardingCompleted: user.onboardingCompleted });
+  } catch (err) {
+    res.status(401).json({ message: "Invalid or expired token." });
+  }
+};
 
 export const handleLogin = (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -41,14 +61,21 @@ export const handleSignup = (req: Request, res: Response) => {
   res.status(201).json({ token, user: { id: newUser.id, email: newUser.email, name: newUser.name, onboardingCompleted: newUser.onboardingCompleted } });
 };
 
-export const handleMe = (req: Request, res: Response) => {
+export const handleUpdateProfile = (req: Request, res: Response) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ message: "Authentication required." });
 
   const token = authHeader.split(" ")[1];
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    res.json({ user: decoded });
+    const decoded: any = jwt.verify(token, JWT_SECRET);
+    const userIndex = users.findIndex(u => u.id === decoded.id);
+    
+    if (userIndex === -1) {
+      return res.status(404).json({ message: "Entity not found." });
+    }
+
+    users[userIndex] = { ...users[userIndex], ...req.body };
+    res.json({ message: "Profile synchronized with Ecosystem.", user: users[userIndex] });
   } catch (err) {
     res.status(401).json({ message: "Session expired or invalid token." });
   }
