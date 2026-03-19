@@ -1,29 +1,21 @@
 import { defineConfig } from "vite";
 import path from "path";
-"use client"; // Required if using Next.js App Router
-
+import react from "@vitejs/plugin-react-swc";
 import { useToast } from "@/hooks/use-toast";
+
+
+export function MyComponent() {
+  const { toast } = useToast();
+
+ 
+    
+
+
 
 export function MyComponent() {
   const { toast } = useToast(); // Initialize the hook
 
-  return (
-    "use client"; // Required if using Next.js App Router
 
-import { useToast } from "@/hooks/use-toast";
-
-export function MyComponent() {
-  const { toast } = useToast(); // Initialize the hook
-
-  return (
-    <button onClick={() => toast({ title: "Success!" })}>
-      Show Toast
-    </button>
-  );
-}
-
-  );
-}
 
 // Server build configuration
 export default defineConfig({
@@ -74,4 +66,6 @@ export default defineConfig({
   define: {
     "process.env.NODE_ENV": '"production"',
   },
+  plugins: [react()],
 });
+
