@@ -28,6 +28,7 @@ export const authAPI = {
 
 export const transactionsAPI = {
   getAll: (params: any) => API.get('/api/finance/transactions', { params }),
+  ingest: (data: any) => API.post('/api/finance/ingest', data),
   uploadReceipt: (formData: FormData) => API.post('/api/finance/upload-receipt', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),

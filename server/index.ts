@@ -7,6 +7,7 @@ const cors = require("cors");
 import { handleDemo } from "./routes/demo";
 import { handleStats } from "./routes/stats";
 import { handleLogin, handleSignup, handleMe, handleUpdateProfile } from "./routes/auth";
+import { handleIngest } from "./routes/ingest";
 
 export function createServer() {
   const app = express();
@@ -24,6 +25,7 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
   app.get("/api/stats", handleStats);
+  app.post("/api/finance/ingest", handleIngest);
   app.post("/api/auth/login", handleLogin);
   app.post("/api/auth/signup", handleSignup);
   app.get("/api/auth/me", handleMe);

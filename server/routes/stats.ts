@@ -43,7 +43,9 @@ export const handleStats: RequestHandler = (req, res) => {
       if (transactionCount > 0) {
         behavioralScore = behavioralScore / transactionCount;
       }
-      totalBalance = 12450.80; // Only set balance if we have data
+      // Natural Balance Logic: Start at a baseline and subtract ingested spend
+      const baseBalance = 15000.00;
+      totalBalance = baseBalance - currentMonthSpend; 
     } else {
         // Empty state for demo
         currentMonthSpend = 0; 

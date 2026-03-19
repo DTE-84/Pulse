@@ -15,7 +15,9 @@ import {
   ExternalLink,
   AlertCircle,
   Loader2,
-  Sparkles
+  Sparkles,
+  Database,
+  RefreshCcw
 } from "lucide-react";
 import { 
   BarChart, 
@@ -29,7 +31,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { statsAPI } from "@/lib/api";
+import { statsAPI, transactionsAPI } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -160,6 +162,46 @@ export default function Index() {
   const [analyzing, setAnalyzing] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const [syncing, setSyncing] = useState(false);
+
+  const syncData = async () => {
+    setSyncing(true);
+    toast({
+      title: "Syncing Nexus Telemetry",
+      description: "Processing natural input via Python Wrangler...",
+    });
+
+    try {
+      // In a real live test, you'd have a modal to paste JSON
+      // For this first step, we'll sync a test set of "Natural Input"
+      const naturalInput = [
+        { date: "2026-03-15", amount: 150.00, category: "Dining", risk_category: "Lifestyle" },
+        { date: "2026-03-16", amount: 45.00, category: "Transport", risk_category: "Essential" },
+        { date: "2026-03-17", amount: 800.00, category: "Tech", risk_category: "Impulse" },
+        { date: "2026-03-18", amount: 1200.00, category: "Rent", risk_category: "Essential" },
+        { date: "2026-03-19", amount: 60.00, category: "Sub", risk_category: "Lifestyle" }
+      ];
+
+      await transactionsAPI.ingest({ transactions: naturalInput });
+      
+      // Refresh stats
+      const res = await statsAPI.get();
+      setStats(res.data);
+
+      toast({
+        title: "Nexus Synchronized",
+        description: "Your behavioral dashboard is now live.",
+      });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Sync Failed",
+        description: "Behavioral Wrangler connection was interrupted.",
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
   
 
   const runAnalysis = () => {
@@ -258,6 +300,14 @@ export default function Index() {
             >
               {analyzing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3 fill-red-400" />}
               {analyzing ? "Analyzing Telemetry..." : "Initialize AI Analysis"}
+            </button>
+            <button 
+              onClick={syncData}
+              disabled={syncing}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-5 py-3 rounded-full text-[10px] font-black transition-all group shadow-lg uppercase tracking-widest disabled:opacity-50"
+            >
+              {syncing ? <RefreshCcw className="w-3 h-3 animate-spin" /> : <Database className="w-3 h-3" />}
+              {syncing ? "Syncing..." : "Sync Nexus Data"}
             </button>
           <div className="flex gap-2 w-full sm:w-auto">
             <div className="flex-1 sm:flex-none text-center bg-white/5 border border-white/5 px-4 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest text-muted-foreground">
