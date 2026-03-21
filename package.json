@@ -11,8 +11,10 @@
     ]
   },
   "scripts": {
-    "dev": "vite",
-    "dev:server": "vite --config vite.config.server.mts",
+    "dev:client": "vite",
+    "dev:server": "tsx watch server/node-build.ts",
+    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
+    
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",
     "build:server": "vite build --config vite.config.server.mts",
@@ -28,9 +30,11 @@
   "dependencies": {
     "@vitejs/plugin-react": "^5.1.4",
     "axios": "^1.13.6",
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.3",
+    "pg": "^8.20.0",
     "stripe": "^20.4.1",
     "undici": "^7.24.1",
     "zod": "^3.25.76"
@@ -70,10 +74,12 @@
     "@tailwindcss/postcss": "^4.0.9",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/react-query": "^5.84.2",
+    "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.2.1",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@types/three": "^0.176.0",

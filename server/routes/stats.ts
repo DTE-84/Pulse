@@ -1,107 +1,101 @@
 import { RequestHandler } from "express";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import { query } from "../db/db";
+import jwt from "jsonwebtoken";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const JWT_SECRET = process.env.JWT_SECRET || "dte-high-fidelity-secret";
 
-export const handleStats: RequestHandler = (req, res) => {
-  // In a real app, we'd get the user from the request session/token
-  const user = (req as any).user || {
-    baselineSpend: 2500,
-    novaTone: "Balanced",
-    intentions: ["Wealth Accrual"]
-  };
+export const handleStats: RequestHandler = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ message: "Authentication required." });
 
-  const dbPath = path.resolve(__dirname, "../db/pulse_ingest.csv");
-  
-  let totalBalance = 0;
-  let currentMonthSpend = 0;
-  let dailyVelocity = 0;
-  let behavioralScore = 0;
-  let transactionCount = 0;
-
+  const token = authHeader.split(" ")[1];
   try {
-    if (fs.existsSync(dbPath)) {
-      const data = fs.readFileSync(dbPath, "utf-8");
-      const rows = data.split("\n").slice(1).filter(row => row.trim() !== "");
-      
-      rows.forEach(row => {
-        const columns = row.split(",");
-        // CSV: date,amount,category,risk_category,behavioral_ordinal,rolling_velocity
-        const amount = parseFloat(columns[1]);
-        const ordinal = parseFloat(columns[4]);
-        
-        if (!isNaN(amount)) currentMonthSpend += amount;
-        if (!isNaN(ordinal)) {
-            behavioralScore += ordinal;
-            transactionCount++;
-        }
-      });
-      
-      if (transactionCount > 0) {
-        behavioralScore = behavioralScore / transactionCount;
-      }
-      // Natural Balance Logic: Start at a baseline and subtract ingested spend
-      const baseBalance = 15000.00;
-      totalBalance = baseBalance - currentMonthSpend; 
-    } else {
-        // Empty state for demo
-        currentMonthSpend = 0; 
-        behavioralScore = 0; 
+    const decoded: any = jwt.verify(token, JWT_SECRET);
+    const userId = decoded.id;
+
+    // Fetch User baseline and tone
+    const userRes = await query("SELECT baseline_spend, nova_tone FROM dim_users WHERE user_id = $1", [userId]);
+    const user = userRes.rows[0];
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
     }
+
+    // Calculate Month Spend
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    
+    const statsRes = await query(`
+      SELECT 
+        COALESCE(SUM(amount), 0) as current_month_spend,
+        COUNT(*) as transaction_count
+      FROM fact_transactions
+      WHERE user_id = $1 AND purchase_date >= $2
+    `, [userId, monthStart]);
+
+    const currentMonthSpend = parseFloat(statsRes.rows[0].current_month_spend);
+
+    // Fetch Chart Data (last 7 days)
+    const chartRes = await query(`
+      SELECT 
+        TO_CHAR(purchase_date, 'DY') as day,
+        SUM(amount) as value
+      FROM fact_transactions
+      WHERE user_id = $1 AND purchase_date >= NOW() - INTERVAL '7 days'
+      GROUP BY TO_CHAR(purchase_date, 'DY'), EXTRACT(DOW FROM purchase_date)
+      ORDER BY EXTRACT(DOW FROM purchase_date)
+    `, [userId]);
+
+    const chartData = chartRes.rows.map(row => ({
+      day: row.day.charAt(0),
+      value: parseFloat(row.value)
+    }));
+
+    // Dynamic Balance Calculation
+    const baseBalance = 15000.00; 
+    const totalBalance = baseBalance - currentMonthSpend;
+
+    // Predicted End of Month
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const dayOfMonth = now.getDate();
+    const daysRemaining = daysInMonth - dayOfMonth;
+    const dailyVelocity = currentMonthSpend / (dayOfMonth || 1);
+    const projectedAdditionalSpend = dailyVelocity * daysRemaining;
+    const predictedBalance = totalBalance - projectedAdditionalSpend;
+
+    // Insights and Triggers
+    let triggers = [];
+    let insight = "";
+
+    if (user.nova_tone === "Aggressive") {
+        triggers = [
+            { id: 1, name: "Velocity Breach", impact: 450, status: "Critical", insight: "Spending is above target velocity." }
+        ];
+        insight = `Nova (Aggressive): You've spent $${currentMonthSpend.toFixed(2)} this month. Tighten the perimeter.`;
+    } else {
+        triggers = [
+            { id: 1, name: "Impulse Trajectory", impact: 210, status: "Active", insight: "Monitoring for discretionary patterns." }
+        ];
+        insight = `Nova (Balanced): Your spending rhythm is stable at $${currentMonthSpend.toFixed(2)} total spend.`;
+    }
+
+    res.json({
+        totalBalance,
+        monthlyIncome: 5200.00,
+        monthlyExpenses: currentMonthSpend,
+        predictedEndOfMonthBalance: Math.max(0, Number(predictedBalance.toFixed(2))),
+        baselineSpend: parseFloat(user.baseline_spend),
+        novaTone: user.nova_tone,
+        novaInsight: insight,
+        triggers,
+        chartData: chartData.length > 0 ? chartData : [
+            { day: "M", value: 0 }, { day: "T", value: 0 }, { day: "W", value: 0 },
+            { day: "T", value: 0 }, { day: "F", value: 0 }, { day: "S", value: 0 }, { day: "S", value: 0 }
+        ]
+    });
+
   } catch (err) {
-    console.error("Error reading pulse_ingest.csv:", err);
+    console.error("Stats Error:", err);
+    res.status(500).json({ error: "Could not calculate telemetry statistics." });
   }
-
-  // Determine Nova Tone based on behavioral score
-  if (behavioralScore > 2.5) user.novaTone = "Aggressive";
-  else if (behavioralScore > 0 && behavioralScore < 1.5) user.novaTone = "Conservative";
-  else user.novaTone = "Balanced";
-
-
-  const now = new Date();
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const dayOfMonth = now.getDate();
-  const daysRemaining = daysInMonth - dayOfMonth;
-  
-  dailyVelocity = currentMonthSpend / (dayOfMonth || 1); // Avoid div by 0
-  const projectedAdditionalSpend = dailyVelocity * daysRemaining;
-  const predictedBalance = totalBalance - currentMonthSpend - (projectedAdditionalSpend > 0 ? projectedAdditionalSpend : 0);
-
-  // Generate dynamic triggers based on Nova Tone
-  let triggers = [];
-  let insight = "";
-
-  if (user.novaTone === "Aggressive") {
-    triggers = [
-      { id: 1, name: "Velocity Breach", impact: 450, status: "Critical", insight: "Spending is 15% above target velocity. Immediate pause recommended." },
-      { id: 2, name: "Capital Leak", impact: 120, status: "Active", insight: "Subscription bloat detected. Pruning required for Wealth Accrual." }
-    ];
-    insight = "Nova (Aggressive): You're drifting from your baseline. Tighten the perimeter or your end-of-month target is compromised.";
-  } else if (user.novaTone === "Conservative") { // Map back to Empathetic logic for now
-    triggers = [
-      { id: 1, name: "Self-Care Surge", impact: 85, status: "Monitored", insight: "Small uptick in comfort spending. Is this a stress response?" },
-      { id: 2, name: "Rhythm Shift", impact: 40, status: "Active", insight: "Your morning pattern has changed. Let's find your balance again." }
-    ];
-    insight = "Nova (Empathetic): I've noticed a small shift in your rhythm. Take a breath; we'll adjust the baseline together.";
-  } else {
-    triggers = [
-      { id: 1, name: "Impulse Trajectory", impact: 210, status: "Active", insight: "Detected 3 high-velocity transactions in 24h. Monitoring for pattern." },
-      { id: 2, name: "Subscription Sync", impact: 55, status: "Active", insight: "Recurring digital service fees are consolidating. Reviewing impact." }
-    ];
-    insight = "Nova (Balanced): Your spending rhythm is largely stable, though I'm tracking a slight impulse trajectory in discretionary categories.";
-  }
-
-  res.json({
-    totalBalance,
-    monthlyIncome: 5200.00,
-    monthlyExpenses: currentMonthSpend,
-    predictedEndOfMonthBalance: Math.max(0, Number(predictedBalance.toFixed(2))),
-    baselineSpend: user.baselineSpend,
-    novaTone: user.novaTone,
-    novaInsight: insight,
-    triggers
-  });
 };

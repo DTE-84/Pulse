@@ -30,7 +30,13 @@ const App = () => (
       <Sonner />
       <AuthProvider>
         {/* 1. Added basename using Vite's environment variable */}
-        <BrowserRouter basename={import.meta.env.BASE_URL}>
+        <BrowserRouter 
+          basename={import.meta.env.BASE_URL}
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
           <Routes>
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />

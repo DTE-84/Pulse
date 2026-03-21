@@ -1,21 +1,20 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from "vite";
 import path from "path";
+import react from "@vitejs/plugin-react-swc";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig({
   plugins: [react()],
-  base: '/PulseAi/',
+  base: "/Pulse/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./client"),
     },
   },
-  server: { 
-    host: "::",
-    port: 8080,
+  server: {
     proxy: {
       "/api": {
         target: "http://localhost:3000",
@@ -23,18 +22,12 @@ export default defineConfig({
         secure: false,
       },
     },
-    fs: {
-      allow: [".", "./client", "./shared"],
-      deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
-    },
   },
   build: {
     outDir: "dist/spa",
-    emptyOutDir: true,
+
     rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, "index.html"),
-      },
+      input: path.resolve(__dirname, "index.html"),
     },
   },
 });

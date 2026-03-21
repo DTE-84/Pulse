@@ -53,8 +53,8 @@ const Sidebar = () => {
               <div 
                 className="w-full h-full bg-primary"
                 style={{
-                  maskImage: 'url(/pulse-logo-circular.svg)',
-                  WebkitMaskImage: 'url(/pulse-logo-circular.svg)',
+                  maskImage: `url(${import.meta.env.BASE_URL}pulse-logo-circular.svg)`,
+                  WebkitMaskImage: `url(${import.meta.env.BASE_URL}pulse-logo-circular.svg)`,
                   maskRepeat: 'no-repeat',
                   WebkitMaskRepeat: 'no-repeat',
                   maskPosition: 'center',
@@ -122,8 +122,8 @@ const Sidebar = () => {
             <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20">Solutions LLC</span>
           </div>
           <div className="flex gap-4 opacity-30">
-            <button className="text-[8px] font-bold uppercase tracking-widest text-white hover:text-primary transition-colors">Terms</button>
-            <button className="text-[8px] font-bold uppercase tracking-widest text-white hover:text-primary transition-colors">Privacy</button>
+            <a href="https://dte-solutions.icu/legal/terms.html" target="_blank" className="text-[8px] font-bold uppercase tracking-widest text-white hover:text-primary transition-colors">Terms</a>
+            <a href="https://dte-solutions.icu/legal/privacy.html" target="_blank" className="text-[8px] font-bold uppercase tracking-widest text-white hover:text-primary transition-colors">Privacy</a>
           </div>
         </div>
       </div>

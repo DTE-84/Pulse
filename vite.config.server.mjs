@@ -14,7 +14,7 @@ export default defineConfig({
         ssr: true,
         rollupOptions: {
             external: [
-                // Node.js built-ins
+                
                 "fs",
                 "path",
                 "url",

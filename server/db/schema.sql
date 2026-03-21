@@ -5,6 +5,8 @@
 CREATE TABLE dim_users (
     user_id SERIAL PRIMARY KEY,
     user_name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
     baseline_spend DECIMAL(10, 2) DEFAULT 2500.00,
     nova_tone VARCHAR(50) DEFAULT 'Balanced'
 );

@@ -36,6 +36,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+
 const chartData = [
   { day: "M", value: 30 },
   { day: "T", value: 45 },
@@ -105,12 +117,12 @@ const TriggerCard = ({ title, subtitle, icon: Icon, stats, chartColor, aiTip, co
 
     <div className="h-32 mb-8 -mx-2">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData}>
+        <BarChart data={stats.chartData || chartData}>
           <Bar dataKey="value" radius={[6, 6, 6, 6]}>
-            {chartData.map((entry, index) => (
+            {(stats.chartData || chartData).map((entry: any, index: number) => (
               <Cell
                 key={`cell-${index}`}
-                fill={index === 3 ? chartColor : "rgba(255,255,255,0.03)"}
+                fill={index === (stats.chartData?.length - 1) ? chartColor : "rgba(255,255,255,0.03)"}
                 className="transition-all duration-500 hover:opacity-80"
               />
             ))}
@@ -163,26 +175,43 @@ export default function Index() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [syncing, setSyncing] = useState(false);
+  const [ingestData, setIngestData] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const syncData = async () => {
+  const handleIngest = async () => {
+    if (!ingestData.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Input Required",
+        description: "Please provide valid transaction telemetry.",
+      });
+      return;
+    }
+
     setSyncing(true);
+    setIsDialogOpen(false);
     toast({
       title: "Syncing Nexus Telemetry",
       description: "Processing natural input via Python Wrangler...",
     });
 
     try {
-      // In a real live test, you'd have a modal to paste JSON
-      // For this first step, we'll sync a test set of "Natural Input"
-      const naturalInput = [
-        { date: "2026-03-15", amount: 150.00, category: "Dining", risk_category: "Lifestyle" },
-        { date: "2026-03-16", amount: 45.00, category: "Transport", risk_category: "Essential" },
-        { date: "2026-03-17", amount: 800.00, category: "Tech", risk_category: "Impulse" },
-        { date: "2026-03-18", amount: 1200.00, category: "Rent", risk_category: "Essential" },
-        { date: "2026-03-19", amount: 60.00, category: "Sub", risk_category: "Lifestyle" }
-      ];
+      let transactions;
+      try {
+        transactions = JSON.parse(ingestData);
+        if (!Array.isArray(transactions)) {
+          transactions = [transactions];
+        }
+      } catch (e) {
+        // Fallback: simple CSV parsing if JSON fails
+        const lines = ingestData.split("\n").filter(l => l.trim());
+        transactions = lines.map(line => {
+          const [date, amount, category, risk_category] = line.split(",");
+          return { date, amount: parseFloat(amount), category, risk_category };
+        });
+      }
 
-      await transactionsAPI.ingest({ transactions: naturalInput });
+      await transactionsAPI.ingest({ transactions });
       
       // Refresh stats
       const res = await statsAPI.get();
@@ -192,6 +221,7 @@ export default function Index() {
         title: "Nexus Synchronized",
         description: "Your behavioral dashboard is now live.",
       });
+      setIngestData("");
     } catch (err) {
       toast({
         variant: "destructive",
@@ -202,6 +232,7 @@ export default function Index() {
       setSyncing(false);
     }
   };
+
   
 
   const runAnalysis = () => {
@@ -301,14 +332,52 @@ export default function Index() {
               {analyzing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3 fill-red-400" />}
               {analyzing ? "Analyzing Telemetry..." : "Initialize AI Analysis"}
             </button>
-            <button 
-              onClick={syncData}
-              disabled={syncing}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-5 py-3 rounded-full text-[10px] font-black transition-all group shadow-lg uppercase tracking-widest disabled:opacity-50"
-            >
-              {syncing ? <RefreshCcw className="w-3 h-3 animate-spin" /> : <Database className="w-3 h-3" />}
-              {syncing ? "Syncing..." : "Sync Nexus Data"}
-            </button>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <button 
+                  disabled={syncing}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-5 py-3 rounded-full text-[10px] font-black transition-all group shadow-lg uppercase tracking-widest disabled:opacity-50"
+                >
+                  {syncing ? <RefreshCcw className="w-3 h-3 animate-spin" /> : <Database className="w-3 h-3" />}
+                  {syncing ? "Syncing..." : "Sync Nexus Data"}
+                </button>
+              </DialogTrigger>
+              <DialogContent className="bg-[#0A0907] border-white/10 text-white max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-black tracking-tighter">Nexus Telemetry Ingestion</DialogTitle>
+                  <DialogDescription className="text-muted-foreground font-medium">
+                    Paste your transaction JSON or CSV below to synchronize with the Behavioral Wrangler.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <Textarea 
+                    placeholder='[{"date": "2026-03-20", "amount": 150.00, "category": "Dining", "risk_category": "Lifestyle"}]'
+                    value={ingestData}
+                    onChange={(e) => setIngestData(e.target.value)}
+                    className="min-h-[200px] bg-white/5 border-white/10 font-mono text-xs"
+                  />
+                  <p className="text-[10px] text-muted-foreground italic">
+                    Format: date,amount,category,risk_category (one per line) or valid JSON array.
+                  </p>
+                </div>
+                <DialogFooter>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsDialogOpen(false)}
+                    className="rounded-full border-white/10 hover:bg-white/5"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleIngest}
+                    disabled={syncing}
+                    className="bg-primary text-black hover:bg-primary/80 rounded-full font-black uppercase tracking-widest px-8"
+                  >
+                    {syncing ? "Syncing..." : "Process Telemetry"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           <div className="flex gap-2 w-full sm:w-auto">
             <div className="flex-1 sm:flex-none text-center bg-white/5 border border-white/5 px-4 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest text-muted-foreground">
               Last 30d

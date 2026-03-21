@@ -57,7 +57,8 @@ export default function AuthPage() {
         variant: "destructive",
         title: "Auth Failed",
         description:
-          err.response?.data?.detail ||
+          err.response?.data?.message ||
+          err.message ||
           "Invalid credentials. Please verify your uplink.",
       });
     } finally {
@@ -78,9 +79,9 @@ export default function AuthPage() {
             <div className="relative w-20 h-24 flex items-center justify-center">
               <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping [animation-duration:4s]" />
               <div className="absolute inset-4 bg-primary/10 rounded-full animate-pulse [animation-duration:2s]" />
-              <div className="relative z-10 w-16 h-16 rounded-[2rem] bg-black border-2 border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[0_0_40px_rgba(45,237,156,0.2)]">
+              <div className="relative z-10 w-16 h-16 rounded-[2rem] bg-black border-2 border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[0_0_40px_rgba(45,237,156,0.2)] overflow-hidden">
                 <img
-                  src="/pulse-logo-circular.svg"
+                  src={`${import.meta.env.BASE_URL}Pulse_logo.svg`}
                   alt="Nova"
                   className="w-10 h-10 object-contain filter drop-shadow-[0_0_12px_rgba(45,237,156,0.8)]"
                 />
@@ -149,9 +150,17 @@ export default function AuthPage() {
             <div className="lg:hidden flex flex-col items-center text-center mb-10">
               <div className="relative w-20 h-20 flex items-center justify-center mb-4">
                 <div className="absolute inset-0 bg-primary/20 rounded-full animate-pulse" />
-                <div className="relative z-10 w-14 h-14 rounded-2xl bg-black border border-primary/20 flex items-center justify-center shadow-2xl">
+                <div className="relative z-10 w-14 h-14 rounded-2xl bg-black border border-primary/20 flex items-center justify-center shadow-2xl overflow-hidden">
                   <img
-                    src="/pulse-logo-circular.svg"
+                    src={`${import.meta.env.BASE_URL}pulse-logo-circular.svg`}
+                    srcSet={`
+                      ${import.meta.env.BASE_URL}mipmap-mdpi.png 48w,
+                      ${import.meta.env.BASE_URL}mipmap-hdpi.png 72w,
+                      ${import.meta.env.BASE_URL}mipmap-xhdpi.png 96w,
+                      ${import.meta.env.BASE_URL}mipmap-xxhdpi.png 144w,
+                      ${import.meta.env.BASE_URL}mipmap-xxxhdpi.png 192w
+                    `}
+                    sizes="32px"
                     alt="Nova"
                     className="w-8 h-8 object-contain"
                   />
@@ -186,6 +195,7 @@ export default function AuthPage() {
                     placeholder="Full Name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    autoComplete="name"
                     className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-14 pr-6 focus:outline-none focus:border-primary/40 focus:bg-white/[0.05] transition-all font-semibold text-white placeholder:text-muted-foreground/40"
                     required
                   />
@@ -199,6 +209,7 @@ export default function AuthPage() {
                   placeholder="Email Address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
                   className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-14 pr-6 focus:outline-none focus:border-primary/40 focus:bg-white/[0.05] transition-all font-semibold text-white placeholder:text-muted-foreground/40"
                   required
                 />
@@ -211,6 +222,7 @@ export default function AuthPage() {
                   placeholder="Secret Key"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete={isLogin ? "current-password" : "new-password"}
                   className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-14 pr-14 focus:outline-none focus:border-primary/40 focus:bg-white/[0.05] transition-all font-semibold text-white placeholder:text-muted-foreground/40"
                   required
                 />
