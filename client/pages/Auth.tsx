@@ -57,7 +57,8 @@ export default function AuthPage() {
         variant: "destructive",
         title: "Auth Failed",
         description:
-          err.response?.data?.detail ||
+          err.response?.data?.message ||
+          err.message ||
           "Invalid credentials. Please verify your uplink.",
       });
     } finally {
