@@ -69,7 +69,11 @@ export const handleLogin = async (req: Request, res: Response) => {
         onboardingCompleted: true 
       } 
     });
-  } catch (err) {
+  } catch (err: any) {
+    if (err.code === 'ECONNREFUSED') {
+      console.error("System Integrity Breach: Database connection refused.");
+      return res.status(503).json({ message: "High-Fidelity DB Connection Failure. Ensure PostgreSQL is active on port 5432." });
+    }
     console.error("Login Error:", err);
     res.status(500).json({ message: "System failure during authentication." });
   }
@@ -103,7 +107,11 @@ export const handleSignup = async (req: Request, res: Response) => {
         onboardingCompleted: true 
       } 
     });
-  } catch (err) {
+  } catch (err: any) {
+    if (err.code === 'ECONNREFUSED') {
+      console.error("System Integrity Breach: Database connection refused.");
+      return res.status(503).json({ message: "High-Fidelity DB Connection Failure. Ensure PostgreSQL is active on port 5432." });
+    }
     console.error("Signup Error:", err);
     res.status(500).json({ message: "System failure during entity creation." });
   }
