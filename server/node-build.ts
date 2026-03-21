@@ -11,17 +11,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // In production, serve the built SPA files
-// Use path.resolve to ensure absolute path from this file's location
 const distPath = path.resolve(__dirname, "../spa");
 
-// Serve static files with caching and explicit asset handling
-app.use("/assets", express.static(path.join(distPath, "assets"), {
+// Serve static files at the base path (/Pulse)
+app.use("/Pulse/assets", express.static(path.join(distPath, "assets"), {
   immutable: true,
   maxAge: "1y",
-  fallthrough: false // Error if asset not found in /assets
+  fallthrough: false
 }));
 
-app.use(express.static(distPath));
+app.use("/Pulse", express.static(distPath));
 
 // Handle React Router - serve index.html for all non-API routes
 app.use((req, res) => {
@@ -30,7 +29,17 @@ app.use((req, res) => {
     return res.status(404).json({ error: "API endpoint not found" });
   }
 
-  res.sendFile(path.join(distPath, "index.html"));
+  // If the path starts with /Pulse, serve the index.html from dist/spa
+  if (req.path.startsWith("/Pulse")) {
+    return res.sendFile(path.join(distPath, "index.html"));
+  }
+
+  // Redirect root to /Pulse for UX consistency
+  if (req.path === "/") {
+    return res.redirect("/Pulse/");
+  }
+
+  res.status(404).json({ error: "Not found" });
 });
 
 app.listen(port, () => {

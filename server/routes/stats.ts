@@ -13,13 +13,29 @@ export const handleStats: RequestHandler = async (req, res) => {
     const decoded: any = jwt.verify(token, JWT_SECRET);
     const userId = decoded.id;
 
-    // Fetch User baseline and tone
-    const userRes = await query("SELECT baseline_spend, nova_tone FROM dim_users WHERE user_id = $1", [userId]);
+    // Fetch User baseline, tone, and income
+    const userRes = await query(`
+      SELECT 
+        baseline_spend, 
+        nova_tone,
+        COALESCE(monthly_income, 5200.00) as monthly_income,
+        COALESCE(initial_balance, 15000.00) as initial_balance
+      FROM dim_users 
+      WHERE user_id = $1
+    `, [userId]);
     const user = userRes.rows[0];
 
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
+
+    // Calculate Total Spend (Lifetime)
+    const lifetimeRes = await query(`
+      SELECT COALESCE(SUM(amount), 0) as lifetime_spend
+      FROM fact_transactions
+      WHERE user_id = $1
+    `, [userId]);
+    const lifetimeSpend = parseFloat(lifetimeRes.rows[0].lifetime_spend);
 
     // Calculate Month Spend
     const now = new Date();
@@ -47,13 +63,12 @@ export const handleStats: RequestHandler = async (req, res) => {
     `, [userId]);
 
     const chartData = chartRes.rows.map(row => ({
-      day: row.day.charAt(0),
+      day: row.day.charAt(0).toUpperCase(),
       value: parseFloat(row.value)
     }));
 
-    // Dynamic Balance Calculation
-    const baseBalance = 15000.00; 
-    const totalBalance = baseBalance - currentMonthSpend;
+    // Dynamic Balance Calculation (Initial + Monthly Income - Lifetime Spend)
+    const totalBalance = parseFloat(user.initial_balance) - lifetimeSpend;
 
     // Predicted End of Month
     const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
@@ -63,28 +78,51 @@ export const handleStats: RequestHandler = async (req, res) => {
     const projectedAdditionalSpend = dailyVelocity * daysRemaining;
     const predictedBalance = totalBalance - projectedAdditionalSpend;
 
-    // Insights and Triggers
+    // Dynamic Insights and Triggers
     let triggers = [];
-    let insight = "";
-
-    if (user.nova_tone === "Aggressive") {
-        triggers = [
-            { id: 1, name: "Velocity Breach", impact: 450, status: "Critical", insight: "Spending is above target velocity." }
-        ];
-        insight = `Nova (Aggressive): You've spent $${currentMonthSpend.toFixed(2)} this month. Tighten the perimeter.`;
-    } else {
-        triggers = [
-            { id: 1, name: "Impulse Trajectory", impact: 210, status: "Active", insight: "Monitoring for discretionary patterns." }
-        ];
-        insight = `Nova (Balanced): Your spending rhythm is stable at $${currentMonthSpend.toFixed(2)} total spend.`;
+    const baseline = parseFloat(user.baseline_spend);
+    const dailyBaseline = baseline / 30;
+    
+    if (currentMonthSpend > baseline) {
+        triggers.push({ 
+            id: 1, 
+            name: "Baseline Breach", 
+            impact: (currentMonthSpend - baseline).toFixed(2), 
+            status: "Critical", 
+            insight: "You have exceeded your target monthly rhythm." 
+        });
     }
 
+    if (dailyVelocity > (dailyBaseline * 1.5)) {
+        triggers.push({ 
+            id: 2, 
+            name: "High Velocity", 
+            impact: dailyVelocity.toFixed(2), 
+            status: "Active", 
+            insight: "Current daily spending is 50% above your strategic protocol." 
+        });
+    }
+
+    if (triggers.length === 0) {
+        triggers.push({ 
+            id: 0, 
+            name: "Rhythm Stable", 
+            impact: 0, 
+            status: "Optimal", 
+            insight: "No deviations detected in your capital trajectory." 
+        });
+    }
+
+    const insight = user.nova_tone === "Aggressive" 
+        ? `Nova (Aggressive): Capital leak detected. You are $${(currentMonthSpend - baseline).toFixed(2)} off protocol.`
+        : `Nova (Balanced): Your spending rhythm is $${currentMonthSpend.toFixed(2)}. Monitoring for drift.`;
+
     res.json({
-        totalBalance,
-        monthlyIncome: 5200.00,
+        totalBalance: Number(totalBalance.toFixed(2)),
+        monthlyIncome: parseFloat(user.monthly_income),
         monthlyExpenses: currentMonthSpend,
         predictedEndOfMonthBalance: Math.max(0, Number(predictedBalance.toFixed(2))),
-        baselineSpend: parseFloat(user.baseline_spend),
+        baselineSpend: baseline,
         novaTone: user.nova_tone,
         novaInsight: insight,
         triggers,

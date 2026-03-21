@@ -50,18 +50,16 @@ const Sidebar = () => {
             
             {/* LOGO CONTAINER */}
             <div className="relative z-10 w-12 h-12 rounded-full bg-black border border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(45,237,156,0.15)] overflow-hidden">
-              <div 
-                className="w-full h-full bg-primary"
-                style={{
-                  maskImage: `url(${import.meta.env.BASE_URL}pulse-logo-circular.svg)`,
-                  WebkitMaskImage: `url(${import.meta.env.BASE_URL}pulse-logo-circular.svg)`,
-                  maskRepeat: 'no-repeat',
-                  WebkitMaskRepeat: 'no-repeat',
-                  maskPosition: 'center',
-                  WebkitMaskPosition: 'center',
-                  maskSize: 'contain',
-                  WebkitMaskSize: 'contain'
-                }}
+              <img
+                src={`${import.meta.env.BASE_URL}icon-1024.png`}
+                srcSet={`
+                  ${import.meta.env.BASE_URL}icon-29@2x.png 58w,
+                  ${import.meta.env.BASE_URL}icon-60@2x.png 120w,
+                  ${import.meta.env.BASE_URL}icon-1024.png 1024w
+                `}
+                sizes="40px"
+                alt="Pulse"
+                className="w-8 h-8 object-contain"
               />
             </div>
 
@@ -173,18 +171,16 @@ export const Layout = ({ children }: LayoutProps) => {
             <div className="relative w-10 h-10 flex items-center justify-center">
               <div className="absolute inset-0 bg-primary/20 rounded-full animate-pulse" />
             <div className="relative z-10 w-8 h-8 rounded-xl bg-black border border-primary/20 flex items-center justify-center overflow-hidden">
-                <div 
-                  className="w-full h-full bg-primary"
-                  style={{
-                    maskImage: 'url(/pulse-logo-circular.svg)',
-                    WebkitMaskImage: 'url(/pulse-logo-circular.svg)',
-                    maskRepeat: 'no-repeat',
-                    WebkitMaskRepeat: 'no-repeat',
-                    maskPosition: 'center',
-                    WebkitMaskPosition: 'center',
-                    maskSize: 'contain',
-                    WebkitMaskSize: 'contain'
-                  }}
+                <img
+                  src={`${import.meta.env.BASE_URL}icon-1024.png`}
+                  srcSet={`
+                    ${import.meta.env.BASE_URL}icon-29@2x.png 58w,
+                    ${import.meta.env.BASE_URL}icon-60@2x.png 120w,
+                    ${import.meta.env.BASE_URL}icon-1024.png 1024w
+                  `}
+                  sizes="32px"
+                  alt="Pulse"
+                  className="w-6 h-6 object-contain"
                 />
               </div>
             </div>

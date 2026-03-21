@@ -81,9 +81,15 @@ export default function AuthPage() {
               <div className="absolute inset-4 bg-primary/10 rounded-full animate-pulse [animation-duration:2s]" />
               <div className="relative z-10 w-16 h-16 rounded-[2rem] bg-black border-2 border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[0_0_40px_rgba(45,237,156,0.2)] overflow-hidden">
                 <img
-                  src={`${import.meta.env.BASE_URL}Pulse_logo.svg`}
-                  alt="Nova"
-                  className="w-10 h-10 object-contain filter drop-shadow-[0_0_12px_rgba(45,237,156,0.8)]"
+                  src={`${import.meta.env.BASE_URL}icon-1024.png`}
+                  srcSet={`
+                    ${import.meta.env.BASE_URL}icon-60@2x.png 120w,
+                    ${import.meta.env.BASE_URL}icon-60@3x.png 180w,
+                    ${import.meta.env.BASE_URL}icon-1024.png 1024w
+                  `}
+                  sizes="64px"
+                  alt="Pulse"
+                  className="w-12 h-12 object-contain filter drop-shadow-[0_0_12px_rgba(45,237,156,0.5)]"
                 />
               </div>
             </div>
@@ -152,17 +158,19 @@ export default function AuthPage() {
                 <div className="absolute inset-0 bg-primary/20 rounded-full animate-pulse" />
                 <div className="relative z-10 w-14 h-14 rounded-2xl bg-black border border-primary/20 flex items-center justify-center shadow-2xl overflow-hidden">
                   <img
-                    src={`${import.meta.env.BASE_URL}pulse-logo-circular.svg`}
+                    src={`${import.meta.env.BASE_URL}icon-1024.png`}
                     srcSet={`
-                      ${import.meta.env.BASE_URL}mipmap-mdpi.png 48w,
-                      ${import.meta.env.BASE_URL}mipmap-hdpi.png 72w,
-                      ${import.meta.env.BASE_URL}mipmap-xhdpi.png 96w,
-                      ${import.meta.env.BASE_URL}mipmap-xxhdpi.png 144w,
-                      ${import.meta.env.BASE_URL}mipmap-xxxhdpi.png 192w
+                      ${import.meta.env.BASE_URL}icon-29@2x.png 58w,
+                      ${import.meta.env.BASE_URL}icon-29@3x.png 87w,
+                      ${import.meta.env.BASE_URL}icon-40@2x.png 80w,
+                      ${import.meta.env.BASE_URL}icon-60@2x.png 120w,
+                      ${import.meta.env.BASE_URL}icon-60@3x.png 180w,
+                      ${import.meta.env.BASE_URL}icon-76@2x.png 152w,
+                      ${import.meta.env.BASE_URL}icon-83.5@2x.png 167w
                     `}
-                    sizes="32px"
-                    alt="Nova"
-                    className="w-8 h-8 object-contain"
+                    sizes="48px"
+                    alt="Pulse"
+                    className="w-10 h-10 object-contain"
                   />
                 </div>
               </div>
