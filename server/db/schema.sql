@@ -1,34 +1,65 @@
 -- Pulse-Ai: High-Fidelity Star Schema
 -- Primary Fact: Transactions
--- Dimensions: Users, Categories, Merchants
+-- Dimensions: Users, Categories, Merchants, Threads, Messages
 
-CREATE TABLE dim_users (
-    user_id SERIAL PRIMARY KEY,
+BEGIN;
+
+-- 1. Dimension: Users (Core Identity)
+CREATE TABLE IF NOT EXISTS "dim_users" (
+    user_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     baseline_spend DECIMAL(10, 2) DEFAULT 2500.00,
-    nova_tone VARCHAR(50) DEFAULT 'Balanced'
+    monthly_income DECIMAL(10, 2) DEFAULT 5200.00,
+    initial_balance DECIMAL(10, 2) DEFAULT 15000.00,
+    nova_tone VARCHAR(50) DEFAULT 'Balanced',
+    avatar_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE dim_categories (
+-- 2. Dimension: Categories (Behavioral Taxonomy)
+CREATE TABLE IF NOT EXISTS "dim_categories" (
     category_id SERIAL PRIMARY KEY,
     category_name VARCHAR(100) NOT NULL,
     risk_level VARCHAR(20) DEFAULT 'Medium' -- Low, Medium, High, Critical
 );
 
-CREATE TABLE fact_transactions (
+-- 3. Fact: Transactions (Financial Telemetry)
+CREATE TABLE IF NOT EXISTS "fact_transactions" (
     transaction_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES dim_users(user_id),
-    category_id INT REFERENCES dim_categories(category_id),
+    user_id uuid REFERENCES "dim_users"(user_id) ON DELETE CASCADE,
+    category_id INT REFERENCES "dim_categories"(category_id),
     amount DECIMAL(10, 2) NOT NULL,
-    purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    purchase_date TIMESTAMPTZ DEFAULT NOW(),
     status VARCHAR(50) DEFAULT 'Completed' -- Completed, Pending, Flagged
 );
 
--- SUPER POWER 1: Strategic vs. Impulsive (VIP vs. Standard)
--- This logic segments users based on their deviation from baseline + total volume.
-CREATE VIEW view_user_segmentation AS
+-- 4. Dimension: Threads (Conversation Nexus)
+CREATE TABLE IF NOT EXISTS "threads" (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    title TEXT,
+    created_by uuid REFERENCES "dim_users"(user_id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 5. Fact: Messages (AI Interaction Logs)
+CREATE TABLE IF NOT EXISTS "messages" (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    thread_id uuid REFERENCES "threads"(id) ON DELETE CASCADE,
+    user_id uuid REFERENCES "dim_users"(user_id) ON DELETE SET NULL,
+    content TEXT NOT NULL,
+    role VARCHAR(20) DEFAULT 'user', -- user, system, assistant
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Performance & Integrity Indexes
+CREATE INDEX IF NOT EXISTS idx_messages_thread_id ON "messages"(thread_id);
+CREATE INDEX IF NOT EXISTS idx_fact_transactions_user_id ON "fact_transactions"(user_id);
+CREATE INDEX IF NOT EXISTS idx_fact_transactions_date ON "fact_transactions"(purchase_date);
+
+-- Analytical Views
+CREATE OR REPLACE VIEW view_user_segmentation AS
 SELECT 
     u.user_name,
     COUNT(f.transaction_id) as total_purchases,
@@ -42,24 +73,4 @@ FROM fact_transactions f
 JOIN dim_users u ON f.user_id = u.user_id
 GROUP BY u.user_id, u.user_name, u.baseline_spend;
 
--- SUPER POWER 2: Behavioral Drift (Churn/Latency)
--- Detects when a user's spending "rhythm" has stalled or shifted significantly.
-CREATE VIEW view_behavioral_drift AS
-WITH LastPurchase AS (
-    SELECT 
-        user_id, 
-        MAX(purchase_date) as last_order_date
-    FROM fact_transactions
-    GROUP BY user_id
-)
-SELECT 
-    u.user_name,
-    lp.last_order_date,
-    CURRENT_DATE - lp.last_order_date::DATE AS days_since_last_pulse,
-    CASE
-        WHEN CURRENT_DATE - lp.last_order_date::DATE > 30 THEN 'Pulse Stalled (Churned)'
-        WHEN CURRENT_DATE - lp.last_order_date::DATE > 7 THEN 'Rhythm Drifting (At Risk)'
-        ELSE 'Pulse Active'
-    END as behavioral_status
-FROM LastPurchase lp
-JOIN dim_users u ON lp.user_id = u.user_id;
+COMMIT;
