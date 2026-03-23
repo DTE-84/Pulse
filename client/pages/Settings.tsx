@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { 
-  Settings as SettingsIcon, 
-  User, 
-  Bell, 
-  Shield, 
-  Zap, 
-  Database, 
+import React, { useState } from "react";
+import {
+  User,
+  Shield,
+  Zap,
+  Database,
   CreditCard,
   ChevronRight,
   Monitor,
-  Cpu
+  Cpu,
+  Heart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -29,10 +28,12 @@ const SettingGroup = ({ title, description, children }: any) => (
 );
 
 const SettingItem = ({ icon: Icon, label, description, rightElement, border = true }: any) => (
-  <div className={cn(
-    "flex items-center justify-between p-6 transition-colors hover:bg-white/[0.01]",
-    border && "border-b border-white/[0.03]"
-  )}>
+  <div
+    className={cn(
+      "flex items-center justify-between p-6 transition-colors hover:bg-white/[0.01]",
+      border && "border-b border-white/[0.03]"
+    )}
+  >
     <div className="flex items-center gap-4">
       <div className="w-10 h-10 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-center">
         <Icon className="w-5 h-5 text-primary" />
@@ -46,20 +47,26 @@ const SettingItem = ({ icon: Icon, label, description, rightElement, border = tr
   </div>
 );
 
+const modeDescriptions: Record<string, string> = {
+  Gentle: "Support me with calm encouragement.",
+  Balanced: "Guide me with clarity and consistency.",
+  Driven: "Push me with stronger accountability.",
+};
+
 export default function Settings() {
   const { toast } = useToast();
   const [protocol, setProtocol] = useState(localStorage.getItem("nova_protocol") || "Balanced");
-  const [mirroring, setMirroring] = useState(localStorage.getItem("nova_mirroring") === "true");
-  const [intervention, setIntervention] = useState(localStorage.getItem("nova_intervention") === "true");
+  const [mirroring, setMirroring] = useState(localStorage.getItem("nova_mirroring") !== "false");
+  const [intervention, setIntervention] = useState(localStorage.getItem("nova_intervention") !== "false");
 
   const toggleProtocol = () => {
-    const protocols = ["Balanced", "Aggressive", "Empathetic"];
+    const protocols = ["Gentle", "Balanced", "Driven"];
     const next = protocols[(protocols.indexOf(protocol) + 1) % protocols.length];
     setProtocol(next);
     localStorage.setItem("nova_protocol", next);
     toast({
-      title: "Nova Protocol Shift",
-      description: `Uplink re-configured to ${next} frequency.`,
+      title: "Nova mode updated",
+      description: `${next} mode is now active.`,
     });
   };
 
@@ -67,8 +74,8 @@ export default function Settings() {
     setter(val);
     localStorage.setItem(key, String(val));
     toast({
-      title: "System Integrity Updated",
-      description: `${label} is now ${val ? 'active' : 'disabled'}.`,
+      title: "Settings updated",
+      description: `${label} is now ${val ? "on" : "off"}.`,
     });
   };
 
@@ -80,36 +87,46 @@ export default function Settings() {
           <ChevronRight className="w-3 h-3 opacity-30" />
           <span className="text-primary">Settings</span>
         </div>
-        <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">System Configuration</h1>
+        <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">Settings</h1>
         <p className="text-muted-foreground font-semibold text-sm">
-          Optimize the Pulse Behavioral Engine and Nova protocols.
+          Choose how Nova guides you and how Pulse handles your financial data.
         </p>
       </div>
 
       <div className="space-y-12 pb-20">
-        <SettingGroup 
-          title="Nova Intelligence Protocol" 
-          description="Adjust how Nova monitors and intervenes in your spending rhythm."
+        <SettingGroup
+          title="Nova guidance"
+          description="Adjust how Nova reads your patterns and how strongly she steps in."
         >
-          <SettingItem 
+          <SettingItem
             icon={Cpu}
-            label="Behavioral Mirroring"
-            description="Allow Nova to analyze and mirror your spending patterns for deeper insight."
-            rightElement={<Switch checked={mirroring} onCheckedChange={(v) => updateSetting("nova_mirroring", v, setMirroring, "Behavioral Mirroring")} />}
-          />
-          <SettingItem 
-            icon={Zap}
-            label="Proactive Intervention"
-            description="Nova will automatically suggest spending pauses during high-velocity surges."
-            rightElement={<Switch checked={intervention} onCheckedChange={(v) => updateSetting("nova_intervention", v, setIntervention, "Proactive Intervention")} />}
-          />
-          <SettingItem 
-            icon={Monitor}
-            label="Nova Tone"
-            description={`Current Protocol: ${protocol}. Adjust the AI's communication style.`}
+            label="Pattern awareness"
+            description="Let Nova analyze spending behavior, category shifts, and repeated triggers."
             rightElement={
-              <Badge 
-                variant="outline" 
+              <Switch
+                checked={mirroring}
+                onCheckedChange={(v) => updateSetting("nova_mirroring", v, setMirroring, "Pattern awareness")}
+              />
+            }
+          />
+          <SettingItem
+            icon={Zap}
+            label="Proactive nudges"
+            description="Allow Nova to surface timely reminders when spending patterns start to drift."
+            rightElement={
+              <Switch
+                checked={intervention}
+                onCheckedChange={(v) => updateSetting("nova_intervention", v, setIntervention, "Proactive nudges")}
+              />
+            }
+          />
+          <SettingItem
+            icon={Heart}
+            label="Nova mode"
+            description={modeDescriptions[protocol] || modeDescriptions.Balanced}
+            rightElement={
+              <Badge
+                variant="outline"
                 className="text-[9px] font-black uppercase tracking-[0.2em] border-primary/30 text-primary px-3 py-1 cursor-pointer hover:bg-primary/5 transition-colors"
                 onClick={toggleProtocol}
               >
@@ -120,39 +137,46 @@ export default function Settings() {
           />
         </SettingGroup>
 
-        <SettingGroup 
-          title="Security & Data Integrity" 
-          description="Manage your DTE Ecosystem uplink and encryption protocols."
+        <SettingGroup
+          title="Security & data"
+          description="Your financial records should be durable, private, and easy to export when needed."
         >
-          <SettingItem 
+          <SettingItem
             icon={Shield}
-            label="Bank-Grade Encryption"
-            description="AES-256 bit encryption is active for all linked financial data."
+            label="Encryption"
+            description="Sensitive financial data is protected with bank-grade security practices."
             rightElement={<div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(45,237,156,0.5)]" />}
           />
-          <SettingItem 
+          <SettingItem
             icon={Database}
-            label="Data Portability"
-            description="Export your high-fidelity behavioral data as JSON or CSV."
-            rightElement={<button className="text-[9px] font-black text-primary uppercase tracking-widest hover:underline" onClick={() => toast({ title: "Data Export Requested", description: "Preparing encrypted archive..." })}>Export Data</button>}
+            label="Export records"
+            description="Download your financial data in a structured format for review or reporting."
+            rightElement={
+              <button
+                className="text-[9px] font-black text-primary uppercase tracking-widest hover:underline"
+                onClick={() => toast({ title: "Export started", description: "Preparing your data for download..." })}
+              >
+                Export data
+              </button>
+            }
           />
-          <SettingItem 
+          <SettingItem
             icon={User}
-            label="Secret Key Management"
-            description="Update your uplink credentials and multi-factor protocols."
+            label="Account details"
+            description="Manage your login information and future account preferences."
             rightElement={<ChevronRight className="w-4 h-4 text-muted-foreground" />}
             border={false}
           />
         </SettingGroup>
 
-        <SettingGroup 
-          title="Subscription & Access" 
-          description="Manage your Pulse tier and ecosystem access."
+        <SettingGroup
+          title="Billing"
+          description="Manage your Pulse plan and account access."
         >
-          <SettingItem 
+          <SettingItem
             icon={CreditCard}
-            label="Current Plan"
-            description="Tier: Pulse Professional (High-Fidelity)."
+            label="Current plan"
+            description="Pulse Professional"
             rightElement={
               <Badge className="bg-primary text-background text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1">
                 Active
@@ -165,4 +189,3 @@ export default function Settings() {
     </div>
   );
 }
-

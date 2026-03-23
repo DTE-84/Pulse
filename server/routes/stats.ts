@@ -4,6 +4,44 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "dte-high-fidelity-secret";
 
+const buildNovaMessage = ({
+  mode,
+  currentMonthSpend,
+  baseline,
+  predictedBalance,
+  goalLabel,
+}: {
+  mode: string;
+  currentMonthSpend: number;
+  baseline: number;
+  predictedBalance: number;
+  goalLabel: string;
+}) => {
+  const delta = currentMonthSpend - baseline;
+  const over = delta > 0;
+  const diff = Math.abs(delta).toFixed(2);
+
+  const normalizedMode = (mode || "Balanced").toLowerCase();
+
+  if (!over) {
+    if (normalizedMode === "gentle") {
+      return `You’re spending below your usual baseline this month, and that’s giving your ${goalLabel} more room to breathe. Keep stacking small wins like this.`;
+    }
+    if (normalizedMode === "driven") {
+      return `You’re under baseline this month. Keep pressing this advantage and turn today’s discipline into faster progress toward your ${goalLabel}.`;
+    }
+    return `Your spending is staying under baseline this month. If you keep this pace, you give your ${goalLabel} more room to move forward.`;
+  }
+
+  if (normalizedMode === "gentle") {
+    return `You’re currently $${diff} above your monthly baseline. This isn’t failure — it’s a signal. A few calmer decisions now can protect your progress toward ${goalLabel}.`;
+  }
+  if (normalizedMode === "driven") {
+    return `You’re $${diff} above baseline right now. Catch the drift early, tighten the next few decisions, and get your ${goalLabel} back in range.`;
+  }
+  return `You’re currently $${diff} above your monthly baseline. It’s worth tightening up now so your ${goalLabel} doesn’t keep slipping further out.`;
+};
+
 export const handleStats: RequestHandler = async (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ message: "Authentication required." });
@@ -13,8 +51,8 @@ export const handleStats: RequestHandler = async (req, res) => {
     const decoded: any = jwt.verify(token, JWT_SECRET);
     const userId = decoded.id;
 
-    // Fetch User baseline, tone, and income
-    const userRes = await query(`
+    const userRes = await query(
+      `
       SELECT 
         baseline_spend, 
         nova_tone,
@@ -22,37 +60,43 @@ export const handleStats: RequestHandler = async (req, res) => {
         COALESCE(initial_balance, 15000.00) as initial_balance
       FROM dim_users 
       WHERE user_id = $1
-    `, [userId]);
+    `,
+      [userId]
+    );
     const user = userRes.rows[0];
 
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
 
-    // Calculate Total Spend (Lifetime)
-    const lifetimeRes = await query(`
+    const lifetimeRes = await query(
+      `
       SELECT COALESCE(SUM(amount), 0) as lifetime_spend
       FROM fact_transactions
       WHERE user_id = $1
-    `, [userId]);
+    `,
+      [userId]
+    );
     const lifetimeSpend = parseFloat(lifetimeRes.rows[0].lifetime_spend);
 
-    // Calculate Month Spend
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    
-    const statsRes = await query(`
+
+    const statsRes = await query(
+      `
       SELECT 
         COALESCE(SUM(amount), 0) as current_month_spend,
         COUNT(*) as transaction_count
       FROM fact_transactions
       WHERE user_id = $1 AND purchase_date >= $2
-    `, [userId, monthStart]);
+    `,
+      [userId, monthStart]
+    );
 
     const currentMonthSpend = parseFloat(statsRes.rows[0].current_month_spend);
 
-    // Fetch Chart Data (last 7 days)
-    const chartRes = await query(`
+    const chartRes = await query(
+      `
       SELECT 
         TO_CHAR(purchase_date, 'DY') as day,
         SUM(amount) as value
@@ -60,17 +104,17 @@ export const handleStats: RequestHandler = async (req, res) => {
       WHERE user_id = $1 AND purchase_date >= NOW() - INTERVAL '7 days'
       GROUP BY TO_CHAR(purchase_date, 'DY'), EXTRACT(DOW FROM purchase_date)
       ORDER BY EXTRACT(DOW FROM purchase_date)
-    `, [userId]);
+    `,
+      [userId]
+    );
 
-    const chartData = chartRes.rows.map(row => ({
+    const chartData = chartRes.rows.map((row) => ({
       day: row.day.charAt(0).toUpperCase(),
-      value: parseFloat(row.value)
+      value: parseFloat(row.value),
     }));
 
-    // Dynamic Balance Calculation (Initial + Monthly Income - Lifetime Spend)
     const totalBalance = parseFloat(user.initial_balance) - lifetimeSpend;
 
-    // Predicted End of Month
     const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
     const dayOfMonth = now.getDate();
     const daysRemaining = daysInMonth - dayOfMonth;
@@ -78,62 +122,79 @@ export const handleStats: RequestHandler = async (req, res) => {
     const projectedAdditionalSpend = dailyVelocity * daysRemaining;
     const predictedBalance = totalBalance - projectedAdditionalSpend;
 
-    // Dynamic Insights and Triggers
-    let triggers = [];
-    const baseline = parseFloat(user.baseline_spend);
+    const baseline = parseFloat(user.baseline_spend || 2500);
+    const monthlyDiff = currentMonthSpend - baseline;
+    const spendingDeltaPct = baseline > 0 ? ((currentMonthSpend - baseline) / baseline) * 100 : 0;
     const dailyBaseline = baseline / 30;
-    
+
+    const triggers = [];
+
     if (currentMonthSpend > baseline) {
-        triggers.push({ 
-            id: 1, 
-            name: "Baseline Breach", 
-            impact: (currentMonthSpend - baseline).toFixed(2), 
-            status: "Critical", 
-            insight: "You have exceeded your target monthly rhythm." 
-        });
+      triggers.push({
+        id: 1,
+        name: "Baseline drift",
+        impact: monthlyDiff.toFixed(2),
+        status: monthlyDiff > baseline * 0.15 ? "High" : "Watch",
+        insight: "Your spending is running above the monthly baseline you set for yourself.",
+      });
     }
 
-    if (dailyVelocity > (dailyBaseline * 1.5)) {
-        triggers.push({ 
-            id: 2, 
-            name: "High Velocity", 
-            impact: dailyVelocity.toFixed(2), 
-            status: "Active", 
-            insight: "Current daily spending is 50% above your strategic protocol." 
-        });
+    if (dailyVelocity > dailyBaseline * 1.5) {
+      triggers.push({
+        id: 2,
+        name: "High spending pace",
+        impact: dailyVelocity.toFixed(2),
+        status: "Active",
+        insight: "Your daily spending pace is noticeably above your usual rhythm this month.",
+      });
     }
 
     if (triggers.length === 0) {
-        triggers.push({ 
-            id: 0, 
-            name: "Rhythm Stable", 
-            impact: 0, 
-            status: "Optimal", 
-            insight: "No deviations detected in your capital trajectory." 
-        });
+      triggers.push({
+        id: 0,
+        name: "Steady rhythm",
+        impact: "0.00",
+        status: "Stable",
+        insight: "Your spending is staying close to plan right now.",
+      });
     }
 
-    const insight = user.nova_tone === "Aggressive" 
-        ? `Nova (Aggressive): Capital leak detected. You are $${(currentMonthSpend - baseline).toFixed(2)} off protocol.`
-        : `Nova (Balanced): Your spending rhythm is $${currentMonthSpend.toFixed(2)}. Monitoring for drift.`;
-
-    res.json({
-        totalBalance: Number(totalBalance.toFixed(2)),
-        monthlyIncome: parseFloat(user.monthly_income),
-        monthlyExpenses: currentMonthSpend,
-        predictedEndOfMonthBalance: Math.max(0, Number(predictedBalance.toFixed(2))),
-        baselineSpend: baseline,
-        novaTone: user.nova_tone,
-        novaInsight: insight,
-        triggers,
-        chartData: chartData.length > 0 ? chartData : [
-            { day: "M", value: 0 }, { day: "T", value: 0 }, { day: "W", value: 0 },
-            { day: "T", value: 0 }, { day: "F", value: 0 }, { day: "S", value: 0 }, { day: "S", value: 0 }
-        ]
+    const goalLabel = "top goal";
+    const novaInsight = buildNovaMessage({
+      mode: user.nova_tone || "Balanced",
+      currentMonthSpend,
+      baseline,
+      predictedBalance,
+      goalLabel,
     });
 
+    res.json({
+      totalBalance: Number(totalBalance.toFixed(2)),
+      monthlyIncome: parseFloat(user.monthly_income),
+      monthlyExpenses: currentMonthSpend,
+      predictedEndOfMonthBalance: Math.max(0, Number(predictedBalance.toFixed(2))),
+      baselineSpend: baseline,
+      monthlyDiff: Number(monthlyDiff.toFixed(2)),
+      spendingDeltaPct: Number(spendingDeltaPct.toFixed(1)),
+      transactionCount: Number(statsRes.rows[0].transaction_count),
+      novaTone: user.nova_tone || "Balanced",
+      novaInsight,
+      triggers,
+      chartData:
+        chartData.length > 0
+          ? chartData
+          : [
+              { day: "M", value: 0 },
+              { day: "T", value: 0 },
+              { day: "W", value: 0 },
+              { day: "T", value: 0 },
+              { day: "F", value: 0 },
+              { day: "S", value: 0 },
+              { day: "S", value: 0 },
+            ],
+    });
   } catch (err) {
     console.error("Stats Error:", err);
-    res.status(500).json({ error: "Could not calculate telemetry statistics." });
+    res.status(500).json({ error: "Could not calculate dashboard statistics." });
   }
 };
