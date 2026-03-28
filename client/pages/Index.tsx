@@ -14,12 +14,13 @@ import {
   Target,
   TrendingUp,
   Wallet,
+  ArrowRight
 } from "lucide-react";
 import { BarChart, Bar, ResponsiveContainer, Cell, XAxis } from "recharts";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { statsAPI, transactionsAPI } from "@/lib/api";
+import { statsAPI, transactionsAPI, novaServiceAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 import {
@@ -33,6 +34,96 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
+
+const WealthVault = ({ stats }: any) => {
+  const baseline = stats?.baselineSpend || 2500;
+  const current = stats?.monthlyExpenses || 0;
+  const progress = Math.min(100, (current / baseline) * 100);
+  const isOver = current > baseline;
+  
+  // Savings Velocity: (Income - Spend) / Income
+  const income = stats?.monthlyIncome || 5200;
+  const savingsRate = Math.max(0, ((income - current) / income) * 100);
+
+  return (
+    <div className="relative w-64 h-64 flex items-center justify-center mx-auto group">
+      {/* Background Glow */}
+      <div className={cn(
+        "absolute inset-0 rounded-full blur-3xl opacity-20 transition-colors duration-1000",
+        isOver ? "bg-red-500" : "bg-primary"
+      )} />
+      
+      <svg className="w-full h-full -rotate-90 drop-shadow-[0_0_15px_rgba(45,237,156,0.3)]">
+        {/* Outer Ring: Baseline Protection */}
+        <circle
+          cx="128"
+          cy="128"
+          r="110"
+          stroke="currentColor"
+          strokeWidth="12"
+          fill="transparent"
+          className="text-white/[0.03]"
+        />
+        <motion.circle
+          cx="128"
+          cy="128"
+          r="110"
+          stroke={isOver ? "#ef4444" : "#2DED9C"}
+          strokeWidth="12"
+          fill="transparent"
+          strokeDasharray={2 * Math.PI * 110}
+          initial={{ strokeDashoffset: 2 * Math.PI * 110 }}
+          animate={{ strokeDashoffset: (2 * Math.PI * 110) * (1 - progress / 100) }}
+          transition={{ duration: 2, ease: "easeOut" }}
+          strokeLinecap="round"
+        />
+
+        {/* Inner Ring: Savings Velocity */}
+        <circle
+          cx="128"
+          cy="128"
+          r="85"
+          stroke="currentColor"
+          strokeWidth="8"
+          fill="transparent"
+          className="text-white/[0.02]"
+        />
+        <motion.circle
+          cx="128"
+          cy="128"
+          r="85"
+          stroke="#60A5FA"
+          strokeWidth="8"
+          fill="transparent"
+          strokeDasharray={2 * Math.PI * 85}
+          initial={{ strokeDashoffset: 2 * Math.PI * 85 }}
+          animate={{ strokeDashoffset: (2 * Math.PI * 85) * (1 - savingsRate / 100) }}
+          transition={{ duration: 2.5, delay: 0.5, ease: "easeOut" }}
+          strokeLinecap="round"
+          className="opacity-60"
+        />
+      </svg>
+
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center space-y-1">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-4xl font-black text-white tracking-tighter"
+        >
+          {Math.round(savingsRate)}%
+        </motion.div>
+        <div className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.3em]">Savings Velocity</div>
+        <div className={cn(
+          "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest mt-2",
+          isOver ? "bg-red-500/10 text-red-400" : "bg-primary/10 text-primary"
+        )}>
+          {isOver ? "High Drift" : "Optimal"}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const fallbackChartData = [
   { day: "M", value: 30 },
@@ -144,6 +235,7 @@ export default function Index() {
   const [syncing, setSyncing] = useState(false);
   const [ingestData, setIngestData] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [triggerId, setTriggerId] = useState<string>("0"); // Default to no trigger
 
   const handleIngest = async () => {
     if (!ingestData.trim()) {
@@ -171,11 +263,25 @@ export default function Index() {
         const lines = ingestData.split("\n").filter((l) => l.trim());
         transactions = lines.map((line) => {
           const [date, amount, category, risk_category] = line.split(",");
-          return { date, amount: parseFloat(amount), category, risk_category };
+          return { 
+            date, 
+            amount: parseFloat(amount), 
+            category, 
+            risk_category,
+            trigger_id: triggerId !== "0" ? parseInt(triggerId) : undefined 
+          };
         });
       }
 
-      await transactionsAPI.ingest({ transactions });
+      // If it was JSON, we also apply the trigger if selected
+      const dataToSync = Array.isArray(transactions) 
+        ? transactions.map(t => ({ 
+            ...t, 
+            trigger_id: t.trigger_id || (triggerId !== "0" ? parseInt(triggerId) : undefined) 
+          }))
+        : transactions;
+
+      await transactionsAPI.ingest({ transactions: dataToSync });
       const res = await statsAPI.get();
       setStats(res.data);
 
@@ -195,19 +301,35 @@ export default function Index() {
     }
   };
 
-  const runAnalysis = () => {
+  const runAnalysis = async () => {
     setAnalyzing(true);
     toast({
       title: "Nova is reviewing your patterns",
-      description: "Looking for changes in spending pace and trigger risk...",
+      description: "Performing high-fidelity behavioral telemetry scan...",
     });
-    setTimeout(() => {
+    
+    try {
+      const res = await novaServiceAPI.getAnalysis();
+      setAnalyzing(false);
+      
+      // Update stats if needed, but the analysis is mostly for the insight
+      toast({
+        title: "Deep Scan Complete",
+        description: res.data.report,
+        duration: 10000,
+      });
+      
+      // Refresh stats to get latest novaInsight
+      const statsRes = await statsAPI.get();
+      setStats(statsRes.data);
+    } catch (err) {
       setAnalyzing(false);
       toast({
-        title: "Review complete",
-        description: "Your latest trends and trigger signals are ready.",
+        variant: "destructive",
+        title: "Analysis failed",
+        description: "Nova encountered a signal deviation during the scan.",
       });
-    }, 3000);
+    }
   };
 
   useEffect(() => {
@@ -246,7 +368,14 @@ export default function Index() {
 
       <div className="flex flex-col gap-6">
         <div className="space-y-2">
-          <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">Your financial heartbeat</h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">Your financial heartbeat</h1>
+            {stats?.projection?.isHighVelocity && (
+              <Badge className="bg-red-500/10 text-red-400 border-red-500/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest animate-pulse">
+                High-Velocity Surge
+              </Badge>
+            )}
+          </div>
           <p className="text-muted-foreground font-semibold text-sm max-w-2xl leading-snug">
             Pulse tracks your spending rhythm. Nova helps you understand what it means and where your habits are helping or hurting your progress.
           </p>
@@ -256,44 +385,86 @@ export default function Index() {
           <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
             <Sparkles size={120} className="text-primary" />
           </div>
-          <div className="flex items-start gap-4 relative z-10">
-            <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0 border border-primary/20 shadow-[0_0_20px_rgba(45,237,156,0.2)]">
-              <div className="w-5 h-5 rounded-full bg-primary shadow-[0_0_15px_rgba(45,237,156,1)]" />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Nova’s insight</span>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded-full">
-                  {stats?.novaTone || "Balanced"} mode
-                </span>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0 border border-primary/20 shadow-[0_0_20px_rgba(45,237,156,0.2)]">
+                <div className="w-5 h-5 rounded-full bg-primary shadow-[0_0_15px_rgba(45,237,156,1)]" />
               </div>
-              <p className="text-sm md:text-base text-white font-medium leading-relaxed max-w-3xl italic">
-                “{stats?.novaInsight || "I’m watching your spending patterns and progress. Sync data to give me more to work with."}”
-              </p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Nova’s insight</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded-full">
+                    {stats?.novaTone || "Balanced"} mode
+                  </span>
+                </div>
+                <p className="text-sm md:text-base text-white font-medium leading-relaxed max-w-3xl italic">
+                  “{stats?.novaInsight || "I’m watching your spending patterns and progress. Sync data to give me more to work with."}”
+                </p>
+              </div>
             </div>
+            
+            <button 
+              onClick={runAnalysis}
+              disabled={analyzing}
+              className="shrink-0 bg-primary text-background px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl disabled:opacity-50 flex items-center gap-2"
+            >
+              {analyzing ? <RefreshCcw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+              Initialize Deep Scan
+            </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-[#0A0907] border border-white/[0.03] rounded-[2rem] p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <Target className="w-5 h-5 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">Goal focus</span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-[#0A0907] border border-white/[0.03] rounded-[3rem] p-10 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+            <WealthVault stats={stats} />
+            <div className="flex-1 space-y-6">
+              <div>
+                <h3 className="text-2xl font-black text-white tracking-tighter mb-2">Vault Trajectory</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Nova is measuring your <span className="text-white font-bold">Savings Velocity</span> against your deterministic baseline. 
+                  Currently, you are protecting <span className="text-primary font-bold">{100 - Math.round((stats?.monthlyExpenses / stats?.baselineSpend) * 100 || 0)}%</span> of your target liquidity.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Projected Spend</p>
+                  <p className="text-lg font-black text-white">${stats?.projection?.projectedSpend?.toLocaleString() || '0'}</p>
+                </div>
+                <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Daily Velocity</p>
+                  <p className={cn("text-lg font-black", stats?.projection?.isHighVelocity ? "text-red-400" : "text-primary")}>
+                    ${stats?.projection?.velocity || '0'}/d
+                  </p>
+                </div>
+              </div>
+              <Link to="/growth" className="block">
+                <Button className="w-full bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-xl font-black uppercase tracking-widest text-[10px] py-6">
+                  View Wealth Analytics <ArrowRight className="w-3.5 h-3.5 ml-2" />
+                </Button>
+              </Link>
             </div>
-            <h2 className="text-xl font-black text-white tracking-tight mb-2">Stay close to your baseline to move faster.</h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              The more consistently you protect your monthly baseline, the easier it is for Nova to connect short-term behavior to long-term goals.
-            </p>
           </div>
-          <div className="bg-[#0A0907] border border-white/[0.03] rounded-[2rem] p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <TrendingUp className="w-5 h-5 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">Trigger focus</span>
+
+          <div className="bg-[#0A0907] border border-white/[0.03] rounded-[3rem] p-10 flex flex-col justify-center space-y-6 relative overflow-hidden">
+            <div className="flex items-center gap-3">
+              <TrendingUp className="w-6 h-6 text-primary" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Pulse Signal</span>
             </div>
-            <h2 className="text-xl font-black text-white tracking-tight mb-2">Catch drift before it becomes a pattern.</h2>
+            <h2 className="text-3xl font-black text-white tracking-tighter leading-tight">Catch drift before it becomes a pattern.</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Trigger spending matters most when it repeats quietly. That’s where Nova should help you notice the pattern early.
+              Trigger spending matters most when it repeats quietly. That’s where Nova helps you notice the pattern early.
             </p>
+            <div className="pt-4">
+               <div className="h-1 bg-white/5 rounded-full w-full overflow-hidden">
+                 <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: "65%" }}
+                  className="h-full bg-primary shadow-[0_0_10px_rgba(45,237,156,0.5)]" 
+                 />
+               </div>
+               <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.2em] mt-3">Behavioral Integrity: 65%</p>
+            </div>
           </div>
         </div>
 
@@ -325,12 +496,31 @@ export default function Index() {
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                <Textarea
-                  placeholder='[{"date": "2026-03-20", "amount": 150.00, "category": "Dining", "risk_category": "Lifestyle"}]'
-                  value={ingestData}
-                  onChange={(e) => setIngestData(e.target.value)}
-                  className="min-h-[200px] bg-white/5 border-white/10 font-mono text-xs"
-                />
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Contextual Catalyst (Trigger)</label>
+                  <select 
+                    value={triggerId} 
+                    onChange={(e) => setTriggerId(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-primary/50"
+                  >
+                    <option value="0">No specific trigger</option>
+                    <option value="1">Stress (High Risk)</option>
+                    <option value="2">Boredom (Medium Risk)</option>
+                    <option value="3">Social Pressure (Medium Risk)</option>
+                    <option value="4">Celebration (Low Risk)</option>
+                    <option value="5">Late Night (High Risk)</option>
+                  </select>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Transaction Data</label>
+                  <Textarea
+                    placeholder='[{"date": "2026-03-20", "amount": 150.00, "category": "Dining", "risk_category": "Lifestyle"}]'
+                    value={ingestData}
+                    onChange={(e) => setIngestData(e.target.value)}
+                    className="min-h-[150px] bg-white/5 border-white/10 font-mono text-xs"
+                  />
+                </div>
                 <p className="text-[10px] text-muted-foreground italic">Format: date,amount,category,risk_category (one per line) or valid JSON array.</p>
               </div>
               <DialogFooter>

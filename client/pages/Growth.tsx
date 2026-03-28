@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   TrendingUp, 
   ChevronRight, 
@@ -9,7 +9,8 @@ import {
   LineChart as LineChartIcon,
   Sparkles,
   Target,
-  ArrowRight
+  ArrowRight,
+  Plus
 } from "lucide-react";
 import { 
   AreaChart, 
@@ -21,28 +22,79 @@ import {
   ResponsiveContainer
 } from "recharts";
 import { cn } from "@/lib/utils";
-
-const growthData = [
-  { month: "Jan", balance: 12000, target: 11000 },
-  { month: "Feb", balance: 13500, target: 12500 },
-  { month: "Mar", balance: 14200, target: 14000 },
-  { month: "Apr", balance: 16800, target: 15500 },
-  { month: "May", balance: 18400, target: 17000 },
-  { month: "Jun", balance: 21500, target: 18500 },
-  { month: "Jul", balance: 23200, target: 20000 },
-  { month: "Aug", balance: 25400, target: 21500 },
-  { month: "Sep", balance: 28900, target: 23000 },
-  { month: "Oct", balance: 32400, target: 24500 },
-];
-
-const goals = [
-  { id: 1, name: "Emergency Fund", icon: PiggyBank, target: 20000, current: 15400, color: "text-blue-400" },
-  { id: 2, name: "House Downpayment", icon: Wallet, target: 150000, current: 32400, color: "text-primary" },
-  { id: 3, name: "New Vehicle", icon: Target, target: 45000, current: 12500, color: "text-purple-400" },
-];
+import { goalsAPI, statsAPI } from "@/lib/api";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 export default function GrowthPage() {
   const [timeframe, setTimeframe] = useState("10m");
+  const [goals, setGoals] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  // Create Goal State
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newGoal, setNewGoal] = useState({ name: "", target: "", deadline: "" });
+
+  const fetchData = async () => {
+    try {
+      const [goalsRes, statsRes] = await Promise.all([
+        goalsAPI.getAll(),
+        statsAPI.get()
+      ]);
+      setGoals(goalsRes.data);
+      setStats(statsRes.data);
+    } catch (err) {
+      console.error("Failed to fetch growth data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleCreateGoal = async () => {
+    if (!newGoal.name || !newGoal.target) return;
+    try {
+      await goalsAPI.create({
+        name: newGoal.name,
+        target: parseFloat(newGoal.target),
+        deadline: newGoal.deadline || null
+      });
+      setIsDialogOpen(false);
+      setNewGoal({ name: "", target: "", deadline: "" });
+      fetchData();
+      toast({ title: "Goal Engineering Complete", description: "Your new behavioral target has been established." });
+    } catch (err) {
+      toast({ variant: "destructive", title: "Goal Failed", description: "Signal deviation detected during creation." });
+    }
+  };
+
+  const getGoalIcon = (name: string) => {
+    const n = name.toLowerCase();
+    if (n.includes("emergency") || n.includes("fund")) return PiggyBank;
+    if (n.includes("house") || n.includes("home") || n.includes("car")) return Wallet;
+    return Target;
+  };
+
+  const growthData = stats?.chartData || [
+    { month: "Jan", value: 12000 },
+    { month: "Feb", value: 13500 },
+    { month: "Mar", value: 14200 },
+  ];
 
   return (
     <div className="p-8 md:p-12 max-w-7xl mx-auto space-y-12">
@@ -56,11 +108,11 @@ export default function GrowthPage() {
         <div className="space-y-3">
           <h1 className="text-5xl font-black tracking-tighter text-white">Financial Growth</h1>
           <p className="text-muted-foreground font-semibold text-lg max-w-lg leading-snug">
-            Your net worth is <span className="text-primary font-black">$32,400</span>, growing <span className="text-primary font-black">+14.2%</span> year-over-year.
+            Your net worth is <span className="text-primary font-black">${stats?.totalBalance?.toLocaleString() || '0'}</span>, growing <span className="text-primary font-black">+{stats?.spendingDeltaPct || '0'}%</span> rhythm.
           </p>
         </div>
         <div className="flex items-center gap-2 bg-white/5 border border-white/10 p-1.5 rounded-2xl shrink-0">
-          {["1m", "3m", "6m", "10m", "1y", "ALL"].map(t => (
+          {["1m", "3m", "6m", "ALL"].map(t => (
             <button 
               key={t}
               onClick={() => setTimeframe(t)}
@@ -83,16 +135,6 @@ export default function GrowthPage() {
               <LineChartIcon className="w-5 h-5 text-primary" />
               Projected Wealth
             </h3>
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-primary" />
-                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Actual</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-white/10" />
-                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Target</span>
-              </div>
-            </div>
           </div>
 
           <div className="flex-1 w-full mt-6">
@@ -112,57 +154,20 @@ export default function GrowthPage() {
                   tick={{ fill: "rgba(255,255,255,0.2)", fontSize: 11, fontWeight: 700 }}
                   dy={20}
                 />
-                <YAxis 
-                  hide
-                  domain={['dataMin - 2000', 'dataMax + 2000']}
-                />
+                <YAxis hide />
                 <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1A1917', 
-                    border: '1px solid rgba(255,255,255,0.1)', 
-                    borderRadius: '1.5rem',
-                    padding: '1rem',
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
-                  }}
-                  itemStyle={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '10px' }}
+                  contentStyle={{ backgroundColor: '#1A1917', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1.5rem' }}
                 />
                 <Area 
                   type="monotone" 
-                  dataKey="target" 
-                  stroke="rgba(255,255,255,0.1)" 
-                  strokeWidth={2}
-                  strokeDasharray="10 10"
-                  fill="transparent" 
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="balance" 
+                  dataKey="value" 
                   stroke="#2DED9C" 
                   strokeWidth={4}
                   fillOpacity={1} 
                   fill="url(#colorBalance)" 
-                  dot={{ r: 4, fill: "#2DED9C", strokeWidth: 2, stroke: "#12110F" }}
-                  activeDot={{ r: 8, fill: "#2DED9C", strokeWidth: 0 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-10 border-t border-white/5 mt-auto">
-            {[
-              { label: "Savings Ratio", value: "34.2%", trend: "+2.1%" },
-              { label: "Growth Momentum", value: "92/100", trend: "High" },
-              { label: "Time to Goal", value: "3.2 Years", trend: "-0.5" },
-              { label: "Investment Yield", value: "8.4%", trend: "+0.8%" }
-            ].map((stat, i) => (
-              <div key={i} className="space-y-1">
-                <div className="text-[9px] font-black text-muted-foreground uppercase tracking-widest leading-tight">{stat.label}</div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-xl font-black text-white">{stat.value}</span>
-                  <span className="text-[10px] font-black text-primary">{stat.trend}</span>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
 
@@ -173,28 +178,28 @@ export default function GrowthPage() {
                <Target className="w-5 h-5 text-primary" />
                Current Goals
              </h3>
-             <div className="space-y-8 flex-1">
+             <div className="space-y-8 flex-1 overflow-y-auto max-h-[400px] scrollbar-hide">
                {goals.map((goal) => {
-                 const progress = (goal.current / goal.target) * 100;
+                 const Icon = getGoalIcon(goal.name);
+                 const progress = Math.min(100, (parseFloat(goal.current) / parseFloat(goal.target)) * 100);
                  return (
-                   <div key={goal.id} className="space-y-3 group cursor-pointer">
+                   <div key={goal.goal_id} className="space-y-3 group cursor-pointer">
                      <div className="flex items-center justify-between">
                        <div className="flex items-center gap-3">
-                         <div className={cn("w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner", goal.color)}>
-                            <goal.icon className="w-5 h-5" />
+                         <div className={cn("w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner text-primary")}>
+                            <Icon className="w-5 h-5" />
                          </div>
                          <span className="text-sm font-bold text-white group-hover:text-primary transition-colors">{goal.name}</span>
                        </div>
-                       <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
                      </div>
                      <div className="space-y-1.5">
                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                         <span className="text-muted-foreground">${goal.current.toLocaleString()}</span>
-                         <span className="text-white">${goal.target.toLocaleString()}</span>
+                         <span className="text-muted-foreground">${parseFloat(goal.current).toLocaleString()}</span>
+                         <span className="text-white">${parseFloat(goal.target).toLocaleString()}</span>
                        </div>
                        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                          <div 
-                           className={cn("h-full rounded-full transition-all duration-[1500ms]", progress > 0 ? "bg-primary" : "bg-white/10")} 
+                           className={cn("h-full rounded-full transition-all duration-[1500ms] bg-primary")} 
                            style={{ width: `${progress}%` }} 
                          />
                        </div>
@@ -202,12 +207,63 @@ export default function GrowthPage() {
                    </div>
                  );
                })}
+               {goals.length === 0 && (
+                 <div className="text-center py-10 opacity-30">
+                   <Sparkles className="w-8 h-8 mx-auto mb-2" />
+                   <p className="text-[10px] font-bold uppercase">No active goal nodes</p>
+                 </div>
+               )}
              </div>
              
-             <button className="w-full bg-white/5 border border-white/5 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2 group shadow-xl">
-               Create New Goal
-               <Sparkles className="w-3.5 h-3.5 text-primary group-hover:rotate-12 transition-transform" />
-             </button>
+             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+               <DialogTrigger asChild>
+                 <button className="w-full bg-white/5 border border-white/5 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2 group shadow-xl">
+                   Create New Goal
+                   <Plus className="w-3.5 h-3.5 text-primary group-hover:rotate-90 transition-transform" />
+                 </button>
+               </DialogTrigger>
+               <DialogContent className="bg-[#0A0907] border-white/10 text-white">
+                 <DialogHeader>
+                   <DialogTitle className="text-2xl font-black tracking-tighter">Goal Engineering</DialogTitle>
+                   <DialogDescription>Define a new financial target node.</DialogDescription>
+                 </DialogHeader>
+                 <div className="space-y-4 py-4">
+                   <div className="space-y-2">
+                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Goal Name</label>
+                     <Input 
+                       placeholder="e.g., Emergency Vault" 
+                       value={newGoal.name}
+                       onChange={(e) => setNewGoal({...newGoal, name: e.target.value})}
+                       className="bg-white/5 border-white/10"
+                     />
+                   </div>
+                   <div className="space-y-2">
+                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Target Amount ($)</label>
+                     <Input 
+                       type="number" 
+                       placeholder="25000" 
+                       value={newGoal.target}
+                       onChange={(e) => setNewGoal({...newGoal, target: e.target.value})}
+                       className="bg-white/5 border-white/10"
+                     />
+                   </div>
+                   <div className="space-y-2">
+                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Deadline (Optional)</label>
+                     <Input 
+                       type="date" 
+                       value={newGoal.deadline}
+                       onChange={(e) => setNewGoal({...newGoal, deadline: e.target.value})}
+                       className="bg-white/5 border-white/10"
+                     />
+                   </div>
+                 </div>
+                 <DialogFooter>
+                   <Button onClick={handleCreateGoal} className="bg-primary text-black font-black uppercase tracking-widest w-full rounded-xl">
+                     Establish Goal Node
+                   </Button>
+                 </DialogFooter>
+               </DialogContent>
+             </Dialog>
            </div>
 
            <div className="bg-primary/5 border border-primary/10 rounded-[2.5rem] p-8 space-y-4 shadow-[0_0_50px_rgba(45,237,156,0.05)]">
@@ -215,15 +271,11 @@ export default function GrowthPage() {
                 <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/20 shrink-0 shadow-[0_0_20px_rgba(45,237,156,0.2)]">
                    <div className="w-4 h-4 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(45,237,156,0.8)]" />
                 </div>
-                <h4 className="text-xs font-black text-primary uppercase tracking-widest">Growth Recommendation</h4>
+                <h4 className="text-xs font-black text-primary uppercase tracking-widest">Nova Insight</h4>
               </div>
               <p className="text-sm font-semibold text-white/90 leading-relaxed italic">
-                "Based on your 14-day mindful streak, you can accelerate your House Goal by 14 months by moving $240/mo to a High-Yield account."
+                {stats?.novaInsight || "Sync data to generate growth recommendations."}
               </p>
-              <button className="w-full py-3 bg-primary text-background rounded-xl font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center justify-center gap-2">
-                Execute Growth Play
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
            </div>
         </div>
       </div>

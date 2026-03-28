@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { 
   ChevronRight, 
   Download, 
@@ -15,7 +15,11 @@ import {
   Flame,
   CheckCircle2,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Database,
+  ShieldCheck,
+  BrainCircuit,
+  Loader2
 } from "lucide-react";
 import { 
   BarChart, 
@@ -33,42 +37,60 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-
-const performanceData = [
-  { month: "Jan", spend: 3200, save: 1200, growth: 10 },
-  { month: "Feb", spend: 2800, save: 1500, growth: 15 },
-  { month: "Mar", spend: 3500, save: 800, growth: 12 },
-  { month: "Apr", spend: 3100, save: 1800, growth: 20 },
-  { month: "May", spend: 2900, save: 2100, growth: 25 },
-  { month: "Jun", spend: 3300, save: 1400, growth: 22 },
-  { month: "Jul", spend: 3000, save: 1900, growth: 30 },
-];
+import { statsAPI, novaServiceAPI } from "@/lib/api";
 
 export default function ReportsPage() {
-  const [selectedMonth, setSelectedMonth] = useState("July 2023");
+  const [stats, setStats] = useState<any>(null);
+  const [analysis, setAnalysis] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [statsRes, analysisRes] = await Promise.all([
+          statsAPI.get(),
+          novaServiceAPI.getAnalysis()
+        ]);
+        setStats(statsRes.data);
+        setAnalysis(analysisRes.data);
+      } catch (err) {
+        console.error("Failed to fetch report data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const performanceData = stats?.chartData || [];
 
   return (
     <div className="p-8 md:p-12 max-w-7xl mx-auto space-y-12">
       <div className="flex items-center gap-3 text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">
         <span className="hover:text-white cursor-pointer transition-colors">Home</span>
         <ChevronRight className="w-3.5 h-3.5 opacity-30" />
-        <span className="text-primary">Monthly Performance</span>
+        <span className="text-primary">System Performance</span>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="space-y-3">
           <h1 className="text-5xl font-black tracking-tighter text-white">Financial Reports</h1>
           <p className="text-muted-foreground font-semibold text-lg max-w-lg leading-snug">
-            Your performance report for <span className="text-primary underline underline-offset-8 decoration-primary/20">{selectedMonth}</span> is ready for review.
+            High-fidelity performance analysis for <span className="text-primary underline underline-offset-8 decoration-primary/20">Current Period</span>.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <button className="flex items-center gap-3 bg-white/5 border border-white/5 px-6 py-3 rounded-full text-[10px] font-black transition-all hover:bg-white/10 uppercase tracking-widest text-muted-foreground group">
             <Download className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
-            PDF Export
-          </button>
-          <button className="bg-primary text-background px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest shadow-[0_0_30px_rgba(45,237,156,0.2)] hover:scale-105 active:scale-95 transition-all">
-            Share Report
+            Export Telemetry
           </button>
         </div>
       </div>
@@ -77,15 +99,11 @@ export default function ReportsPage() {
         {/* Analytical Performance Narrative */}
         <div className="lg:col-span-4 bg-[#12110F] border border-white/5 rounded-[2.5rem] p-10 space-y-12">
            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-black text-white uppercase tracking-tighter">Performance Score</h3>
+              <h3 className="text-xl font-black text-white uppercase tracking-tighter">7-Day Velocity Chart</h3>
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2">
                    <div className="w-3 h-3 rounded-full bg-primary" />
-                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Savings Growth</span>
-                </div>
-                <div className="flex items-center gap-2">
-                   <div className="w-3 h-3 rounded-full bg-white/10" />
-                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Spend Efficiency</span>
+                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Behavioral Volume</span>
                 </div>
               </div>
            </div>
@@ -95,7 +113,7 @@ export default function ReportsPage() {
                <BarChart data={performanceData}>
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
                  <XAxis 
-                   dataKey="month" 
+                   dataKey="day" 
                    axisLine={false} 
                    tickLine={false} 
                    tick={{ fill: "rgba(255,255,255,0.2)", fontSize: 11, fontWeight: 700 }}
@@ -106,8 +124,7 @@ export default function ReportsPage() {
                    cursor={{ fill: 'rgba(255,255,255,0.02)' }}
                    contentStyle={{ backgroundColor: '#1A1917', border: 'none', borderRadius: '1.5rem', padding: '1.5rem', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}
                  />
-                 <Bar dataKey="save" fill="#2DED9C" radius={[4, 4, 0, 0]} barSize={40} />
-                 <Bar dataKey="spend" fill="rgba(255,255,255,0.05)" radius={[4, 4, 0, 0]} barSize={40} />
+                 <Bar dataKey="value" fill="#2DED9C" radius={[4, 4, 0, 0]} barSize={40} />
                </BarChart>
              </ResponsiveContainer>
            </div>
@@ -117,9 +134,9 @@ export default function ReportsPage() {
         <div className="lg:col-span-3 space-y-8">
            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
              {[
-               { label: "Net Savings", value: "+$12.4k", trend: "up", trendValue: "18%", icon: TrendingUp, color: "text-primary", bg: "bg-primary/5" },
-               { label: "AI Awareness", value: "94/100", trend: "up", trendValue: "5.2%", icon: Zap, color: "text-orange-400", bg: "bg-orange-400/5" },
-               { label: "Streak Bonus", value: "$420", trend: "up", trendValue: "$120", icon: Flame, color: "text-red-400", bg: "bg-red-400/5" }
+               { label: "Current Volume", value: `$${stats?.monthlyExpenses?.toLocaleString()}`, trend: stats?.monthlyDiff > 0 ? "down" : "up", trendValue: `${Math.abs(stats?.spendingDeltaPct)}%`, icon: BarChart3, color: "text-primary", bg: "bg-primary/5" },
+               { label: "Data Integrity", value: "100%", trend: "up", trendValue: "NOMINAL", icon: ShieldCheck, color: "text-blue-400", bg: "bg-blue-400/5" },
+               { label: "Vault Drift", value: `$${Math.abs(stats?.monthlyDiff || 0).toLocaleString()}`, trend: stats?.monthlyDiff > 0 ? "down" : "up", trendValue: stats?.monthlyDiff > 0 ? "SURGE" : "SAVED", icon: Zap, color: stats?.monthlyDiff > 0 ? "text-red-400" : "text-primary", bg: "bg-red-400/5" }
              ].map((stat, i) => (
                <div key={i} className="bg-[#12110F] border border-white/5 rounded-3xl p-8 space-y-4 hover:bg-[#1A1917] transition-all cursor-pointer group">
                  <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform", stat.bg)}>
@@ -133,7 +150,7 @@ export default function ReportsPage() {
                        {stat.trend === "up" ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                        {stat.trendValue}
                      </span>
-                     <span className="text-muted-foreground/40">vs last month</span>
+                     <span className="text-muted-foreground/40">vs baseline</span>
                    </div>
                  </div>
                </div>
@@ -142,26 +159,52 @@ export default function ReportsPage() {
 
            <div className="bg-[#12110F] border border-white/5 rounded-[2.5rem] p-10 space-y-10">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-black text-white uppercase tracking-tighter">AI Behavioral Insights</h3>
-                <button className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest">Full Behavior Log</button>
+                <h3 className="text-xl font-black text-white uppercase tracking-tighter">AI Behavioral Synthesis</h3>
+                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-[10px] px-3">Gemini 1.5 Pro Enabled</Badge>
               </div>
 
               <div className="space-y-6">
-                {[
-                  { title: "Peak Discipline Hours", text: "You are 92% less likely to spend impulsively between 7 PM and 10 PM. This is your 'Golden Hour'.", icon: CheckCircle2, color: "text-primary" },
-                  { title: "Trigger Mitigation", text: "Successfully blocked 14 'Late Night' checkout flows by using the pause feature.", icon: Sparkles, color: "text-orange-400" },
-                  { title: "Savings Accelerator", text: "Moving to annual subscriptions for Pro saved you an additional $48 this year.", icon: Zap, color: "text-primary" }
-                ].map((insight, i) => (
-                  <div key={i} className="flex gap-6 p-6 rounded-3xl bg-white/[0.01] border border-white/5 hover:bg-white/[0.03] transition-all group cursor-pointer">
-                    <div className={cn("w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform", insight.color)}>
-                       <insight.icon className="w-6 h-6" />
-                    </div>
-                    <div>
-                       <h4 className="text-base font-black text-white mb-1">{insight.title}</h4>
-                       <p className="text-sm font-semibold text-muted-foreground leading-relaxed">{insight.text}</p>
-                    </div>
+                <div className="flex gap-6 p-8 rounded-[2rem] bg-primary/5 border border-primary/10 hover:bg-primary/10 transition-all group cursor-pointer relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4 opacity-5">
+                    <Sparkles size={80} className="text-primary" />
                   </div>
-                ))}
+                  <div className={cn("w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform text-primary")}>
+                     <BrainCircuit className="w-8 h-8" />
+                  </div>
+                  <div className="space-y-2">
+                     <h4 className="text-lg font-black text-white leading-none">Nova Deep-Scan Report</h4>
+                     <p className="text-sm font-semibold text-muted-foreground leading-relaxed italic whitespace-pre-wrap">
+                       "{analysis?.report || "Insufficient telemetry for a deep scan. Sync more data to initialize synthesis."}"
+                     </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <div className="p-6 rounded-3xl bg-white/[0.01] border border-white/5">
+                      <h5 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-3">Top Catalyst</h5>
+                      <div className="flex items-center gap-3">
+                         <div className="w-10 h-10 rounded-xl bg-red-400/10 flex items-center justify-center text-red-400">
+                            <Zap className="w-5 h-5" />
+                         </div>
+                         <div>
+                            <div className="text-base font-bold text-white">{analysis?.summary?.topTrigger || "None Detected"}</div>
+                            <div className="text-[10px] text-muted-foreground">Highest Spending Impact</div>
+                         </div>
+                      </div>
+                   </div>
+                   <div className="p-6 rounded-3xl bg-white/[0.01] border border-white/5">
+                      <h5 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-3">Goal Acceleration</h5>
+                      <div className="flex items-center gap-3">
+                         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                            <TrendingUp className="w-5 h-5" />
+                         </div>
+                         <div>
+                            <div className="text-base font-bold text-white">{analysis?.summary?.acceleration === "Detected" ? "ACCELERATING" : "STABLE"}</div>
+                            <div className="text-[10px] text-muted-foreground">Trajectory Shift</div>
+                         </div>
+                      </div>
+                   </div>
+                </div>
               </div>
            </div>
         </div>
@@ -182,21 +225,28 @@ export default function ReportsPage() {
              
              <div className="space-y-2">
                 <h3 className="text-2xl font-black text-white">Nova Advisor</h3>
-                <p className="text-xs font-black text-primary uppercase tracking-[0.2em]">Always Analyzing</p>
+                <p className="text-xs font-black text-primary uppercase tracking-[0.2em]">Live Telemetry Sink</p>
              </div>
 
-             <div className="space-y-4 pt-6 flex-1">
-                <p className="text-sm font-semibold text-muted-foreground leading-relaxed">
-                  "Your financial performance this month is in the <span className="text-white font-black">top 5%</span> of Pulse users. Ready to optimize your growth strategy further?"
-                </p>
-                <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4 text-[10px] font-black text-primary uppercase tracking-widest text-left flex items-center gap-3">
-                  <Flame className="w-4 h-4 fill-primary" />
-                  Performance Rating: ELITE
+             <div className="space-y-4 pt-6 flex-1 text-left">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4">
+                   <div className="space-y-1">
+                      <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Monthly Status</p>
+                      <p className="text-sm font-bold text-white">
+                         {stats?.monthlyDiff > 0 ? "Drifting above baseline" : "Protecting baseline"}
+                      </p>
+                   </div>
+                   <div className="space-y-1">
+                      <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Projection</p>
+                      <p className="text-sm font-bold text-primary">
+                         ${stats?.projection?.projectedSpend?.toLocaleString()} Total
+                      </p>
+                   </div>
                 </div>
              </div>
 
              <button className="w-full bg-primary text-background font-black py-4 rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(45,237,156,0.2)] uppercase tracking-widest text-xs mt-auto">
-                Open Strategy Deck
+                Refresh Performance
                 <ArrowRight className="w-4 h-4" />
              </button>
            </div>

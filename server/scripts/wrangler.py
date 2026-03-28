@@ -46,6 +46,10 @@ def pulse_wrangler(input_csv):
         df['rolling_velocity'] = df['amount'].rolling(window=3).mean()
         print("[+] Behavioral Velocity calculated (3-transaction rolling average).")
 
+    # Ensure trigger_id exists even if empty for schema alignment
+    if 'trigger_id' not in df.columns:
+        df['trigger_id'] = ""
+
     # 5. Export to Star Schema structure (CSV format for Postgres ingestion)
     output_path = "server/db/pulse_ingest.csv"
     df.to_csv(output_path, index=False)

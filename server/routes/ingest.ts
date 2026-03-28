@@ -2,91 +2,130 @@ import { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { exec } from "child_process";
+import { spawn } from "child_process";
 import { query } from "../db/db";
-import jwt from "jsonwebtoken";
+import { sanitizeCsvField, validateTransaction } from "../middleware/security";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const JWT_SECRET = process.env.JWT_SECRET || "dte-high-fidelity-secret";
+
+const MAX_TRANSACTIONS = 500;
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY || "");
 
 export const handleIngest = async (req: Request, res: Response) => {
   const { transactions } = req.body;
-  const authHeader = req.headers.authorization;
+  const userId = req.userId;
 
-  if (!authHeader) return res.status(401).json({ error: "Authentication required for telemetry ingestion." });
-  const token = authHeader.split(" ")[1];
+  if (!Array.isArray(transactions) || transactions.length === 0)
+    return res.status(400).json({ error: "transactions must be a non-empty array." });
 
-  let userId: string;
+  if (transactions.length > MAX_TRANSACTIONS)
+    return res.status(400).json({ error: `Payload exceeds maximum of ${MAX_TRANSACTIONS} transactions.` });
+
+  // 1. AI-Driven Data Integrity: Auto-Categorization & Risk Scoring
+  let enrichedTransactions = transactions;
   try {
-    const decoded: any = jwt.verify(token, JWT_SECRET);
-    userId = decoded.id;
-  } catch (err) {
-    return res.status(401).json({ error: "Invalid session." });
-  }
-
-  if (!transactions || !Array.isArray(transactions)) {
-    return res.status(400).json({ error: "Missing transaction telemetry." });
-  }
-
-  // 1. Convert JSON transactions to temporary CSV for the Python Wrangler
-  const tempCsvPath = path.resolve(__dirname, "../db/transactions_temp.csv");
-  const headers = "date,amount,category,risk_category\n";
-  const rows = transactions.map(t => `${t.date},${t.amount},${t.category},${t.risk_category}`).join("\n");
-  
-  try {
-    fs.writeFileSync(tempCsvPath, headers + rows);
-
-    // 2. Execute Python Wrangler
-    const scriptPath = path.resolve(__dirname, "../scripts/wrangler.py");
-    const pythonCmd = "python"; 
-    
-    exec(`${pythonCmd} "${scriptPath}" "${tempCsvPath}"`, async (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Wrangler Execution Error: ${error}`);
-        return res.status(500).json({ error: "Behavioral Wrangler failed to initialize.", detail: stderr });
-      }
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const prompt = `
+      You are Nova's Behavioral Data Wrangler. 
+      Analyze the following transactions and ensure they have a 'category' and 'risk_category'.
       
-      // 3. Process the Wrangler output (pulse_ingest.csv) and insert into DB
-      const processedCsvPath = path.resolve(__dirname, "../db/pulse_ingest.csv");
-      if (fs.existsSync(processedCsvPath)) {
-        const data = fs.readFileSync(processedCsvPath, "utf-8");
-        const lines = data.split("\n").slice(1).filter(line => line.trim() !== "");
-        
-        for (const line of lines) {
-          const [date, amount, category, risk_category, behavioral_ordinal, rolling_velocity] = line.split(",");
-          
-          // Ensure category exists in dim_categories
-          let catResult = await query("SELECT category_id FROM dim_categories WHERE category_name = $1", [category]);
-          let categoryId: number;
-          
-          if (catResult.rows.length === 0) {
-            const newCat = await query(
-              "INSERT INTO dim_categories (category_name, risk_level) VALUES ($1, $2) RETURNING category_id",
-              [category, risk_category || 'Medium']
-            );
-            categoryId = newCat.rows[0].category_id;
-          } else {
-            categoryId = catResult.rows[0].category_id;
-          }
+      Categories: Dining, Groceries, Transport, Entertainment, Utilities, Rent, Shopping, Healthcare, Misc.
+      Risk Levels (Categorical to Ordinal): Essential, Lifestyle, Impulse, Critical.
+      
+      Return ONLY a valid JSON array of objects with the fields: date, amount, category, risk_category.
+      Keep existing data if it's already accurate.
+      
+      Transactions: ${JSON.stringify(transactions)}
+    `;
 
-          // Insert transaction
-          await query(
-            "INSERT INTO fact_transactions (user_id, category_id, amount, purchase_date, status) VALUES ($1, $2, $3, $4, $5)",
-            [userId, categoryId, parseFloat(amount), date, 'Completed']
-          );
-        }
-      }
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    // Basic JSON extraction in case Gemini wraps in code blocks
+    const jsonMatch = text.match(/\[.*\]/s);
+    if (jsonMatch) {
+      enrichedTransactions = JSON.parse(jsonMatch[0]);
+    }
+  } catch (aiErr) {
+    console.warn("[!] Nova AI Categorization bypassed due to error:", aiErr);
+    // Continue with raw transactions if AI fails - prioritize Data Availability
+  }
 
-      res.json({ 
-        status: "Synchronized", 
-        message: "Natural input processed and persisted to High-Fidelity Star Schema.",
-        wranglerOutput: stdout.trim()
+  // Validate enriched transactions
+  for (let i = 0; i < enrichedTransactions.length; i++) {
+    const err = validateTransaction(enrichedTransactions[i]);
+    if (err) return res.status(400).json({ error: `Transaction ${i} validation failed: ${err}` });
+  }
+
+  // Build CSV with sanitized values
+  const headers = "date,amount,category,risk_category,trigger_id";
+  const rows = enrichedTransactions.map((t: any) => [
+    sanitizeCsvField(t.date),
+    sanitizeCsvField(t.amount),
+    sanitizeCsvField(t.category || "Misc"),
+    sanitizeCsvField(t.risk_category || "Lifestyle"),
+    sanitizeCsvField(t.trigger_id || ""),
+  ].join(",")).join("\n");
+
+  const tempCsvPath = path.resolve(__dirname, "../db/transactions_temp.csv");
+  const scriptPath = path.resolve(__dirname, "../scripts/wrangler.py");
+
+  try {
+    fs.writeFileSync(tempCsvPath, headers + "\n" + rows, { mode: 0o600 });
+
+    await new Promise<void>((resolve, reject) => {
+      const proc = spawn("python", [scriptPath, tempCsvPath], { stdio: ["ignore", "pipe", "pipe"] });
+      let stderr = "";
+      proc.stderr.on("data", (d: Buffer) => { stderr += d.toString(); });
+      proc.on("close", (code) => {
+        if (code !== 0) reject(new Error(stderr || "Wrangler exited with code " + code));
+        else resolve();
       });
+      proc.on("error", reject);
     });
 
-  } catch (err) {
-    console.error("Ingest Error:", err);
-    res.status(500).json({ error: "System Integrity Breach: Could not process ingestion." });
+    const processedCsvPath = path.resolve(__dirname, "../db/pulse_ingest.csv");
+    if (!fs.existsSync(processedCsvPath))
+      return res.status(500).json({ error: "Wrangler did not produce output file." });
+
+    const lines = fs.readFileSync(processedCsvPath, "utf-8")
+      .split("\n").slice(1).filter((l: string) => l.trim());
+
+    let inserted = 0;
+    for (const line of lines) {
+      const parts = line.split(",");
+      if (parts.length < 5) continue;
+      const [date, amount, category, risk_category, trigger_id] = parts;
+
+      let catResult = await query("SELECT category_id FROM dim_categories WHERE category_name = $1", [category]);
+      let categoryId: number;
+      if (catResult.rows.length === 0) {
+        const newCat = await query(
+          "INSERT INTO dim_categories (category_name, risk_level) VALUES ($1, $2) RETURNING category_id",
+          [category, risk_category || "Medium"]
+        );
+        categoryId = newCat.rows[0].category_id;
+      } else {
+        categoryId = catResult.rows[0].category_id;
+      }
+
+      const tid = trigger_id && trigger_id.trim() !== "" ? parseInt(trigger_id) : null;
+
+      await query(
+        "INSERT INTO fact_transactions (user_id, category_id, amount, purchase_date, status, trigger_id) VALUES ($1, $2, $3, $4, $5, $6)",
+        [userId, categoryId, parseFloat(amount), date, "Completed", tid]
+      );
+      inserted++;
+    }
+
+    try { fs.unlinkSync(tempCsvPath); } catch {}
+    try { fs.unlinkSync(processedCsvPath); } catch {}
+
+    res.json({ status: "Synchronized", inserted, message: `High-fidelity ingestion of ${inserted} nodes complete.` });
+
+  } catch (err: any) {
+    console.error("Ingest Error:", err.message);
+    res.status(500).json({ error: "Ingest pipeline failed.", detail: err.message });
   }
 };

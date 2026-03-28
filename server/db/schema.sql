@@ -73,4 +73,34 @@ FROM fact_transactions f
 JOIN dim_users u ON f.user_id = u.user_id
 GROUP BY u.user_id, u.user_name, u.baseline_spend;
 
+-- 4. Dimension: Triggers (Emotional Catalysts)
+CREATE TABLE IF NOT EXISTS "dim_triggers" (
+    trigger_id SERIAL PRIMARY KEY,
+    trigger_name VARCHAR(50) NOT NULL, -- e.g., 'Stress', 'Boredom', 'Social'
+    risk_level VARCHAR(20) DEFAULT 'Medium'
+);
+
+-- 5. Dimension: Goals (Target Nodes)
+CREATE TABLE IF NOT EXISTS "dim_goals" (
+    goal_id SERIAL PRIMARY KEY,
+    user_id UUID REFERENCES dim_users(user_id),
+    goal_name VARCHAR(100) NOT NULL,
+    target_amount DECIMAL(12, 2) NOT NULL,
+    current_progress DECIMAL(12, 2) DEFAULT 0,
+    deadline DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Update Fact table to include Trigger linkage
+ALTER TABLE fact_transactions ADD COLUMN IF NOT EXISTS trigger_id INT REFERENCES dim_triggers(trigger_id);
+
+-- Insert Default Triggers for Signal Clarity
+INSERT INTO dim_triggers (trigger_name, risk_level) VALUES 
+('Stress', 'High'),
+('Boredom', 'Medium'),
+('Social Pressure', 'Medium'),
+('Celebration', 'Low'),
+('Late Night', 'High')
+ON CONFLICT DO NOTHING;
+
 COMMIT;

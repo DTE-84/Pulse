@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { 
   ArrowUpRight, 
   ArrowDownRight, 
@@ -15,7 +15,11 @@ import {
   MoreVertical,
   Zap,
   Flame,
-  PieChart as PieChartIcon
+  PieChart as PieChartIcon,
+  Flag,
+  Database,
+  EyeOff,
+  History
 } from "lucide-react";
 import { 
   BarChart, 
@@ -30,15 +34,22 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-
-const transactions = [
-  { id: 1, name: "Amazon Marketplace", category: "Shopping", date: "Oct 24, 2023", amount: -142.50, trigger: "Late Night", status: "Detected", icon: ShoppingBag, color: "text-blue-400" },
-  { id: 2, name: "Uber Eats", category: "Food & Drink", date: "Oct 23, 2023", amount: -42.20, trigger: "Stress Eating", status: "Pending", icon: Utensils, color: "text-orange-400" },
-  { id: 3, name: "Apple Subscription", category: "Digital", date: "Oct 22, 2023", amount: -14.99, trigger: "None", status: "Safe", icon: Smartphone, color: "text-purple-400" },
-  { id: 4, name: "Starbucks Coffee", category: "Food & Drink", date: "Oct 22, 2023", amount: -6.45, trigger: "Boredom Scrolling", status: "Detected", icon: Coffee, color: "text-green-400" },
-  { id: 5, name: "Chevron Gasoline", category: "Travel", date: "Oct 21, 2023", amount: -54.00, trigger: "None", status: "Safe", icon: Car, color: "text-yellow-400" },
-  { id: 6, name: "Nike Store", category: "Shopping", date: "Oct 20, 2023", amount: -210.00, trigger: "Social Influenced", status: "High Risk", icon: ShoppingBag, color: "text-blue-400" },
-];
+import { transactionsAPI, statsAPI } from "@/lib/api";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const categoryData = [
   { name: "Shopping", value: 35, color: "#60A5FA" },
@@ -49,6 +60,42 @@ const categoryData = [
 ];
 
 export default function SpendingPage() {
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [txRes, statsRes] = await Promise.all([
+          transactionsAPI.getAll({ limit: 10 }),
+          statsAPI.get()
+        ]);
+        setTransactions(txRes.data);
+        setStats(statsRes.data);
+      } catch (err) {
+        console.error("Failed to fetch spending data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const getIcon = (cat: string) => {
+    const c = cat.toLowerCase();
+    if (c.includes("food") || c.includes("dining")) return Utensils;
+    if (c.includes("shop")) return ShoppingBag;
+    if (c.includes("travel") || c.includes("transport")) return Car;
+    if (c.includes("digital") || c.includes("tech")) return Smartphone;
+    if (c.includes("coffee")) return Coffee;
+    return CreditCard;
+  };
+
+  const filteredTransactions = selectedCategory 
+    ? transactions.filter(tx => tx.category_name?.toLowerCase().includes(selectedCategory.name.toLowerCase()))
+    : [];
   return (
     <div className="p-8 md:p-12 max-w-7xl mx-auto space-y-12">
       <div className="flex items-center gap-3 text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">
@@ -118,7 +165,11 @@ export default function SpendingPage() {
 
           <div className="w-full space-y-4 pt-6 border-t border-white/5">
             {categoryData.map((cat, i) => (
-              <div key={i} className="flex items-center justify-between group cursor-pointer hover:bg-white/5 p-2 rounded-xl transition-all">
+              <div 
+                key={i} 
+                onClick={() => setSelectedCategory(cat)}
+                className="flex items-center justify-between group cursor-pointer hover:bg-white/5 p-2 rounded-xl transition-all"
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
                   <span className="text-xs font-bold text-white">{cat.name}</span>
@@ -132,6 +183,49 @@ export default function SpendingPage() {
           </div>
         </div>
 
+        {/* Transaction Detail Dialog */}
+        <Dialog open={!!selectedCategory} onOpenChange={(open) => !open && setSelectedCategory(null)}>
+          <DialogContent className="bg-[#0A0907] border-white/10 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <div className="flex items-center gap-4 mb-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: selectedCategory?.color }} />
+                <DialogTitle className="text-2xl font-black tracking-tighter">{selectedCategory?.name} Deep-Dive</DialogTitle>
+              </div>
+              <DialogDescription className="text-muted-foreground font-medium">
+                Analysis of behavioral nodes within the {selectedCategory?.name} category.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4">
+                <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">Nova Analysis</p>
+                <p className="text-sm italic text-white/90">
+                  "Your spending in {selectedCategory?.name} represents {selectedCategory?.value}% of your current monthly volume. I've detected a stable rhythm here, with most nodes aligning with your baseline."
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Recent {selectedCategory?.name} Nodes</h4>
+                {filteredTransactions.length > 0 ? (
+                  filteredTransactions.map((tx: any) => (
+                    <div key={tx.transaction_id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                      <div>
+                        <div className="text-sm font-bold text-white">{tx.merchant_name || tx.category_name}</div>
+                        <div className="text-[10px] text-muted-foreground">{new Date(tx.purchase_date).toLocaleDateString()}</div>
+                      </div>
+                      <div className="text-sm font-black text-white">${parseFloat(tx.amount).toFixed(2)}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-10 border border-dashed border-white/5 rounded-xl">
+                    <p className="text-xs text-muted-foreground">No specific transactions found for this node.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Transactions List */}
         <div className="lg:col-span-2 bg-[#12110F] border border-white/5 rounded-[2.5rem] p-10 space-y-10">
           <div className="flex items-center justify-between">
@@ -140,48 +234,69 @@ export default function SpendingPage() {
           </div>
 
           <div className="space-y-4">
-            {transactions.map((tx) => (
-              <div key={tx.id} className="group flex items-center justify-between p-5 rounded-3xl hover:bg-white/[0.03] border border-transparent hover:border-white/5 transition-all">
-                <div className="flex items-center gap-5 flex-1">
-                   <div className={cn("w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-105 transition-transform", tx.color)}>
-                     <tx.icon className="w-7 h-7" />
-                   </div>
-                   <div className="overflow-hidden">
-                     <div className="text-base font-bold text-white mb-0.5 truncate">{tx.name}</div>
-                     <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                       <span>{tx.category}</span>
-                       <span className="opacity-30">•</span>
-                       <span>{tx.date}</span>
-                     </div>
-                   </div>
-                </div>
+            {transactions.map((tx) => {
+              const Icon = getIcon(tx.category_name || "");
+              const isExpense = parseFloat(tx.amount) > 0;
+              return (
+                <div key={tx.transaction_id} className="group flex items-center justify-between p-5 rounded-3xl hover:bg-white/[0.03] border border-transparent hover:border-white/5 transition-all">
+                  <div className="flex items-center gap-5 flex-1">
+                    <div className={cn("w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-105 transition-transform text-primary")}>
+                      <Icon className="w-7 h-7" />
+                    </div>
+                    <div className="overflow-hidden">
+                      <div className="text-base font-bold text-white mb-0.5 truncate">{tx.merchant_name || tx.category_name}</div>
+                      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        <span>{tx.category_name}</span>
+                        <span className="opacity-30">•</span>
+                        <span>{new Date(tx.purchase_date).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  </div>
 
-                <div className="flex flex-col items-end gap-3 shrink-0 ml-4">
-                   <div className="text-lg font-black text-white">
-                     {tx.amount < 0 ? "-" : "+"}${Math.abs(tx.amount).toFixed(2)}
-                   </div>
-                   <div className="flex items-center gap-2">
-                     {tx.trigger !== "None" && (
-                       <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/20 px-2.5 py-0 text-[9px] font-black flex gap-1 uppercase tracking-widest">
-                         <Zap className="w-3 h-3 fill-red-400" />
-                         {tx.trigger}
-                       </Badge>
-                     )}
-                     <div className={cn(
-                       "text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest",
-                       tx.status === "Safe" ? "bg-primary/10 text-primary border border-primary/20" : 
-                       tx.status === "Detected" ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" : 
-                       "bg-red-500/10 text-red-400 border border-red-500/20"
-                     )}>
-                       {tx.status}
-                     </div>
-                     <button className="p-1 hover:bg-white/10 rounded-lg transition-colors ml-2">
-                       <MoreVertical className="w-4 h-4 text-muted-foreground" />
-                     </button>
-                   </div>
+                  <div className="flex flex-col items-end gap-3 shrink-0 ml-4">
+                    <div className="text-lg font-black text-white">
+                      {isExpense ? "-" : "+"}${Math.abs(tx.amount).toFixed(2)}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {tx.trigger_name && (
+                        <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/20 px-2.5 py-0 text-[9px] font-black flex gap-1 uppercase tracking-widest">
+                          <Zap className="w-3 h-3 fill-red-400" />
+                          {tx.trigger_name}
+                        </Badge>
+                      )}
+                      
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="p-1 hover:bg-white/10 rounded-lg transition-colors ml-2">
+                            <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-[#12110F] border-white/10 text-white w-48">
+                          <DropdownMenuLabel className="text-[10px] uppercase tracking-widest opacity-50">Node Actions</DropdownMenuLabel>
+                          <DropdownMenuSeparator className="bg-white/5" />
+                          <DropdownMenuItem className="flex items-center gap-2 text-xs focus:bg-white/5 focus:text-primary cursor-pointer">
+                            <Flag className="w-3.5 h-3.5" /> Flag as Inaccurate
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="flex items-center gap-2 text-xs focus:bg-white/5 focus:text-primary cursor-pointer">
+                            <History className="w-3.5 h-3.5" /> View Behavioral History
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="flex items-center gap-2 text-xs focus:bg-white/5 focus:text-red-400 cursor-pointer">
+                            <EyeOff className="w-3.5 h-3.5" /> Ignore Trigger Signal
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
                 </div>
+              );
+            })}
+            
+            {transactions.length === 0 && !loading && (
+              <div className="text-center py-20 border border-dashed border-white/5 rounded-3xl">
+                <Database className="w-10 h-10 text-muted-foreground/20 mx-auto mb-4" />
+                <p className="text-sm text-muted-foreground">No financial nodes detected in this period.</p>
               </div>
-            ))}
+            )}
           </div>
 
           <div className="bg-primary/5 border border-primary/10 rounded-3xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 group cursor-pointer hover:bg-primary/10 transition-all">

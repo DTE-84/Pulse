@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import { query } from "../db/db";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "dte-high-fidelity-secret";
+import { JWT_SECRET } from "../middleware/security";
 
 const buildNovaMessage = ({
   mode,
@@ -120,12 +120,20 @@ export const handleStats: RequestHandler = async (req, res) => {
     const daysRemaining = daysInMonth - dayOfMonth;
     const dailyVelocity = currentMonthSpend / (dayOfMonth || 1);
     const projectedAdditionalSpend = dailyVelocity * daysRemaining;
+    const predictedEndOfMonthSpend = currentMonthSpend + projectedAdditionalSpend;
     const predictedBalance = totalBalance - projectedAdditionalSpend;
 
     const baseline = parseFloat(user.baseline_spend || 2500);
-    const monthlyDiff = currentMonthSpend - baseline;
-    const spendingDeltaPct = baseline > 0 ? ((currentMonthSpend - baseline) / baseline) * 100 : 0;
     const dailyBaseline = baseline / 30;
+    const spendingDrift = currentMonthSpend - (dailyBaseline * dayOfMonth);
+    const spendingDeltaPct = baseline > 0 ? ((currentMonthSpend - baseline) / baseline) * 100 : 0;
+
+    const projection = {
+      velocity: Number(dailyVelocity.toFixed(2)),
+      projectedSpend: Number(predictedEndOfMonthSpend.toFixed(2)),
+      drift: Number(spendingDrift.toFixed(2)),
+      isHighVelocity: dailyVelocity > (dailyBaseline * 1.2)
+    };
 
     const triggers = [];
 
@@ -174,12 +182,13 @@ export const handleStats: RequestHandler = async (req, res) => {
       monthlyExpenses: currentMonthSpend,
       predictedEndOfMonthBalance: Math.max(0, Number(predictedBalance.toFixed(2))),
       baselineSpend: baseline,
-      monthlyDiff: Number(monthlyDiff.toFixed(2)),
+      monthlyDiff: Number(spendingDrift.toFixed(2)),
       spendingDeltaPct: Number(spendingDeltaPct.toFixed(1)),
       transactionCount: Number(statsRes.rows[0].transaction_count),
       novaTone: user.nova_tone || "Balanced",
       novaInsight,
       triggers,
+      projection,
       chartData:
         chartData.length > 0
           ? chartData

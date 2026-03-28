@@ -16,9 +16,10 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api": {
+      "/Pulse/api": {
         target: "http://localhost:3000",
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/Pulse/, ""),
         secure: false,
       },
     },

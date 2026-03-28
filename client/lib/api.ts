@@ -39,6 +39,11 @@ export const accountsAPI = {
   getBalances: () => API.get('/api/finance/balances'),
 };
 
+export const goalsAPI = {
+  getAll: () => API.get('/api/finance/goals'),
+  create: (data: any) => API.post('/api/finance/goals', data),
+};
+
 export const statsAPI = {
   get: () => API.get('/api/stats'),
 };
@@ -59,6 +64,7 @@ export const stripeAPI = {
 export const novaServiceAPI = {
   chat: (message: string, context?: any) => API.post('/api/nova/chat', { message, context }),
   getInsights: () => API.get('/api/nova/insights'),
+  getAnalysis: () => API.post('/api/nova/analysis'),
 };
 
 export { API, novaAPI };
