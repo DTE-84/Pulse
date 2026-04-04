@@ -3,7 +3,7 @@
     { "source": "/api/(.*)", "destination": "/api/index" },
     { "source": "/((?!assets/|favicon\\.ico|manifest\\.json|.*\\.png|.*\\.svg|.*\\.otf).*)", "destination": "/index.html" }
   ],
-  "buildCommand": "npm run build:client",
+  "buildCommand": "npm run build",
   "devCommand": "npm run dev",
-  "outputDirectory": "dist"
+  "outputDirectory": "client",
 }

@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowDownRight,
   ArrowUpRight,
   ChevronRight,
   Play,
   Flame,
-  Zap,
   AlertCircle,
   Loader2,
   Sparkles,
@@ -34,7 +33,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 const WealthVault = ({ stats }: any) => {
   const baseline = stats?.baselineSpend || 2500;

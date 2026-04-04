@@ -1,4 +1,3 @@
-import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   LayoutDashboard, 
@@ -6,16 +5,8 @@ import {
   CreditCard, 
   TrendingUp, 
   Zap, 
-  BarChart3,
-  Moon,
-  Sun,
-  Flame,
   Settings,
   LogOut,
-  User,
-  X,
-  Menu,
-  Mail
   } from "lucide-react";
 
 import { cn } from "@/lib/utils";

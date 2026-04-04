@@ -21,15 +21,14 @@
     "noFallthroughCasesInSwitch": true,
 
     /* Paths */
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["./client/*"],
-      "@shared/*": ["./shared/*"]
+      "@/*": ["./src/client/*"],
+      "@shared/*": ["./src/shared/*"]
     },
 
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true
   },
-  "include": ["client", "server", "shared", "vite.config.ts", "vite.config.server.mts"],
+  "include": ["src/client", "src/server", "src/shared", "src/vite.config.ts", "src/vite.config.server.mts"],
   "exclude": ["node_modules"]
 }

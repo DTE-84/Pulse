@@ -1,24 +1,14 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { 
   ChevronRight, 
   Download, 
-  Calendar, 
-  PieChart as PieChartIcon, 
   TrendingUp, 
   Zap, 
   ArrowUpRight, 
   ArrowDownRight, 
-  Printer, 
-  Mail,
-  Filter,
   BarChart3,
-  Flame,
-  CheckCircle2,
   Sparkles,
   ArrowRight,
-  Database,
-  ShieldCheck,
-  BrainCircuit,
   Loader2
 } from "lucide-react";
 import { 
@@ -29,7 +19,6 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer, 
-  Cell,
   LineChart,
   Line,
   AreaChart,
