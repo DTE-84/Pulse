@@ -25,7 +25,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "dist/spa",
+    outDir: "dist",
 
     rollupOptions: {
       input: path.resolve(__dirname, "index.html"),
