@@ -1,17 +1,14 @@
 import { defineConfig } from "vite";
 import path from "path";
 import react from "@vitejs/plugin-react-swc";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  root: "src/client", // Set the project root for Vite
   plugins: [react()],
   base: "/",
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./client"),
+      "@": path.resolve(process.cwd(), "src/client"),
     },
   },
   server: {
@@ -26,9 +23,5 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
-
-    rollupOptions: {
-      input: path.resolve(__dirname, "index.html"),
-    },
   },
 });

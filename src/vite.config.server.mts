@@ -5,7 +5,7 @@ import react from "@vitejs/plugin-react-swc";
 export default defineConfig({
   build: {
     lib: {
-      entry: path.resolve(__dirname, "server/node-build.ts"),
+      entry: path.resolve(__dirname, "server/node-build.ts"), // Corrected path
       name: "server",
       fileName: "production",
       formats: ["es"],
@@ -43,8 +43,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./client"),
-      "@shared": path.resolve(__dirname, "./shared"),
+      "@": path.resolve(__dirname, "src/client/components"),
+      "@shared": path.resolve(__dirname, "src/shared"),
     },
   },
   define: {

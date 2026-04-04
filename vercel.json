@@ -1,10 +1,10 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "server/index.py" },
-    { "source": "/(.*)", "destination": "client/index.html" }
+    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
 
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run build:client",
   "devCommand": "npm run dev",
 
   "outputDirectory": "dist"
