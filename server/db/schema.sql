@@ -6,7 +6,7 @@ BEGIN;
 
 -- 1. Dimension: Users (Core Identity)
 CREATE TABLE IF NOT EXISTS "dim_users" (
-    user_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id SERIAL PRIMARY KEY,
     user_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS "dim_categories" (
 -- 3. Fact: Transactions (Financial Telemetry)
 CREATE TABLE IF NOT EXISTS "fact_transactions" (
     transaction_id SERIAL PRIMARY KEY,
-    user_id uuid REFERENCES "dim_users"(user_id) ON DELETE CASCADE,
+    user_id INT REFERENCES "dim_users"(user_id) ON DELETE CASCADE,
     category_id INT REFERENCES "dim_categories"(category_id),
     amount DECIMAL(10, 2) NOT NULL,
     purchase_date TIMESTAMPTZ DEFAULT NOW(),
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS "fact_transactions" (
 CREATE TABLE IF NOT EXISTS "threads" (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     title TEXT,
-    created_by uuid REFERENCES "dim_users"(user_id) ON DELETE SET NULL,
+    created_by INT REFERENCES "dim_users"(user_id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS "threads" (
 CREATE TABLE IF NOT EXISTS "messages" (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     thread_id uuid REFERENCES "threads"(id) ON DELETE CASCADE,
-    user_id uuid REFERENCES "dim_users"(user_id) ON DELETE SET NULL,
+    user_id INT REFERENCES "dim_users"(user_id) ON DELETE SET NULL,
     content TEXT NOT NULL,
     role VARCHAR(20) DEFAULT 'user', -- user, system, assistant
     created_at TIMESTAMPTZ DEFAULT NOW()
@@ -76,14 +76,14 @@ GROUP BY u.user_id, u.user_name, u.baseline_spend;
 -- 4. Dimension: Triggers (Emotional Catalysts)
 CREATE TABLE IF NOT EXISTS "dim_triggers" (
     trigger_id SERIAL PRIMARY KEY,
-    trigger_name VARCHAR(50) NOT NULL, -- e.g., 'Stress', 'Boredom', 'Social'
+    trigger_name VARCHAR(50) UNIQUE NOT NULL, -- e.g., 'Stress', 'Boredom', 'Social'
     risk_level VARCHAR(20) DEFAULT 'Medium'
 );
 
 -- 5. Dimension: Goals (Target Nodes)
 CREATE TABLE IF NOT EXISTS "dim_goals" (
     goal_id SERIAL PRIMARY KEY,
-    user_id UUID REFERENCES dim_users(user_id),
+    user_id INT REFERENCES dim_users(user_id),
     goal_name VARCHAR(100) NOT NULL,
     target_amount DECIMAL(12, 2) NOT NULL,
     current_progress DECIMAL(12, 2) DEFAULT 0,

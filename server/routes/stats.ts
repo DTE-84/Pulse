@@ -141,8 +141,8 @@ export const handleStats: RequestHandler = async (req, res) => {
       triggers.push({
         id: 1,
         name: "Baseline drift",
-        impact: monthlyDiff.toFixed(2),
-        status: monthlyDiff > baseline * 0.15 ? "High" : "Watch",
+        impact: spendingDrift.toFixed(2),
+        status: spendingDrift > baseline * 0.15 ? "High" : "Watch",
         insight: "Your spending is running above the monthly baseline you set for yourself.",
       });
     }

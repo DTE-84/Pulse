@@ -195,11 +195,18 @@ const handleStats = async (req, res) => {
     const daysRemaining = daysInMonth - dayOfMonth;
     const dailyVelocity = currentMonthSpend / (dayOfMonth || 1);
     const projectedAdditionalSpend = dailyVelocity * daysRemaining;
+    const predictedEndOfMonthSpend = currentMonthSpend + projectedAdditionalSpend;
     const predictedBalance = totalBalance - projectedAdditionalSpend;
     const baseline = parseFloat(user.baseline_spend || 2500);
-    const monthlyDiff = currentMonthSpend - baseline;
-    const spendingDeltaPct = baseline > 0 ? (currentMonthSpend - baseline) / baseline * 100 : 0;
     const dailyBaseline = baseline / 30;
+    const spendingDrift = currentMonthSpend - dailyBaseline * dayOfMonth;
+    const spendingDeltaPct = baseline > 0 ? (currentMonthSpend - baseline) / baseline * 100 : 0;
+    const projection = {
+      velocity: Number(dailyVelocity.toFixed(2)),
+      projectedSpend: Number(predictedEndOfMonthSpend.toFixed(2)),
+      drift: Number(spendingDrift.toFixed(2)),
+      isHighVelocity: dailyVelocity > dailyBaseline * 1.2
+    };
     const triggers = [];
     if (currentMonthSpend > baseline) {
       triggers.push({
@@ -242,12 +249,13 @@ const handleStats = async (req, res) => {
       monthlyExpenses: currentMonthSpend,
       predictedEndOfMonthBalance: Math.max(0, Number(predictedBalance.toFixed(2))),
       baselineSpend: baseline,
-      monthlyDiff: Number(monthlyDiff.toFixed(2)),
+      monthlyDiff: Number(spendingDrift.toFixed(2)),
       spendingDeltaPct: Number(spendingDeltaPct.toFixed(1)),
       transactionCount: Number(statsRes.rows[0].transaction_count),
       novaTone: user.nova_tone || "Balanced",
       novaInsight,
       triggers,
+      projection,
       chartData: chartData.length > 0 ? chartData : [
         { day: "M", value: 0 },
         { day: "T", value: 0 },
@@ -394,12 +402,13 @@ const handleIngest = async (req, res) => {
     const err = validateTransaction(enrichedTransactions[i]);
     if (err) return res.status(400).json({ error: `Transaction ${i} validation failed: ${err}` });
   }
-  const headers = "date,amount,category,risk_category";
+  const headers = "date,amount,category,risk_category,trigger_id";
   const rows = enrichedTransactions.map((t) => [
     sanitizeCsvField(t.date),
     sanitizeCsvField(t.amount),
     sanitizeCsvField(t.category || "Misc"),
-    sanitizeCsvField(t.risk_category || "Lifestyle")
+    sanitizeCsvField(t.risk_category || "Lifestyle"),
+    sanitizeCsvField(t.trigger_id || "")
   ].join(",")).join("\n");
   const tempCsvPath = path.resolve(__dirname$2, "../db/transactions_temp.csv");
   const scriptPath = path.resolve(__dirname$2, "../scripts/wrangler.py");
@@ -424,8 +433,8 @@ const handleIngest = async (req, res) => {
     let inserted = 0;
     for (const line of lines) {
       const parts = line.split(",");
-      if (parts.length < 4) continue;
-      const [date, amount, category, risk_category] = parts;
+      if (parts.length < 5) continue;
+      const [date, amount, category, risk_category, trigger_id] = parts;
       let catResult = await query("SELECT category_id FROM dim_categories WHERE category_name = $1", [category]);
       let categoryId;
       if (catResult.rows.length === 0) {
@@ -437,9 +446,10 @@ const handleIngest = async (req, res) => {
       } else {
         categoryId = catResult.rows[0].category_id;
       }
+      const tid = trigger_id && trigger_id.trim() !== "" ? parseInt(trigger_id) : null;
       await query(
-        "INSERT INTO fact_transactions (user_id, category_id, amount, purchase_date, status) VALUES ($1, $2, $3, $4, $5)",
-        [userId, categoryId, parseFloat(amount), date, "Completed"]
+        "INSERT INTO fact_transactions (user_id, category_id, amount, purchase_date, status, trigger_id) VALUES ($1, $2, $3, $4, $5, $6)",
+        [userId, categoryId, parseFloat(amount), date, "Completed", tid]
       );
       inserted++;
     }
@@ -575,39 +585,66 @@ const handleAnalysis = async (req, res) => {
       [userId]
     );
     const user = userRes.rows[0];
-    const transactionsRes = await query(
-      `SELECT f.amount, f.purchase_date, c.category_name, c.risk_level
-       FROM fact_transactions f
-       JOIN dim_categories c ON f.category_id = c.category_id
-       WHERE f.user_id = $1 AND f.purchase_date >= NOW() - INTERVAL '30 days'
-       ORDER BY f.purchase_date DESC`,
+    const currentMonthRes = await query(
+      `SELECT COALESCE(SUM(amount), 0) as spend FROM fact_transactions 
+       WHERE user_id = $1 AND purchase_date >= DATE_TRUNC('month', CURRENT_DATE)`,
       [userId]
     );
-    const transactions = transactionsRes.rows;
-    const totalSpend = transactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
-    const count = transactions.length;
-    const highRiskSpend = transactions.filter((t) => t.risk_level === "High" || t.risk_level === "Critical").reduce((sum, t) => sum + parseFloat(t.amount), 0);
-    const categorySummary = transactions.reduce((acc, t) => {
-      acc[t.category_name] = (acc[t.category_name] || 0) + parseFloat(t.amount);
-      return acc;
-    }, {});
-    const topCategories = Object.entries(categorySummary).sort(([, a], [, b]) => b - a).slice(0, 3).map(([name, total]) => `${name}: $${parseFloat(total).toFixed(2)}`).join(", ");
+    const lastMonthRes = await query(
+      `SELECT COALESCE(SUM(amount), 0) as spend FROM fact_transactions 
+       WHERE user_id = $1 AND purchase_date >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month') 
+       AND purchase_date < DATE_TRUNC('month', CURRENT_DATE)`,
+      [userId]
+    );
+    const currentSpend = parseFloat(currentMonthRes.rows[0].spend);
+    const lastMonthSpend = parseFloat(lastMonthRes.rows[0].spend);
+    const income = parseFloat(user.monthly_income || 5200);
+    const currentSavings = income - currentSpend;
+    const lastMonthSavings = income - lastMonthSpend;
+    const savingsImprovement = currentSavings - lastMonthSavings;
+    const goalsRes = await query(
+      `SELECT goal_name, target_amount, current_progress FROM dim_goals WHERE user_id = $1`,
+      [userId]
+    );
+    const goals = goalsRes.rows;
+    const triggerRes = await query(
+      `SELECT t.trigger_name, SUM(f.amount) as total
+       FROM fact_transactions f
+       JOIN dim_triggers t ON f.trigger_id = t.trigger_id
+       WHERE f.user_id = $1 AND f.purchase_date >= NOW() - INTERVAL '30 days'
+       GROUP BY t.trigger_name ORDER BY total DESC LIMIT 1`,
+      [userId]
+    );
+    const topTrigger = triggerRes.rows[0];
+    let goalInsight = "";
+    if (goals.length > 0 && savingsImprovement > 0) {
+      const primaryGoal = goals[0];
+      const remaining = parseFloat(primaryGoal.target_amount) - parseFloat(primaryGoal.current_progress);
+      const oldMonthsToGoal = remaining / (lastMonthSavings > 0 ? lastMonthSavings : 1);
+      const newMonthsToGoal = remaining / (currentSavings > 0 ? currentSavings : 1);
+      const acceleration = oldMonthsToGoal - newMonthsToGoal;
+      if (acceleration > 0.1) {
+        goalInsight = `Based on your ${savingsImprovement.toFixed(2)} savings delta this month, your '${primaryGoal.goal_name}' is now attainable approximately ${acceleration.toFixed(1)} months faster than your previous trajectory.`;
+      }
+    }
     const systemPrompt = `
-      You are Nova, a Senior Behavioral Financial Analyst.
-      Perform a "Deep Scan" on the provided financial telemetry.
-      Use professional, industry-grade terminology: 'Behavioral Velocity', 'Data Integrity', 'Categorical to Ordinal', 'Spending Drift'.
+      You are Nova, the Senior Behavioral Financial Analyst.
+      Perform a "Deep Scan" on the provided telemetry.
+      Use professional terminology: 'Behavioral Velocity', 'Data Integrity', 'Goal Acceleration', 'Spending Drift'.
 
       Telemetry Overview:
-      - Subject: ${user?.user_name || "Unknown"}
-      - 30-Day Volume: $${totalSpend.toFixed(2)} (${count} transactions)
-      - High-Risk Exposure: $${highRiskSpend.toFixed(2)}
-      - Monthly Baseline: $${parseFloat(user?.baseline_spend || 2500).toFixed(2)}
-      - Top Nodes: ${topCategories}
+      - Subject: ${user?.user_name || "Subject"}
+      - Current Month Spend: $${currentSpend.toFixed(2)}
+      - Last Month Spend: $${lastMonthSpend.toFixed(2)}
+      - Savings Delta: $${savingsImprovement.toFixed(2)}
+      - Top Behavioral Catalyst: ${topTrigger ? topTrigger.trigger_name : "No concentration detected"}
+      - Goal Logic: ${goalInsight || "Maintain current trajectory to protect goals."}
 
       Goal:
       Provide a concise, high-signal behavioral report (max 4-5 sentences). 
-      Identify "Spending Drift" and comment on the "Behavioral Velocity". 
-      Distinguish between "Correlation" and "Causation" if you see patterns in the data (e.g. concentration of high-risk spend).
+      Specifically highlight the "Goal Acceleration" if the user is saving more. 
+      Identify if the "Top Behavioral Catalyst" is causing any "Spending Drift".
+      Distinguish between "Correlation" and "Causation" in their habits.
       Suggest one "Strategic Intervention".
     `;
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
@@ -616,16 +653,51 @@ const handleAnalysis = async (req, res) => {
     res.json({
       report,
       summary: {
-        totalSpend,
-        transactionCount: count,
-        highRiskSpend,
-        drift: totalSpend - parseFloat(user?.baseline_spend || 2500)
+        currentSpend,
+        savingsImprovement,
+        acceleration: goalInsight ? "Detected" : "Stable",
+        topTrigger: topTrigger?.trigger_name || null
       },
       timestamp: (/* @__PURE__ */ new Date()).toISOString()
     });
   } catch (err) {
     console.error("Analysis Error:", err);
     res.status(500).json({ error: "Nova Deep Scan failed.", detail: err.message });
+  }
+};
+const handleGetGoals = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ message: "Authentication required." });
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const userId = decoded.id;
+    const result = await query(
+      `SELECT goal_id, goal_name as name, target_amount as target, current_progress as current, deadline 
+       FROM dim_goals WHERE user_id = $1 ORDER BY created_at DESC`,
+      [userId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch goals." });
+  }
+};
+const handleCreateGoal = async (req, res) => {
+  const { name, target, deadline } = req.body;
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ message: "Authentication required." });
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const userId = decoded.id;
+    const result = await query(
+      `INSERT INTO dim_goals (user_id, goal_name, target_amount, deadline) 
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [userId, name, target, deadline]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to create goal." });
   }
 };
 const require$1 = createRequire(import.meta.url);
@@ -651,6 +723,8 @@ function createServer() {
   app2.get("/api/stats", apiLimiter, requireAuth, handleStats);
   app2.post("/api/nova/chat", apiLimiter, requireAuth, handleNovaChat);
   app2.post("/api/nova/analysis", apiLimiter, requireAuth, handleAnalysis);
+  app2.get("/api/finance/goals", apiLimiter, requireAuth, handleGetGoals);
+  app2.post("/api/finance/goals", apiLimiter, requireAuth, handleCreateGoal);
   app2.post("/api/finance/ingest", ingestLimiter, requireAuth, handleIngest);
   app2.post("/api/auth/login", authLimiter, handleLogin);
   app2.post("/api/auth/signup", authLimiter, handleSignup);

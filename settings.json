@@ -1,0 +1,66 @@
+{
+    "editor.fontSize": 14,
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "editor.wordWrap": "on",
+    "editor.minimap.enabled": false,
+    "files.autoSave": "afterDelay",
+    "workbench.colorTheme": "Default Dark Modern",
+    "terminal.integrated.fontSize": 14,
+  
+    "git.confirmSync": false,
+    "git.autofetch": true,
+ 
+    "mcp": {
+      "allowed": ["my-trusted-server"],
+      "excluded": ["experimental-server"]
+    },
+    "mcp.trust": {
+      "my-trusted-server": true
+    },
+  "mcpServers": {
+    "serverName": {
+      "command": "path/to/server",
+      "args": ["--arg1", "value1"],
+      "env": {
+        "API_KEY": "$MY_API_TOKEN",
+        "myPythonServer": {
+            "command": "python",
+            "args": ["./server.py"],
+            "cwd": "./servers/python",
+            "timeout": 10000,
+            "trust": true
+      },
+      "cwd": "./server-directory",
+      "timeout": 30000,
+      "trust": false
+    }
+  },
+  "env": {
+    "API_KEY": "$MY_EXTERNAL_TOKEN",
+    "LOG_LEVEL": "$LOG_LEVEL",
+    "TEMP_DIR": "%TEMP%"
+  },
+  "mcpServers": {
+    "myPythonServer": {
+      "command": "python",
+      "args": ["./server.py"],
+      "cwd": "./servers/python",
+      "timeout": 10000,
+      "trust": true,
+  
+    "mcpServers": {
+      "pythonTools": {
+        "command": "python",
+        "args": ["-m", "my_mcp_server", "--port", "8080"],
+        "cwd": "./mcp-servers/python",
+        
+          "DATABASE_URL": "$DB_CONNECTION_STRING",
+          "API_KEY": "${EXTERNAL_API_KEY}"
+        },
+        "timeout": 15000,
+        "trust": true
+      }
+    }
+  }
+  
