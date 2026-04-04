@@ -8,13 +8,13 @@ const buildNovaMessage = ({
   mode,
   currentMonthSpend,
   baseline,
-  predictedBalance,
+  _predictedBalance,
   goalLabel,
 }: {
   mode: string;
   currentMonthSpend: number;
   baseline: number;
-  predictedBalance: number;
+  _predictedBalance: number;
   goalLabel: string;
 }) => {
   const delta = currentMonthSpend - baseline;
@@ -172,7 +172,7 @@ export const handleStats: RequestHandler = async (req, res) => {
       mode: user.nova_tone || "Balanced",
       currentMonthSpend,
       baseline,
-      predictedBalance,
+      _predictedBalance: predictedBalance,
       goalLabel,
     });
 

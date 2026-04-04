@@ -13,7 +13,8 @@ import {
   Target,
   TrendingUp,
   Wallet,
-  ArrowRight
+  ArrowRight,
+  Zap
 } from "lucide-react";
 import { BarChart, Bar, ResponsiveContainer, Cell, XAxis } from "recharts";
 import { cn } from "@/lib/utils";
