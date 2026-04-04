@@ -1,11 +1,9 @@
 {
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!assets/|favicon\\.ico|manifest\\.json|.*\\.png|.*\\.svg|.*\\.otf).*)", "destination": "/index.html" }
   ],
-
   "buildCommand": "npm run build:client",
   "devCommand": "npm run dev",
-
   "outputDirectory": "dist"
 }
