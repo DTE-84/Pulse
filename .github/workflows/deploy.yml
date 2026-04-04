@@ -30,7 +30,7 @@ jobs:
         run: npm install
 
       - name: Build
-        run: npm run build:client
+        run: npx vite build --config src/vite.config.ts
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
