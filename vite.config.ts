@@ -8,7 +8,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [react()],
-  base: "/Pulse/",
+  base: "/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./client"),

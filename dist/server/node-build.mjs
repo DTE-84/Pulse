@@ -212,8 +212,8 @@ const handleStats = async (req, res) => {
       triggers.push({
         id: 1,
         name: "Baseline drift",
-        impact: monthlyDiff.toFixed(2),
-        status: monthlyDiff > baseline * 0.15 ? "High" : "Watch",
+        impact: spendingDrift.toFixed(2),
+        status: spendingDrift > baseline * 0.15 ? "High" : "Watch",
         insight: "Your spending is running above the monthly baseline you set for yourself."
       });
     }
@@ -281,7 +281,7 @@ function validateAuthInput(email, password) {
 const handleMe = async (req, res) => {
   try {
     const result = await query(
-      "SELECT user_id, user_name, email, baseline_spend, nova_tone FROM dim_users WHERE user_id = ",
+      "SELECT user_id, user_name, email, baseline_spend, nova_tone FROM dim_users WHERE user_id = $1",
       [req.userId]
     );
     const user = result.rows[0];
@@ -304,7 +304,7 @@ const handleLogin = async (req, res) => {
   if (err) return res.status(400).json({ message: err });
   try {
     const result = await query(
-      "SELECT user_id, user_name, email, password, baseline_spend, nova_tone FROM dim_users WHERE email = ",
+      "SELECT user_id, user_name, email, password, baseline_spend, nova_tone FROM dim_users WHERE email = $1",
       [email.toLowerCase().trim()]
     );
     const user = result.rows[0];
@@ -332,11 +332,11 @@ const handleSignup = async (req, res) => {
   if (typeof name !== "string" || name.trim().length < 1)
     return res.status(400).json({ message: "Name is required." });
   try {
-    const existing = await query("SELECT 1 FROM dim_users WHERE email = ", [email.toLowerCase().trim()]);
+    const existing = await query("SELECT 1 FROM dim_users WHERE email = $1", [email.toLowerCase().trim()]);
     if (existing.rows.length > 0) return res.status(400).json({ message: "An account with that email already exists." });
     const hashed = await bcrypt.hash(password, 12);
     const result = await query(
-      "INSERT INTO dim_users (user_name, email, password) VALUES (, , ) RETURNING user_id, user_name, email",
+      "INSERT INTO dim_users (user_name, email, password) VALUES ($1, $2, $3) RETURNING user_id, user_name, email",
       [name.trim().slice(0, 100), email.toLowerCase().trim(), hashed]
     );
     const u = result.rows[0];
@@ -354,7 +354,7 @@ const handleUpdateProfile = async (req, res) => {
     return res.status(400).json({ message: "novaTone must be Gentle, Balanced, or Driven." });
   try {
     const result = await query(
-      "UPDATE dim_users SET user_name = COALESCE(, user_name), baseline_spend = COALESCE(, baseline_spend), nova_tone = COALESCE(, nova_tone) WHERE user_id =  RETURNING user_id, user_name, email, baseline_spend, nova_tone",
+      "UPDATE dim_users SET user_name = COALESCE($1, user_name), baseline_spend = COALESCE($2, baseline_spend), nova_tone = COALESCE($3, nova_tone) WHERE user_id = $4 RETURNING user_id, user_name, email, baseline_spend, nova_tone",
       [name?.trim().slice(0, 100) || null, baselineSpend || null, novaTone || null, req.userId]
     );
     if (result.rows.length === 0) return res.status(404).json({ message: "User not found." });
