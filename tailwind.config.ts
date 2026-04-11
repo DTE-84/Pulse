@@ -1,15 +1,11 @@
 import type { Config } from "tailwindcss";
-import path from "path";
-import { fileURLToPath } from "url";
 import tailwindcssAnimate from "tailwindcss-animate";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default {
   darkMode: ["class"],
   content: [
-    path.resolve(__dirname, "./index.html"),
-    path.resolve(__dirname, "./src/**/*.{ts,tsx}"),
+    "./index.html",
+    "./src/**/*.{ts,tsx}",
   ],
   prefix: "",
   theme: {
