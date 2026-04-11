@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 const plans = [
   {
     name: "Standard",
-    price: "$0",
+    price: "$9.99",
     period: "Forever",
     description: "Essential tools for basic financial tracking.",
     features: [
@@ -31,7 +31,7 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "$19",
+    price: "$14.99",
     period: "/mo",
     description: "Harness the full power of Nova AI.",
     features: [
@@ -48,12 +48,12 @@ const plans = [
   },
   {
     name: "Elite",
-    price: "$9.99",
+    price: "$19.99",
     period: "/mo",
     description: "Secure the early-bird pre-order rate. Full Elite benefits at launch.",
     features: [
       "Everything in Pro",
-      "Early-Bird Locked Rate ($9.99 vs $14.99)",
+      "Early-Bird Locked Rate ($14.99 vs $19.99)",
       "1-on-1 coaching with financial experts",
       "Tax optimization strategies",
       "Wealth management reporting",
