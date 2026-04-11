@@ -18,6 +18,7 @@ import OnboardingPage from "./pages/Onboarding";
 import SubscriptionPage from "./pages/Subscription";
 import SettingsPage from "./pages/Settings";
 import OutreachPage from "./pages/Outreach";
+import TriggersPage from "./pages/Triggers";
 import NotFound from "./pages/NotFound";
 import { Layout } from "./components/Layout";
 
@@ -51,7 +52,7 @@ const App = () => (
                   <Route path="/growth" element={<GrowthPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
                   <Route path="/outreach" element={<OutreachPage />} />
-                  <Route path="/triggers" element={<Index />} />
+                  <Route path="/triggers" element={<TriggersPage />} />
                   <Route path="/reports" element={<ReportsPage />} />
                   <Route path="/subscription" element={<SubscriptionPage />} />
                   <Route path="*" element={<NotFound />} />
