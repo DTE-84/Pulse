@@ -3,11 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev:client": "vite",
+    "dev:client": "vite --config src/vite.config.ts --base=/",
     "dev:server": "tsx watch src/server/dev.ts",
-    "dev": "concurrently npm run dev:client npm run dev:server",
-    "build": "npm run build:client && npm run build:server",
-    "build:client": "vite build",
+    "dev": "npx vite build --config src/vite.config.ts:client",
+    "build": "npx vite build --config src/vite.config.ts",
+    "build:client": "vite build --config src/vite.config.ts",
     "build:server": "vite build --config src/vite.config.server.mts",
     "start": "node dist/server/node-build.mjs",
     "typecheck": "tsc"
@@ -70,7 +70,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.5",
-    "@types/node": "^20.19.39",
+    "@types/node": "^20.11.5",
     "@types/pg": "^8.11.0",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
@@ -88,7 +88,7 @@
     "tailwindcss-animate": "^1.0.7",
     "tsx": "^4.7.1",
     "typescript": "^6.0.2",
-    "vite": "^8.0.3",
+    "vite": "^5.1.0",
     "vitest": "^4.1.2"
   }
 }

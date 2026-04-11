@@ -7,6 +7,8 @@ import {
   Zap, 
   Settings,
   LogOut,
+  Crown,
+  Sparkles
   } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -22,6 +24,7 @@ const menuItems = [
   { icon: Zap, label: "Triggers", href: "/triggers" },
   { icon: CreditCard, label: "Spending", href: "/spending" },
   { icon: TrendingUp, label: "Growth", href: "/growth" },
+  { icon: Crown, label: "Elite Access", href: "/subscription" },
   { icon: Settings, label: "Settings", href: "/settings" },
 ];
 
@@ -31,7 +34,7 @@ const Sidebar = () => {
   const { logout } = useAuth();
 
   return (
-    <aside className="hidden lg:flex flex-col w-72 h-screen bg-[#0A0907] border-r border-white/5 sticky top-0 overflow-hidden">
+    <aside className="hidden lg:flex flex-col w-72 xl:w-80 h-screen bg-[#0A0907] border-r border-white/5 sticky top-0 overflow-hidden transition-all duration-500">
       <div className="p-8">
         <Link to="/" className="flex items-center gap-4 mb-12 group">
           <div className="relative w-14 h-14 flex items-center justify-center">
@@ -84,6 +87,21 @@ const Sidebar = () => {
             );
           })}
         </nav>
+
+        {/* Pre-Order CTA Card */}
+        <div className="mt-10 p-5 bg-primary/5 border border-primary/20 rounded-3xl relative overflow-hidden group/preorder hover:bg-primary/10 transition-all cursor-pointer" onClick={() => navigate("/subscription")}>
+          <div className="absolute -top-12 -right-12 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover/preorder:bg-primary/20 transition-all" />
+          <div className="relative z-10 space-y-3">
+             <div className="flex items-center gap-2">
+                <Sparkles className="w-3 h-3 text-primary" />
+                <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">Early Access</span>
+             </div>
+             <p className="text-[11px] font-bold text-white leading-relaxed">Secure your <span className="text-primary underline">Pre-Order Elite</span> membership today.</p>
+             <button className="w-full py-2 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/20 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">
+                Pre-Order Now
+             </button>
+          </div>
+        </div>
       </div>
 
       <div className="mt-auto p-8 border-t border-white/5 bg-black/20">
@@ -155,7 +173,7 @@ export const Layout = ({ children }: LayoutProps) => {
     <div className="flex min-h-screen bg-[#050505] text-white font-sans selection:bg-primary/30">
       <Sidebar />
       
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="flex-1 flex flex-col min-w-0 transition-all duration-500">
         {/* Mobile Header */}
         <header className="lg:hidden h-20 shrink-0 border-b border-white/5 px-8 flex items-center justify-between sticky top-0 bg-[#0A0907]/80 backdrop-blur-md z-40">
           <div className="flex items-center gap-3">

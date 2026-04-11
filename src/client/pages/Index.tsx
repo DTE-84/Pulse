@@ -14,12 +14,13 @@ import {
   TrendingUp,
   Wallet,
   ArrowRight,
-  Zap
+  Zap,
+  Crown
 } from "lucide-react";
 import { BarChart, Bar, ResponsiveContainer, Cell, XAxis } from "recharts";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { statsAPI, transactionsAPI, novaServiceAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -232,6 +233,7 @@ export default function Index() {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [syncing, setSyncing] = useState(false);
   const [ingestData, setIngestData] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -569,6 +571,28 @@ export default function Index() {
           colorClass="bg-primary"
           icon={Flame}
         />
+      </div>
+
+      {/* Pre-Order Banner Card */}
+      <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-[3rem] p-8 md:p-12 relative overflow-hidden group hover:bg-primary/[0.12] transition-all cursor-pointer" onClick={() => navigate("/subscription")}>
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-[100px] group-hover:bg-primary/20 transition-all" />
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+          <div className="space-y-4 text-center md:text-left">
+            <div className="flex items-center justify-center md:justify-start gap-3">
+               <Crown className="w-6 h-6 text-yellow-400 animate-bounce" />
+               <Badge className="bg-primary text-background font-black uppercase tracking-[0.2em] px-4">Pre-Order Live</Badge>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter">Become a Founding Elite Member</h2>
+            <p className="text-muted-foreground font-semibold max-w-xl leading-relaxed">
+              Lock in the <span className="text-primary underline underline-offset-4 decoration-primary/30">Early-Bird $39/mo rate</span> forever. 
+              Get exclusive access to the investor network and custom behavior triggers at launch.
+            </p>
+          </div>
+          <button className="bg-primary text-background px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-[0_20px_40px_-10px_rgba(45,237,156,0.3)] flex items-center gap-3">
+             Secure Your Spot
+             <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

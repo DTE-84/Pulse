@@ -48,18 +48,19 @@ const plans = [
   },
   {
     name: "Elite",
-    price: "$49",
+    price: "$39",
     period: "/mo",
-    description: "The ultimate financial performance suite.",
+    description: "Secure the early-bird pre-order rate. Full Elite benefits at launch.",
     features: [
       "Everything in Pro",
+      "Early-Bird Locked Rate ($39 vs $49)",
       "1-on-1 coaching with financial experts",
       "Tax optimization strategies",
       "Wealth management reporting",
       "Exclusive access to investor network",
       "Custom trigger development"
     ],
-    cta: "Contact Sales",
+    cta: "Pre-Order Now",
     popular: false
   }
 ];
