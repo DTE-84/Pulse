@@ -26,7 +26,7 @@ const plans = [
       "Manual trigger logging",
       "Community support"
     ],
-    cta: "Continue Free",
+    cta: " Free Trial",
     popular: false
   },
   {
