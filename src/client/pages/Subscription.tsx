@@ -48,12 +48,12 @@ const plans = [
   },
   {
     name: "Elite",
-    price: "$39",
+    price: "$9.99",
     period: "/mo",
     description: "Secure the early-bird pre-order rate. Full Elite benefits at launch.",
     features: [
       "Everything in Pro",
-      "Early-Bird Locked Rate ($39 vs $49)",
+      "Early-Bird Locked Rate ($9.99 vs $14.99)",
       "1-on-1 coaching with financial experts",
       "Tax optimization strategies",
       "Wealth management reporting",
