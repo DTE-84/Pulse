@@ -584,7 +584,7 @@ export default function Index() {
             </div>
             <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter">Become a Founding Elite Member</h2>
             <p className="text-muted-foreground font-semibold max-w-xl leading-relaxed">
-              Lock in the <span className="text-primary underline underline-offset-4 decoration-primary/30">Early-Bird $39/mo rate</span> forever. 
+              Lock in the <span className="text-primary underline underline-offset-4 decoration-primary/30">Early-Bird $9.99/mo rate</span> forever. 
               Get exclusive access to the investor network and custom behavior triggers at launch.
             </p>
           </div>
