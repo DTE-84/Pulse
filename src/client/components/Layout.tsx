@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { 
   LayoutDashboard, 
   MessageSquare, 
@@ -138,30 +139,94 @@ const Sidebar = () => {
   );
 };
 
+const primaryNav = menuItems.filter(i => ["/", "/nova", "/spending", "/growth"].includes(i.href));
+const secondaryNav = menuItems.filter(i => !["/", "/nova", "/spending", "/growth"].includes(i.href));
+
 const MobileNav = () => {
   const location = useLocation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const isSecondaryActive = secondaryNav.some(
+    i => location.pathname === i.href
+  );
+
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 h-20 bg-[#0A0907]/90 backdrop-blur-2xl border-t border-white/5 z-50 flex items-center justify-around px-6 pb-2">
-      {menuItems.map((item) => {
-        const isActive = location.pathname === item.href || (item.active && location.pathname === "/");
-        return (
-          <Link
-            key={item.label}
-            to={item.href}
-            className={cn(
-              "flex flex-col items-center gap-1.5 transition-all relative",
-              isActive ? "text-primary scale-110" : "text-muted-foreground opacity-50 hover:opacity-100"
-            )}
-          >
-            <item.icon className="w-6 h-6" />
-            <span className="text-[8px] font-black uppercase tracking-[0.2em]">{item.label}</span>
-            {isActive && (
-              <div className="absolute -top-3 w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_15px_rgba(45,237,156,1)]" />
-            )}
-          </Link>
-        );
-      })}
-    </div>
+    <>
+      {/* Overlay */}
+      {drawerOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+          onClick={() => setDrawerOpen(false)}
+        />
+      )}
+
+      {/* Secondary drawer */}
+      <div className={cn(
+        "lg:hidden fixed left-0 right-0 z-50 bg-[#0A0907] border-t border-white/10 transition-all duration-300 ease-in-out",
+        drawerOpen ? "bottom-20 opacity-100" : "bottom-20 opacity-0 pointer-events-none translate-y-4"
+      )}>
+        <div className="flex items-center justify-around px-6 py-5">
+          {secondaryNav.map((item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <Link
+                key={item.label}
+                to={item.href}
+                onClick={() => setDrawerOpen(false)}
+                className={cn(
+                  "flex flex-col items-center gap-1.5 transition-all relative",
+                  isActive ? "text-primary scale-110" : "text-muted-foreground opacity-60 hover:opacity-100"
+                )}
+              >
+                <item.icon className="w-6 h-6" />
+                <span className="text-[8px] font-black uppercase tracking-[0.2em]">{item.label}</span>
+                {isActive && <div className="absolute -top-3 w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_15px_rgba(45,237,156,1)]" />}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Primary tab bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 h-20 bg-[#0A0907]/95 backdrop-blur-2xl border-t border-white/5 z-50 flex items-center justify-around px-4 pb-2">
+        {primaryNav.map((item) => {
+          const isActive = location.pathname === item.href || (item.active && location.pathname === "/");
+          return (
+            <Link
+              key={item.label}
+              to={item.href}
+              className={cn(
+                "flex flex-col items-center gap-1.5 transition-all relative",
+                isActive ? "text-primary scale-110" : "text-muted-foreground opacity-50 hover:opacity-100"
+              )}
+            >
+              <item.icon className="w-6 h-6" />
+              <span className="text-[8px] font-black uppercase tracking-[0.2em]">{item.label}</span>
+              {isActive && <div className="absolute -top-3 w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_15px_rgba(45,237,156,1)]" />}
+            </Link>
+          );
+        })}
+
+        {/* More button */}
+        <button
+          onClick={() => setDrawerOpen(prev => !prev)}
+          className={cn(
+            "flex flex-col items-center gap-1.5 transition-all relative",
+            drawerOpen || isSecondaryActive ? "text-primary scale-110" : "text-muted-foreground opacity-50 hover:opacity-100"
+          )}
+        >
+          <div className={cn(
+            "w-6 h-6 flex flex-col items-center justify-center gap-[4px] transition-transform duration-300",
+            drawerOpen && "rotate-180"
+          )}>
+            <span className="w-4 h-[2px] bg-current rounded-full" />
+            <span className="w-4 h-[2px] bg-current rounded-full" />
+            <span className="w-4 h-[2px] bg-current rounded-full" />
+          </div>
+          <span className="text-[8px] font-black uppercase tracking-[0.2em]">More</span>
+          {isSecondaryActive && !drawerOpen && <div className="absolute -top-3 w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_15px_rgba(45,237,156,1)]" />}
+        </button>
+      </div>
+    </>
   );
 };
 
