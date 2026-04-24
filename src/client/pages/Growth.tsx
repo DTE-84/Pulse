@@ -78,8 +78,9 @@ export default function GrowthPage() {
       setNewGoal({ name: "", target: "", deadline: "" });
       fetchData();
       toast({ title: "Goal Engineering Complete", description: "Your new behavioral target has been established." });
-    } catch (err) {
-      toast({ variant: "destructive", title: "Goal Failed", description: "Signal deviation detected during creation." });
+    } catch (err: any) {
+      const errMsg = err.response?.data?.error || err.response?.data?.message || "Signal deviation detected during creation.";
+      toast({ variant: "destructive", title: "Goal Failed", description: errMsg });
     }
   };
 
@@ -181,7 +182,9 @@ export default function GrowthPage() {
              <div className="space-y-8 flex-1 overflow-y-auto max-h-[400px] scrollbar-hide">
                {goals.map((goal) => {
                  const Icon = getGoalIcon(goal.name);
-                 const progress = Math.min(100, (parseFloat(goal.current) / parseFloat(goal.target)) * 100);
+                 const current = parseFloat(goal.current) || 0;
+                 const target = parseFloat(goal.target) || 1;
+                 const progress = Math.min(100, (current / target) * 100);
                  return (
                    <div key={goal.goal_id} className="space-y-3 group cursor-pointer">
                      <div className="flex items-center justify-between">
@@ -194,8 +197,8 @@ export default function GrowthPage() {
                      </div>
                      <div className="space-y-1.5">
                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                         <span className="text-muted-foreground">${parseFloat(goal.current).toLocaleString()}</span>
-                         <span className="text-white">${parseFloat(goal.target).toLocaleString()}</span>
+                         <span className="text-muted-foreground">${current.toLocaleString()}</span>
+                         <span className="text-white">${target.toLocaleString()}</span>
                        </div>
                        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                          <div 

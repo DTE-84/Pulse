@@ -1,20 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { 
-  Send, 
-  Sparkles, 
-  ChevronRight, 
-  AlertCircle, 
-  CheckCircle2, 
-  TrendingUp, 
-  Moon, 
-  Zap, 
-  Smartphone,
-  Info,
-  ArrowUpRight,
-  ArrowDownRight,
-  X,
-  Loader2
-} from "lucide-react";
+import { Send, Sparkles, Moon, Zap, Info, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -25,6 +10,7 @@ import {
 } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
 import { statsAPI, novaServiceAPI } from "@/lib/api";
+import { useTheme } from "@/components/theme-provider";
 
 const StressIndex = ({ value }: { value: number }) => {
   const circumference = 2 * Math.PI * 40;
@@ -93,27 +79,13 @@ export default function NovaChat() {
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [stats, setStats] = useState<any>(null);
-  const { user, token } = useAuth();
+  useAuth();
+  const { theme, setTheme } = useTheme();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const initChat = async () => {
-      try {
-        const res = await statsAPI.get();
-        setStats(res.data);
-        
-        // Initial Greeting from Nova based on real data
-        setChatMessages([{
-          role: "assistant",
-          content: `Systems online. Analysis for ${user?.name || 'Subject'} complete. I see your current monthly velocity is $${res.data.monthlyExpenses.toFixed(2)}. How can I assist with your behavioral telemetry today?`,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }]);
-      } catch (err) {
-        console.error("Failed to fetch stats for Nova:", err);
-      }
-    };
-    initChat();
-  }, [user]);
+    statsAPI.get().then(res => setStats(res.data)).catch(console.error);
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -121,73 +93,57 @@ export default function NovaChat() {
     }
   }, [chatMessages, isTyping]);
 
-  const runDeepScan = async () => {
+  const handleSend = async () => {
+    if (!input.trim()) return;
+    const userMsg = { role: "user", content: input, timestamp: new Date().toLocaleTimeString() };
+    setChatMessages(prev => [...prev, userMsg]);
+    setInput("");
     setIsTyping(true);
     try {
-      const res = await novaServiceAPI.getAnalysis();
-      const novaMsg = {
-        role: "assistant",
-        type: "insight",
-        content: `DEEP SCAN COMPLETE: ${res.data.report}`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      setChatMessages(prev => [...prev, novaMsg]);
-    } catch (err) {
-      console.error("Deep Scan Error:", err);
+      const res = await novaServiceAPI.chat(input, stats);
+      setChatMessages(prev => [...prev, { role: "assistant", content: res.data.content, timestamp: new Date().toLocaleTimeString() }]);
+    } catch {
+      setChatMessages(prev => [...prev, { role: "assistant", content: "Nova is unavailable right now. Try again shortly.", timestamp: new Date().toLocaleTimeString() }]);
     } finally {
       setIsTyping(false);
     }
   };
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
-
-    const userMsg = {
-      role: "user",
-      content: input,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setChatMessages(prev => [...prev, userMsg]);
-    setInput("");
+  const runDeepScan = async () => {
     setIsTyping(true);
-
     try {
-      const response = await novaServiceAPI.chat(input, chatMessages.slice(-5));
-      setChatMessages(prev => [...prev, response.data]);
-    } catch (err: any) {
-      console.error("Chat Error:", err);
-      setChatMessages(prev => [...prev, {
-        role: "assistant",
-        content: "I'm having trouble connecting to my analytical core right now. Please check your network or API key.",
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      }]);
+      const res = await novaServiceAPI.getAnalysis();
+      setChatMessages(prev => [...prev, { role: "assistant", type: "insight", content: res.data.analysis, timestamp: new Date().toLocaleTimeString() }]);
+    } catch {
+      setChatMessages(prev => [...prev, { role: "assistant", content: "Deep scan failed. Please try again.", timestamp: new Date().toLocaleTimeString() }]);
     } finally {
       setIsTyping(false);
     }
   };
 
   return (
-    <div className="flex h-[calc(100vh-64px)] md:h-screen overflow-hidden">
-      <div className="flex-1 flex flex-col min-w-0 bg-background relative">
-        <header className="h-20 border-b border-border/40 px-6 flex items-center justify-between shrink-0 bg-background/50 backdrop-blur-md z-10">
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/20">
-                 <div className="w-4 h-4 rounded-full bg-primary animate-pulse shadow-[0_0_15px_rgba(45,237,156,0.8)]" />
-              </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-primary border-2 border-background" />
+    <div className="flex h-full">
+      <div className="flex flex-col flex-1 min-w-0">
+        <div className="flex items-center justify-between p-6 border-b border-white/5 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/20">
+              <div className="w-3 h-3 rounded-full bg-primary animate-pulse" />
             </div>
             <div>
-              <h2 className="font-bold text-lg leading-tight">Nova</h2>
-              <p className="text-[10px] text-muted-foreground font-medium">Advanced Financial AI Consultant — Active</p>
+              <h2 className="text-sm font-black text-white">Nova</h2>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Behavioral AI</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-             <button className="p-2 hover:bg-white/5 rounded-full transition-colors"><Moon className="w-5 h-5 text-muted-foreground" /></button>
+             <button 
+               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+               className="p-2 hover:bg-white/5 rounded-full transition-colors"
+             >
+               <Moon className="w-5 h-5 text-muted-foreground" />
+             </button>
              <button className="p-2 hover:bg-white/5 rounded-full transition-colors"><Info className="w-5 h-5 text-muted-foreground" /></button>
           </div>
-        </header>
+        </div>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-hide">
           {chatMessages.map((msg, i) => (

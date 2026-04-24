@@ -5,7 +5,6 @@ import {
   Mail,
   User,
   ArrowRight,
-  CheckCircle2,
   ShieldCheck,
   Zap,
   Loader2,
@@ -13,7 +12,6 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { authAPI } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
@@ -37,7 +35,7 @@ export default function AuthPage() {
     try {
       if (isLogin) {
         const res = await authAPI.login({ email, password });
-        login(res.data.token, res.data.user);
+        login(res.data.token || "", res.data.user);
         toast({
           title: "Uplink Established",
           description: "Welcome back to the Command Center.",
@@ -45,7 +43,7 @@ export default function AuthPage() {
         navigate(res.data.user.onboardingCompleted ? "/" : "/onboarding");
       } else {
         const res = await authAPI.signup({ name, email, password });
-        login(res.data.token, res.data.user);
+        login(res.data.token || "", res.data.user);
         toast({
           title: "Profile Initialized",
           description: "Preparing your Advanced Financial AI protocols.",
@@ -77,16 +75,12 @@ export default function AuthPage() {
         <div className="hidden lg:flex flex-col space-y-10">
           <div className="flex items-center gap-6 group">
             <div className="relative w-20 h-24 flex items-center justify-center">
-              <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping [animation-duration:4s]" />
-              <div className="absolute inset-4 bg-primary/10 rounded-full animate-pulse [animation-duration:2s]" />
+              <div className="absolute inset-0 bg-transparent border border-primary/20 rounded-full animate-ping [animation-duration:4s]" />
+              <div className="absolute inset-4 bg-transparent border border-primary/10 rounded-full animate-pulse [animation-duration:2s]" />
               <div className="relative z-10 w-16 h-16 rounded-[2rem] bg-black border-2 border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[0_0_40px_rgba(45,237,156,0.2)] overflow-hidden">
                 <img
-                  src={`${import.meta.env.BASE_URL}icon-1024.png`}
-                  srcSet={`
-                    ${import.meta.env.BASE_URL}icon-60@2x.png 120w,
-                    ${import.meta.env.BASE_URL}icon-60@3x.png 180w,
-                    ${import.meta.env.BASE_URL}icon-1024.png 1024w
-                  `}
+                  src={`${import.meta.env.BASE_URL}PulseLogoTransp.png`}
+                  
                   sizes="64px"
                   alt="Pulse"
                   className="w-12 h-12 object-contain filter drop-shadow-[0_0_12px_rgba(45,237,156,0.5)]"

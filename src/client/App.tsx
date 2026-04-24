@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ThemeProvider } from "./components/theme-provider";
 
 import "./global.css";
 
@@ -26,43 +27,45 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
-        {/* 1. Added basename using Vite's environment variable */}
-        <BrowserRouter 
-          basename={import.meta.env.BASE_URL}
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true,
-          }}
-        >
-          <Routes>
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/onboarding" element={<OnboardingPage />} />
-            
-            {/* 2. Main App Shell with Layout */}
-            <Route path="*" element={
-              <Layout>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/nova" element={<NovaChat />} />
-                  <Route path="/spending" element={<SpendingPage />} />
-                  <Route path="/growth" element={<GrowthPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
-                  <Route path="/outreach" element={<OutreachPage />} />
-                  <Route path="/triggers" element={<TriggersPage />} />
-                  <Route path="/reports" element={<ReportsPage />} />
-                  <Route path="/subscription" element={<SubscriptionPage />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Layout>
-            } />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </TooltipProvider>
+    <ThemeProvider defaultTheme="dark" storageKey="pulse-theme">
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AuthProvider>
+          {/* 1. Added basename using Vite's environment variable */}
+          <BrowserRouter 
+            basename={import.meta.env.BASE_URL}
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
+            <Routes>
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/onboarding" element={<OnboardingPage />} />
+              
+              {/* 2. Main App Shell with Layout */}
+              <Route path="*" element={
+                <Layout>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/nova" element={<NovaChat />} />
+                    <Route path="/spending" element={<SpendingPage />} />
+                    <Route path="/growth" element={<GrowthPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/outreach" element={<OutreachPage />} />
+                    <Route path="/triggers" element={<TriggersPage />} />
+                    <Route path="/reports" element={<ReportsPage />} />
+                    <Route path="/subscription" element={<SubscriptionPage />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Layout>
+              } />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

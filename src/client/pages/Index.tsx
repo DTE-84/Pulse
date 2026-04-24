@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link, useNavigate } from "react-router-dom";
 import { statsAPI, transactionsAPI, novaServiceAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 import {
   Dialog,
@@ -238,6 +239,7 @@ export default function Index() {
   const [ingestData, setIngestData] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [triggerId, setTriggerId] = useState<string>("0"); // Default to no trigger
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   const handleIngest = async () => {
     if (!ingestData.trim()) {
@@ -335,6 +337,12 @@ export default function Index() {
   };
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!isAuthenticated) {
+      navigate("/auth");
+      return;
+    }
+
     const fetchStats = async () => {
       try {
         const res = await statsAPI.get();
@@ -346,9 +354,9 @@ export default function Index() {
       }
     };
     fetchStats();
-  }, []);
+  }, [isAuthenticated, authLoading, navigate]);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />

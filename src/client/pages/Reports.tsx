@@ -9,7 +9,10 @@ import {
   BarChart3,
   Sparkles,
   ArrowRight,
-  Loader2
+  Loader2,
+  ShieldCheck,
+  BrainCircuit,
+  CheckCircle2
 } from "lucide-react";
 import { 
   BarChart, 
