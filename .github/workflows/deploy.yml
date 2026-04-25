@@ -30,7 +30,7 @@ jobs:
         run: npm install
 
       - name: Build
-        run: npx vite build --config src/vite.config.ts
+        run: npm run build:client
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -38,7 +38,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist/spa'
+          path: './dist'
 
       - name: Deploy to GitHub Pages
         id: deployment

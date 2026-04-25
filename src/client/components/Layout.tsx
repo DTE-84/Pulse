@@ -139,8 +139,8 @@ const Sidebar = () => {
   );
 };
 
-const primaryNav = menuItems.filter(i => ["/", "/nova", "/spending", "/growth"].includes(i.href));
-const secondaryNav = menuItems.filter(i => !["/", "/nova", "/spending", "/growth"].includes(i.href));
+const primaryNav = menuItems.filter(i => ["/", "/nova", "/triggers", "/growth"].includes(i.href));
+const secondaryNav = menuItems.filter(i => !["/", "/nova", "/triggers", "/growth"].includes(i.href));
 
 const MobileNav = () => {
   const location = useLocation();
