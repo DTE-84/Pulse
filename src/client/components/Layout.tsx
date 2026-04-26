@@ -161,10 +161,13 @@ const MobileNav = () => {
 
       {/* Secondary drawer */}
       <div className={cn(
-        "lg:hidden fixed left-0 right-0 z-50 bg-[#0A0907] border-t border-white/10 transition-all duration-300 ease-in-out",
-        drawerOpen ? "bottom-20 opacity-100" : "bottom-20 opacity-0 pointer-events-none translate-y-4"
+        "lg:hidden fixed left-4 right-4 z-50 bg-[#0A0907]/90 backdrop-blur-2xl border border-white/10 rounded-[2rem] transition-all duration-500 ease-out shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden",
+        drawerOpen ? "bottom-24 opacity-100 translate-y-0" : "bottom-20 opacity-0 pointer-events-none translate-y-12"
       )}>
-        <div className="flex items-center justify-around px-6 py-5">
+        <div className="p-3 space-y-1">
+          <div className="px-4 py-3 mb-2 border-b border-white/5">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/50">Pulse Command</span>
+          </div>
           {secondaryNav.map((item) => {
             const isActive = location.pathname === item.href;
             return (
@@ -173,13 +176,26 @@ const MobileNav = () => {
                 to={item.href}
                 onClick={() => setDrawerOpen(false)}
                 className={cn(
-                  "flex flex-col items-center gap-1.5 transition-all relative",
-                  isActive ? "text-primary scale-110" : "text-muted-foreground opacity-60 hover:opacity-100"
+                  "flex items-center justify-between px-5 py-4 rounded-2xl transition-all relative group",
+                  isActive 
+                    ? "bg-white/5 text-primary" 
+                    : "text-white/70 hover:bg-white/[0.03] hover:text-white"
                 )}
               >
-                <item.icon className="w-6 h-6" />
-                <span className="text-[8px] font-black uppercase tracking-[0.2em]">{item.label}</span>
-                {isActive && <div className="absolute -top-3 w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_15px_rgba(45,237,156,1)]" />}
+                <div className="flex items-center gap-4">
+                  <div className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center border transition-all",
+                    isActive ? "bg-primary/20 border-primary/20" : "bg-white/5 border-white/5 group-hover:border-white/10"
+                  )}>
+                    <item.icon className="w-5 h-5" />
+                  </div>
+                  <span className="text-xs font-bold uppercase tracking-widest">{item.label}</span>
+                </div>
+                {isActive ? (
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(45,237,156,1)]" />
+                ) : (
+                  <Zap className="w-3 h-3 opacity-0 group-hover:opacity-20 transition-opacity" />
+                )}
               </Link>
             );
           })}
