@@ -80,8 +80,8 @@ export default function Onboarding() {
     children,
     nextLabel = "Next",
   }: any) => (
-    <div className="flex-1 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="space-y-3 mb-10">
+    <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="space-y-3 mb-6 shrink-0">
         <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tighter leading-none">
           {title}
         </h2>
@@ -89,8 +89,8 @@ export default function Onboarding() {
           {subtitle}
         </p>
       </div>
-      <div className="flex-1">{children}</div>
-      <div className="mt-auto pt-10 flex gap-4">
+      <div className="flex-1 overflow-y-auto min-h-0 pr-2 -mr-2 pb-4 scrollbar-hide">{children}</div>
+      <div className="mt-auto pt-6 shrink-0 flex gap-4 bg-[#12110F]">
         {currentStep > 0 && (
           <Button
             variant="outline"
@@ -148,7 +148,7 @@ export default function Onboarding() {
           </button>
         </div>
 
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-h-0">
           {currentStep === 0 && (
             <div className="flex-1 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-1000">
               <div className="relative mb-12">
@@ -174,7 +174,7 @@ export default function Onboarding() {
               <Button
                 size="lg"
                 onClick={next}
-                className="w-full rounded-2xl h-16 bg-primary text-background font-black uppercase tracking-widest text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(45,237,156,0.3)] mt-auto"
+                className="w-full shrink-0 rounded-2xl h-16 bg-primary text-background font-black uppercase tracking-widest text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(45,237,156,0.3)] mt-auto"
               >
                 Get Started
                 <ArrowRight className="ml-2 w-5 h-5" />
@@ -479,7 +479,7 @@ export default function Onboarding() {
                 size="lg"
                 onClick={finish}
                 disabled={loading}
-                className="w-full rounded-2xl h-16 bg-primary text-background font-black uppercase tracking-widest text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(45,237,156,0.3)] mt-auto"
+                className="w-full shrink-0 rounded-2xl h-16 bg-primary text-background font-black uppercase tracking-widest text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(45,237,156,0.3)] mt-auto"
               >
                 {loading ? "Saving..." : "Enter Pulse"}
                 <ArrowRight className="ml-2 w-5 h-5" />

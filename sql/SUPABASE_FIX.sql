@@ -44,12 +44,28 @@ SET user_id_uuid = u.user_id_uuid
 FROM public.dim_users u
 WHERE g.user_id = u.user_id AND g.user_id_uuid IS NULL;
 
--- 5. SWAP COLUMNS: Make UUID the Primary Key
--- This is the critical step to stop the 400 errors.
+-- 5. CLEANUP: Delete orphaned records that couldn't be linked to a UUID
+-- If we can't link them to a Supabase Auth account, they are invalid in the new schema.
+DELETE FROM public.fact_transactions WHERE user_id_uuid IS NULL;
 
+DO $$ 
+BEGIN 
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'dim_goals') THEN
+        DELETE FROM public.dim_goals WHERE user_id_uuid IS NULL;
+    END IF;
+END $$;
+
+DELETE FROM public.dim_users WHERE user_id_uuid IS NULL;
+
+-- 6. SWAP COLUMNS: Make UUID the Primary Key
 -- A. Remove old constraints
 ALTER TABLE public.fact_transactions DROP CONSTRAINT IF EXISTS fact_transactions_user_id_fkey;
-ALTER TABLE public.dim_goals DROP CONSTRAINT IF EXISTS dim_goals_user_id_fkey;
+DO $$ 
+BEGIN 
+    IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'dim_goals_user_id_fkey') THEN
+        ALTER TABLE public.dim_goals DROP CONSTRAINT IF EXISTS dim_goals_user_id_fkey;
+    END IF;
+END $$;
 
 -- B. Rename columns to swap identities
 ALTER TABLE public.dim_users RENAME COLUMN user_id TO user_id_int;
@@ -80,7 +96,7 @@ BEGIN
     END IF;
 END $$;
 
--- 6. Re-apply RLS Policies
+-- 7. Re-apply RLS Policies
 ALTER TABLE public.dim_users ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users can view own profile" ON public.dim_users;
 CREATE POLICY "Users can view own profile" ON public.dim_users FOR SELECT USING (auth.uid() = user_id);
