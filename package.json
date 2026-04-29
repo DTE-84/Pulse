@@ -6,7 +6,7 @@
     "dev:client": "vite --config vite.config.ts --base=/",
     "dev:server": "tsx watch src/server/dev.ts",
     "dev": "vite build --config vite.config.ts",
-    "build": "vite build --config vite.config.ts",
+    "build": "npm run build:client && npm run build:server",
     "build:client": "vite build --config vite.config.ts",
     "build:server": "vite build --config vite.config.server.mjs",
     "start": "node dist/server/node-build.mjs",
