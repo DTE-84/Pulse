@@ -51,13 +51,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const { data: profile } = await supabase
           .from('dim_users')
           .select('*')
-          .eq('user_id_uuid', session.user.id)
+          .eq('user_id', session.user.id)
           .maybeSingle();
           
         if (profile) {
           const userData = { 
             ...profile, 
-            id: profile.user_id_uuid, 
+            id: profile.user_id, 
             name: profile.user_name,
             onboardingCompleted: profile.onboarding_completed 
           };

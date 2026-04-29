@@ -225,6 +225,8 @@ export const transactionsAPI = {
       user_id: user.id,
       amount: tx.amount,
       purchase_date: tx.date || new Date().toISOString(),
+      category_id: tx.category_id,
+      trigger_id: tx.trigger_id,
       status: "Completed",
     }));
 
