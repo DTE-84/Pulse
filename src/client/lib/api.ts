@@ -36,7 +36,7 @@ export const authAPI = {
     if (error) throw error;
 
     // Attempt to fetch profile
-    let { data: user, error: userError } = await supabase
+    let { data: user, error: _userError } = await supabase
       .from('dim_users')
       .select('*')
       .eq('user_id_uuid', data.user.id)

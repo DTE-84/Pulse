@@ -170,7 +170,6 @@ export const handleStats: RequestHandler = async (req, res) => {
       mode: user.nova_tone || "Balanced",
       currentMonthSpend,
       baseline,
-      _predictedBalance: predictedBalance,
       goalLabel,
     });
 
