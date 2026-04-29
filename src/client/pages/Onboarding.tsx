@@ -154,7 +154,7 @@ export default function Onboarding() {
               <div className="relative mb-12">
                 <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150 animate-pulse" />
                 <div className="w-24 h-24 bg-zinc-900 border-4 border-primary rounded-3xl flex items-center justify-center relative z-10 shadow-2xl rotate-12">
-                  <span className="text-4xl font-black text-primary">P</span>
+                  <img src="/dist/PulseLogoTransp.png" alt="Logo" className="w-10 h-10" />
                 </div>
               </div>
               <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tighter mb-4">
