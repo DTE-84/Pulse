@@ -153,31 +153,36 @@ export const authAPI = {
         onboardingCompleted: profile.onboarding_completed,
       },
     };
-  },
-  updateProfile: async (updates: any) => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  },updateProfile: async (updates: any) => {
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
-
+  
     const dbUpdates: any = {};
-    if (updates.name) dbUpdates.user_name = updates.name;
-    if (updates.baselineSpend) dbUpdates.baseline_spend = updates.baselineSpend;
-    if (updates.novaTone) dbUpdates.nova_tone = updates.novaTone;
-    if (updates.onboardingCompleted !== undefined)
+  
+    if (updates.name !== undefined) dbUpdates.user_name = updates.name;
+  
+    if (updates.baselineSpend !== undefined) {
+      dbUpdates.baseline_spend = updates.baselineSpend;
+    }
+  
+    if (updates.novaTone !== undefined) {
+      dbUpdates.nova_tone = updates.novaTone;
+    }
+  
+    if (updates.onboardingCompleted !== undefined) {
       dbUpdates.onboarding_completed = updates.onboardingCompleted;
-
+    }
+  
     const { data, error } = await supabase
       .from("dim_users")
       .update(dbUpdates)
-      .eq("user_id", user.id)
+      .eq("user_id", user.id) // <-- key fix
       .select()
       .single();
-
+  
     if (error) throw error;
     return { data };
   },
-};
 
 export const transactionsAPI = {
   getAll: async (params?: any) => {
