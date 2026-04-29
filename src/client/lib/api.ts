@@ -153,7 +153,9 @@ export const authAPI = {
         onboardingCompleted: profile.onboarding_completed,
       },
     };
-  },updateProfile: async (updates: any) => {
+  },
+
+  updateProfile: async (updates: any) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
   
@@ -183,6 +185,7 @@ export const authAPI = {
     if (error) throw error;
     return { data };
   },
+};
 
 export const transactionsAPI = {
   getAll: async (params?: any) => {
