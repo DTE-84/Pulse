@@ -127,6 +127,7 @@ export const authAPI = {
       .maybeSingle();
 
     if (!profile) {
+      console.log("[PulseAi] Profile missing for me() call, creating...");
       // Auto-create profile if missing on 'me' call (Self-healing)
       const { data: newProfile, error: insertError } = await supabase
         .from("dim_users")
@@ -141,7 +142,10 @@ export const authAPI = {
         ])
         .select()
         .single();
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error("[PulseAi] Self-healing failed:", insertError);
+        throw insertError;
+      }
       profile = newProfile;
     }
 
@@ -150,6 +154,8 @@ export const authAPI = {
         ...profile,
         name: profile.user_name,
         id: profile.user_id,
+        baselineSpend: profile.baseline_spend,
+        novaTone: profile.nova_tone,
         onboardingCompleted: profile.onboarding_completed,
       },
     };
@@ -184,13 +190,30 @@ export const authAPI = {
       .maybeSingle();
   
     if (error) {
-      console.error("[PulseAi] Update Profile Error:", error);
-      throw error;
+      console.error("UpdateProfile Supabase Error:", error);
+      throw new Error(error.message || "Failed to update profile in database");
     }
     
     if (!data) {
-      console.warn("[PulseAi] No profile found to update for user:", user.id);
-      throw new Error("Profile record not found.");
+      console.warn("[PulseAi] No profile found to update for user:", user.id, ". Auto-healing...");
+      // Auto-heal the profile on update if it somehow wasn't created during signup/login
+      const { data: newData, error: insertError } = await supabase
+        .from("dim_users")
+        .insert([{
+          user_id: user.id,
+          user_name: user.email?.split("@")[0] || "User",
+          email: user.email,
+          baseline_spend: 2500,
+          ...dbUpdates
+        }])
+        .select()
+        .single();
+        
+      if (insertError) {
+        console.error("UpdateProfile Auto-Heal Error:", insertError);
+        throw new Error(insertError.message || "Failed to create profile record.");
+      }
+      return { data: newData };
     }
 
     return { data };
