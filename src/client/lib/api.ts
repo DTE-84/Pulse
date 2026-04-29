@@ -161,24 +161,25 @@ export const authAPI = {
   
     const dbUpdates: any = {};
   
+    // Map frontend keys to DB columns
     if (updates.name !== undefined) dbUpdates.user_name = updates.name;
+    if (updates.user_name !== undefined) dbUpdates.user_name = updates.user_name;
+    
+    if (updates.baselineSpend !== undefined) dbUpdates.baseline_spend = updates.baselineSpend;
+    if (updates.baseline_spend !== undefined) dbUpdates.baseline_spend = updates.baseline_spend;
   
-    if (updates.baselineSpend !== undefined) {
-      dbUpdates.baseline_spend = updates.baselineSpend;
-    }
+    if (updates.novaTone !== undefined) dbUpdates.nova_tone = updates.novaTone;
+    if (updates.nova_tone !== undefined) dbUpdates.nova_tone = updates.nova_tone;
   
-    if (updates.novaTone !== undefined) {
-      dbUpdates.nova_tone = updates.novaTone;
-    }
-  
-    if (updates.onboardingCompleted !== undefined) {
-      dbUpdates.onboarding_completed = updates.onboardingCompleted;
-    }
+    if (updates.onboardingCompleted !== undefined) dbUpdates.onboarding_completed = updates.onboardingCompleted;
+    if (updates.onboarding_completed !== undefined) dbUpdates.onboarding_completed = updates.onboarding_completed;
+
+    if (updates.intentions !== undefined) dbUpdates.intentions = updates.intentions;
   
     const { data, error } = await supabase
       .from("dim_users")
       .update(dbUpdates)
-      .eq("user_id", user.id) // <-- key fix
+      .eq("user_id", user.id)
       .select()
       .single();
   
