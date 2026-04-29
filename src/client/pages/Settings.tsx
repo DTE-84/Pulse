@@ -27,23 +27,33 @@ const SettingGroup = ({ title, description, children }: any) => (
   </div>
 );
 
-const SettingItem = ({ icon: Icon, label, description, rightElement, border = true }: any) => (
+const SettingItem = ({
+  icon: Icon,
+  label,
+  description,
+  rightElement,
+  border = true,
+}: any) => (
   <div
     className={cn(
-      "flex items-center justify-between p-6 transition-colors hover:bg-white/[0.01]",
-      border && "border-b border-white/[0.03]"
+      "flex items-center justify-between p-4 sm:p-6 gap-3 transition-colors hover:bg-white/[0.01]",
+      border && "border-b border-white/[0.03]",
     )}
   >
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
       <div className="w-10 h-10 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-center">
         <Icon className="w-5 h-5 text-primary" />
       </div>
-      <div>
-        <div className="text-sm font-bold text-white uppercase tracking-wider">{label}</div>
-        <div className="text-[11px] text-muted-foreground font-medium mt-0.5">{description}</div>
+      <div className="min-w-0">
+        <div className="text-sm font-bold text-white uppercase tracking-wider truncate">
+          {label}
+        </div>
+        <div className="text-[11px] text-muted-foreground font-medium mt-0.5 truncate">
+          {description}
+        </div>
       </div>
     </div>
-    {rightElement}
+    <div className="shrink-0">{rightElement}</div>
   </div>
 );
 
@@ -55,13 +65,20 @@ const modeDescriptions: Record<string, string> = {
 
 export default function Settings() {
   const { toast } = useToast();
-  const [protocol, setProtocol] = useState(localStorage.getItem("nova_protocol") || "Balanced");
-  const [mirroring, setMirroring] = useState(localStorage.getItem("nova_mirroring") !== "false");
-  const [intervention, setIntervention] = useState(localStorage.getItem("nova_intervention") !== "false");
+  const [protocol, setProtocol] = useState(
+    localStorage.getItem("nova_protocol") || "Balanced",
+  );
+  const [mirroring, setMirroring] = useState(
+    localStorage.getItem("nova_mirroring") !== "false",
+  );
+  const [intervention, setIntervention] = useState(
+    localStorage.getItem("nova_intervention") !== "false",
+  );
 
   const toggleProtocol = () => {
     const protocols = ["Gentle", "Balanced", "Driven"];
-    const next = protocols[(protocols.indexOf(protocol) + 1) % protocols.length];
+    const next =
+      protocols[(protocols.indexOf(protocol) + 1) % protocols.length];
     setProtocol(next);
     localStorage.setItem("nova_protocol", next);
     toast({
@@ -70,7 +87,12 @@ export default function Settings() {
     });
   };
 
-  const updateSetting = (key: string, val: boolean, setter: any, label: string) => {
+  const updateSetting = (
+    key: string,
+    val: boolean,
+    setter: any,
+    label: string,
+  ) => {
     setter(val);
     localStorage.setItem(key, String(val));
     toast({
@@ -87,7 +109,9 @@ export default function Settings() {
           <ChevronRight className="w-3 h-3 opacity-30" />
           <span className="text-primary">Settings</span>
         </div>
-        <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">Settings</h1>
+        <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">
+          Settings
+        </h1>
         <p className="text-muted-foreground font-semibold text-sm">
           Choose how Nova guides you and how Pulse handles your financial data.
         </p>
@@ -105,7 +129,14 @@ export default function Settings() {
             rightElement={
               <Switch
                 checked={mirroring}
-                onCheckedChange={(v) => updateSetting("nova_mirroring", v, setMirroring, "Pattern awareness")}
+                onCheckedChange={(v) =>
+                  updateSetting(
+                    "nova_mirroring",
+                    v,
+                    setMirroring,
+                    "Pattern awareness",
+                  )
+                }
               />
             }
           />
@@ -116,14 +147,23 @@ export default function Settings() {
             rightElement={
               <Switch
                 checked={intervention}
-                onCheckedChange={(v) => updateSetting("nova_intervention", v, setIntervention, "Proactive nudges")}
+                onCheckedChange={(v) =>
+                  updateSetting(
+                    "nova_intervention",
+                    v,
+                    setIntervention,
+                    "Proactive nudges",
+                  )
+                }
               />
             }
           />
           <SettingItem
             icon={Heart}
             label="Nova mode"
-            description={modeDescriptions[protocol] || modeDescriptions.Balanced}
+            description={
+              modeDescriptions[protocol] || modeDescriptions.Balanced
+            }
             rightElement={
               <Badge
                 variant="outline"
@@ -145,7 +185,9 @@ export default function Settings() {
             icon={Shield}
             label="Encryption"
             description="Sensitive financial data is protected with bank-grade security practices."
-            rightElement={<div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(45,237,156,0.5)]" />}
+            rightElement={
+              <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(45,237,156,0.5)]" />
+            }
           />
           <SettingItem
             icon={Database}
@@ -154,7 +196,12 @@ export default function Settings() {
             rightElement={
               <button
                 className="text-[9px] font-black text-primary uppercase tracking-widest hover:underline"
-                onClick={() => toast({ title: "Export started", description: "Preparing your data for download..." })}
+                onClick={() =>
+                  toast({
+                    title: "Export started",
+                    description: "Preparing your data for download...",
+                  })
+                }
               >
                 Export data
               </button>
@@ -164,7 +211,9 @@ export default function Settings() {
             icon={User}
             label="Account details"
             description="Manage your login information and future account preferences."
-            rightElement={<ChevronRight className="w-4 h-4 text-muted-foreground" />}
+            rightElement={
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            }
             border={false}
           />
         </SettingGroup>

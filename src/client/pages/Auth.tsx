@@ -80,7 +80,6 @@ export default function AuthPage() {
               <div className="relative z-10 w-16 h-16 rounded-[2rem] bg-black border-2 border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[0_0_40px_rgba(45,237,156,0.2)] overflow-hidden">
                 <img
                   src={`${import.meta.env.BASE_URL}PulseLogoTransp.png`}
-                  
                   sizes="64px"
                   alt="Pulse"
                   className="w-12 h-12 object-contain filter drop-shadow-[0_0_12px_rgba(45,237,156,0.5)]"
@@ -145,9 +144,9 @@ export default function AuthPage() {
 
         {/* Right Side: Auth Interface */}
         <div className="flex justify-center lg:justify-end">
-          <div className="w-full max-w-[480px] bg-[#0A0908] border border-white/5 rounded-[3rem] p-10 md:p-14 shadow-2xl relative overflow-hidden">
+          <div className="w-full max-w-[480px] bg-[#0A0908] border border-white/5 rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 md:p-14 shadow-2xl relative overflow-hidden">
             {/* Header for Mobile */}
-            <div className="lg:hidden flex flex-col items-center text-center mb-10">
+            <div className="lg:hidden flex flex-col items-center text-center mb-6 sm:mb-10">
               <div className="relative w-20 h-20 flex items-center justify-center mb-4">
                 <div className="absolute inset-0 bg-primary/20 rounded-full animate-pulse" />
                 <div className="relative z-10 w-14 h-14 rounded-2xl bg-black border border-primary/20 flex items-center justify-center shadow-2xl overflow-hidden">
@@ -177,7 +176,7 @@ export default function AuthPage() {
               </p>
             </div>
 
-            <div className="mb-10 text-center lg:text-left">
+            <div className="mb-6 sm:mb-10 text-center lg:text-left">
               <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">
                 {isLogin ? "Welcome Back" : "Initialize Profile"}
               </h3>
@@ -198,7 +197,7 @@ export default function AuthPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     autoComplete="name"
-                    className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-14 pr-6 focus:outline-none focus:border-primary/40 focus:bg-white/[0.05] transition-all font-semibold text-white placeholder:text-muted-foreground/40"
+                    className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-4 sm:py-5 pl-14 pr-6 focus:outline-none focus:border-primary/40 focus:bg-white/[0.05] transition-all font-semibold text-white placeholder:text-muted-foreground/40"
                     required
                   />
                 </div>
@@ -212,7 +211,7 @@ export default function AuthPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
-                  className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-14 pr-6 focus:outline-none focus:border-primary/40 focus:bg-white/[0.05] transition-all font-semibold text-white placeholder:text-muted-foreground/40"
+                  className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-4 sm:py-5 pl-14 pr-6 focus:outline-none focus:border-primary/40 focus:bg-white/[0.05] transition-all font-semibold text-white placeholder:text-muted-foreground/40"
                   required
                 />
               </div>
@@ -225,7 +224,7 @@ export default function AuthPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete={isLogin ? "current-password" : "new-password"}
-                  className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-5 pl-14 pr-14 focus:outline-none focus:border-primary/40 focus:bg-white/[0.05] transition-all font-semibold text-white placeholder:text-muted-foreground/40"
+                  className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-4 sm:py-5 pl-14 pr-14 focus:outline-none focus:border-primary/40 focus:bg-white/[0.05] transition-all font-semibold text-white placeholder:text-muted-foreground/40"
                   required
                 />
                 <button
@@ -255,7 +254,7 @@ export default function AuthPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-primary text-background font-black py-5 rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_40px_rgba(45,237,156,0.25)] uppercase tracking-[0.2em] text-xs disabled:opacity-50"
+                className="w-full bg-primary text-background font-black py-4 sm:py-5 rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_40px_rgba(45,237,156,0.25)] uppercase tracking-[0.2em] text-xs disabled:opacity-50"
               >
                 {loading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
