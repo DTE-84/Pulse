@@ -8,13 +8,11 @@ const buildNovaMessage = ({
   mode,
   currentMonthSpend,
   baseline,
-  _predictedBalance,
   goalLabel,
 }: {
   mode: string;
   currentMonthSpend: number;
   baseline: number;
-  _predictedBalance: number;
   goalLabel: string;
 }) => {
   const delta = currentMonthSpend - baseline;

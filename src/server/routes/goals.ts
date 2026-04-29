@@ -1,7 +1,5 @@
 import { RequestHandler } from "express";
 import { query } from "../db/db";
-import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../middleware/security";
 
 export const handleGetGoals: RequestHandler = async (req, res) => {
   try {
