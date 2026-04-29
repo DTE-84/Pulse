@@ -1,0 +1,29 @@
+import pg from 'pg';
+import fs from 'fs';
+import path from 'path';
+import "dotenv/config";
+
+const { Pool } = pg;
+
+async function cleanPolicies() {
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+  });
+
+  try {
+    console.log("Reading CLEAN_POLICIES.sql...");
+    const sqlPath = path.join(process.cwd(), 'sql', 'CLEAN_POLICIES.sql');
+    const sql = fs.readFileSync(sqlPath, 'utf8');
+
+    console.log("Consolidating RLS policies in Supabase...");
+    await pool.query(sql);
+    console.log("✅ RLS policies cleaned and consolidated.");
+  } catch (err) {
+    console.error("❌ Failed to clean policies:", err);
+  } finally {
+    await pool.end();
+  }
+}
+
+cleanPolicies();

@@ -43,12 +43,20 @@ export default function AuthPage() {
         navigate(res.data.user.onboardingCompleted ? "/" : "/onboarding");
       } else {
         const res = await authAPI.signup({ name, email, password });
-        login(res.data.token || "", res.data.user);
-        toast({
-          title: "Profile Initialized",
-          description: "Preparing your Advanced Financial AI protocols.",
-        });
-        navigate("/onboarding");
+        if (!res.data.token) {
+          toast({
+            title: "Verification Required",
+            description: "Please check your email to verify your account before logging in.",
+          });
+          setIsLogin(true);
+        } else {
+          login(res.data.token, res.data.user);
+          toast({
+            title: "Profile Initialized",
+            description: "Preparing your Advanced Financial AI protocols.",
+          });
+          navigate("/onboarding");
+        }
       }
     } catch (err: any) {
       toast({

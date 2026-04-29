@@ -181,9 +181,18 @@ export const authAPI = {
       .update(dbUpdates)
       .eq("user_id", user.id)
       .select()
-      .single();
+      .maybeSingle();
   
-    if (error) throw error;
+    if (error) {
+      console.error("[PulseAi] Update Profile Error:", error);
+      throw error;
+    }
+    
+    if (!data) {
+      console.warn("[PulseAi] No profile found to update for user:", user.id);
+      throw new Error("Profile record not found.");
+    }
+
     return { data };
   },
 };
