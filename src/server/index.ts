@@ -20,7 +20,7 @@ import {
 } from "./middleware/security";
 
 // Allowed origins — add your production domain here
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:5173,http://localhost:3000")
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:5173,http://localhost:3000,https://pulse-nova-solutions.vercel.app,https://dte-solutions.icu")
   .split(",").map((o: string) => o.trim());
 
 export function createServer() {
