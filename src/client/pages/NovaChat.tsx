@@ -117,7 +117,7 @@ export default function NovaChat() {
     setInput("");
     setIsTyping(true);
     try {
-      const res = await novaServiceAPI.chat(input, stats);
+      const res = await novaServiceAPI.chat(input, chatMessages);
       setChatMessages((prev) => [
         ...prev,
         {

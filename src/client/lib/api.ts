@@ -1,5 +1,4 @@
 import { supabase } from "./supabase";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "";
@@ -20,10 +19,6 @@ API.interceptors.request.use((config) => {
 const novaAPI = axios.create({
   baseURL: API_BASE_URL,
 });
-
-// Initialize AI if key is present
-const googleApiKey = import.meta.env.VITE_GOOGLE_AI_KEY || "";
-const genAI = googleApiKey ? new GoogleGenerativeAI(googleApiKey) : null;
 
 /**
  * Pulse-Ai Supabase-Native API Layer
@@ -362,42 +357,25 @@ export const statsAPI = {
 };
 
 export const novaServiceAPI = {
-  chat: async (message: string, context?: any) => {
-    if (!genAI) throw new Error("Google AI Key not configured.");
-
-    try {
-      // Primary: High-Fidelity 1.5 Pro
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
-      const result = await model.generateContent(message);
-      const response = await result.response;
-      return { data: { content: response.text() } };
-    } catch (err) {
-      console.warn(
-        "Nova: Falling back to Flash core due to signal deviation.",
-        err,
-      );
-      // Fallback: 1.5 Flash
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
-      const result = await model.generateContent(
-        `${message} (Low-latency mode active)`,
-      );
-      const response = await result.response;
-      return { data: { content: response.text() } };
-    }
+  chat: async (message: string, history?: any[]) => {
+    // We now use the server-side proxy for high-fidelity telemetry and security.
+    const response = await API.post("/api/nova/chat", { message, history });
+    return response;
   },
   getInsights: async () => {
+    const response = await API.get("/api/stats");
     return {
-      data: { insights: ["Uplink stable.", "Data integrity nominal."] },
+      data: { 
+        insights: [
+          `Total Balance: $${response.data.totalBalance.toLocaleString()}`,
+          response.data.novaInsight
+        ] 
+      }
     };
   },
   getAnalysis: async () => {
-    return {
-      data: {
-        analysis: "Behavioral telemetry indicates a balanced rhythm.",
-        report: "Behavioral telemetry indicates a balanced rhythm.",
-        monthlyExpenses: 0,
-      },
-    };
+    const response = await API.post("/api/nova/analysis");
+    return response;
   },
 };
 
