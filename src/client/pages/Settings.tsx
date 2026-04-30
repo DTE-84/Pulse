@@ -9,11 +9,14 @@ import {
   Monitor,
   Cpu,
   Heart,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
+import { useTheme } from "@/components/theme-provider";
 
 const SettingGroup = ({ title, description, children }: any) => (
   <div className="space-y-6">
@@ -65,6 +68,7 @@ const modeDescriptions: Record<string, string> = {
 
 export default function Settings() {
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
   const [protocol, setProtocol] = useState(
     localStorage.getItem("nova_protocol") || "Balanced",
   );
@@ -118,6 +122,36 @@ export default function Settings() {
       </div>
 
       <div className="space-y-12 pb-20">
+        <SettingGroup
+          title="Visual protocol"
+          description="Customize the interface to match your environment."
+        >
+          <div className="grid grid-cols-3 gap-0 divide-x divide-white/[0.03] border-b border-white/[0.03]">
+            {[
+              { id: "light", icon: Sun, label: "Light" },
+              { id: "dark", icon: Moon, label: "Dark" },
+              { id: "system", icon: Monitor, label: "System" },
+            ].map((m) => (
+              <button
+                key={m.id}
+                onClick={() => setTheme(m.id as any)}
+                className={cn(
+                  "flex flex-col items-center gap-3 py-8 transition-all hover:bg-white/[0.02]",
+                  theme === m.id ? "bg-white/[0.03] text-primary" : "text-muted-foreground"
+                )}
+              >
+                <m.icon className={cn("w-6 h-6", theme === m.id ? "text-primary" : "text-muted-foreground")} />
+                <span className={cn("text-[10px] font-black uppercase tracking-[0.2em]", theme === m.id ? "text-primary" : "text-muted-foreground")}>
+                  {m.label}
+                </span>
+                {theme === m.id && (
+                  <div className="w-1 h-1 rounded-full bg-primary shadow-[0_0_8px_rgba(45,237,156,0.8)] mt-1" />
+                )}
+              </button>
+            ))}
+          </div>
+        </SettingGroup>
+
         <SettingGroup
           title="Nova guidance"
           description="Adjust how Nova reads your patterns and how strongly she steps in."
