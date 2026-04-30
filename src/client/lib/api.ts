@@ -367,7 +367,7 @@ export const novaServiceAPI = {
 
     try {
       // Primary: High-Fidelity 1.5 Pro
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
       const result = await model.generateContent(message);
       const response = await result.response;
       return { data: { content: response.text() } };
@@ -377,7 +377,7 @@ export const novaServiceAPI = {
         err,
       );
       // Fallback: 1.5 Flash
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
       const result = await model.generateContent(
         `${message} (Low-latency mode active)`,
       );

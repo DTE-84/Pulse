@@ -59,7 +59,9 @@ CREATE INDEX IF NOT EXISTS idx_fact_transactions_user_id ON "fact_transactions"(
 CREATE INDEX IF NOT EXISTS idx_fact_transactions_date ON "fact_transactions"(purchase_date);
 
 -- Analytical Views
-CREATE OR REPLACE VIEW view_user_segmentation AS
+CREATE OR REPLACE VIEW view_user_segmentation 
+WITH (security_invoker = on)
+AS
 SELECT 
     u.user_name,
     COUNT(f.transaction_id) as total_purchases,
@@ -72,6 +74,28 @@ SELECT
 FROM fact_transactions f
 JOIN dim_users u ON f.user_id = u.user_id
 GROUP BY u.user_id, u.user_name, u.baseline_spend;
+
+CREATE OR REPLACE VIEW view_behavioral_drift 
+WITH (security_invoker = on)
+AS
+WITH LastPurchase AS (
+    SELECT
+        user_id,
+        MAX(purchase_date) as last_order_date
+    FROM fact_transactions
+    GROUP BY user_id
+)
+SELECT
+    u.user_name,
+    lp.last_order_date,
+    CURRENT_DATE - lp.last_order_date::DATE AS days_since_last_pulse,
+    CASE
+        WHEN CURRENT_DATE - lp.last_order_date::DATE > 30 THEN 'Pulse Stalled (Churned)'
+        WHEN CURRENT_DATE - lp.last_order_date::DATE > 7 THEN 'Rhythm Drifting (At Risk)'
+        ELSE 'Pulse Active'
+    END as behavioral_status
+FROM LastPurchase lp
+JOIN dim_users u ON lp.user_id = u.user_id;
 
 -- 4. Dimension: Triggers (Emotional Catalysts)
 CREATE TABLE IF NOT EXISTS "dim_triggers" (
