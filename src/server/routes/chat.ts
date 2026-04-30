@@ -8,15 +8,10 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY || "");
 
 export const handleNovaChat: RequestHandler = async (req, res) => {
   const { message, history } = req.body;
-  const authHeader = req.headers.authorization;
 
-  if (!authHeader) return res.status(401).json({ message: "Authentication required." });
-  if (!message) return res.status(400).json({ message: "Message is required." });
-
-  const token = authHeader.split(" ")[1];
   try {
-    const decoded: any = jwt.verify(token, JWT_SECRET);
-    const userId = decoded.id;
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: "Authentication required." });
 
     // 1. Fetch User Context for High-Fidelity Personalization
     const userRes = await query(
@@ -92,8 +87,9 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
     `;
 
     // 3. Generate AI Response with History Support
+    // Use gemini-1.5-pro-latest for maximum reliability and systemInstruction support
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-pro",
+      model: "gemini-1.5-pro-latest",
       systemInstruction: systemPrompt 
     });
     
@@ -102,13 +98,14 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
       .filter((msg: any) => msg.role === "user" || msg.role === "assistant")
       .map((msg: any) => ({
         role: msg.role === "assistant" ? "model" : "user",
-        parts: [{ text: msg.content }]
+        parts: [{ text: msg.content || "" }]
       }));
 
     const chat = model.startChat({
       history: geminiHistory,
     });
     
+    console.log(`[Nova] Processing request for ${user?.user_name || 'unknown'} (ID: ${userId})`);
     const result = await chat.sendMessage(message);
     const responseText = result.response.text();
 
@@ -119,10 +116,16 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
     });
 
   } catch (err: any) {
-    console.error("Nova Chat Error:", err);
-    // Fallback to flash if pro fails (e.g. quota)
+    console.error("[Nova Chat Error] Full context:", {
+      message: err.message,
+      stack: err.stack,
+      userId: req.userId,
+      code: err.code
+    });
+    
+    // Fallback to flash if pro fails (e.g. quota or model not found)
     try {
-      const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
       const result = await modelFlash.generateContent(`${req.body.message} (Note: System is in limited capacity mode)`);
       const text = result.response.text();
       return res.json({ 
@@ -130,8 +133,12 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
         content: text,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
-    } catch (innerErr) {
-      res.status(500).json({ error: "Nova is currently recalibrating.", detail: err.message });
+    } catch (innerErr: any) {
+      console.error("[Nova Fallback Error]:", innerErr.message);
+      res.status(500).json({ 
+        message: "Nova is currently recalibrating.", 
+        detail: err.message 
+      });
     }
   }
 };

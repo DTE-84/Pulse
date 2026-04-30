@@ -41,13 +41,9 @@ const buildNovaMessage = ({
 };
 
 export const handleStats: RequestHandler = async (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ message: "Authentication required." });
-
-  const token = authHeader.split(" ")[1];
   try {
-    const decoded: any = jwt.verify(token, JWT_SECRET);
-    const userId = decoded.id;
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: "Authentication required." });
 
     const userRes = await query(
       `

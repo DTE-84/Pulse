@@ -7,13 +7,9 @@ import { JWT_SECRET } from "../middleware/security";
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY || "");
 
 export const handleAnalysis: RequestHandler = async (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ message: "Authentication required." });
-
-  const token = authHeader.split(" ")[1];
   try {
-    const decoded: any = jwt.verify(token, JWT_SECRET);
-    const userId = decoded.id;
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: "Authentication required." });
 
     // 1. Fetch High-Fidelity Telemetry
     const userRes = await query(

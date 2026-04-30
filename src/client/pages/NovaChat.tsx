@@ -126,12 +126,14 @@ export default function NovaChat() {
           timestamp: new Date().toLocaleTimeString(),
         },
       ]);
-    } catch {
+    } catch (err: any) {
+      console.error("[Nova] Chat error:", err);
+      const errorMsg = err.response?.data?.message || err.message || "Nova is unavailable right now.";
       setChatMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: "Nova is unavailable right now. Try again shortly.",
+          content: `${errorMsg} Try again shortly.`,
           timestamp: new Date().toLocaleTimeString(),
         },
       ]);

@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import jwt from "jsonwebtoken";
+import { createClient } from "@supabase/supabase-js";
 
 // 1. JWT SECRET GUARD — server exits if not set or too short
 const _secret = process.env.JWT_SECRET;
@@ -11,21 +12,43 @@ if (!_secret) {
 const isDev = process.env.NODE_ENV !== "production";
 const minLen = isDev ? 16 : 32;
 if (_secret && _secret.length < minLen) { 
-  console.error(`[PULSE SECURITY] FATAL: JWT_SECRET too short (min ${minLen} chars for ${isDev ? "dev" : "prod"}).`); 
+  console.error(`[PULSE SECURITY] FATAL: JWT_SECRET too short (min ${minLen} chars for ${isDev ? \"dev\" : \"prod\"}).`); 
   if (process.env.NODE_ENV !== "production") process.exit(1);
 }
 export const JWT_SECRET: string = _secret || "temp-development-secret-only-for-fallback";
 
-// 2. AUTH MIDDLEWARE — single reusable JWT verifier
+// Initialize Supabase Admin for token verification
+const supabaseUrl = process.env.VITE_SUPABASE_URL || "";
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || "";
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// 2. AUTH MIDDLEWARE — multi-protocol JWT verifier (Local + Supabase)
 declare global { namespace Express { interface Request { userId?: string; userEmail?: string; } } }
 
-export const requireAuth: RequestHandler = (req, res, next) => {
+export const requireAuth: RequestHandler = async (req, res, next) => {
   const h = req.headers.authorization;
   if (!h || !h.startsWith("Bearer ")) { res.status(401).json({ message: "Authentication required." }); return; }
+  
+  const token = h.split(" ")[1];
+  
+  // Strategy A: Try local JWT (custom auth routes)
   try {
-    const d = jwt.verify(h.split(" ")[1], JWT_SECRET) as { id: string; email: string };
-    req.userId = d.id; req.userEmail = d.email; next();
-  } catch { res.status(401).json({ message: "Invalid or expired session." }); }
+    const d = jwt.verify(token, JWT_SECRET) as { id: string; email: string };
+    req.userId = d.id; req.userEmail = d.email;
+    return next();
+  } catch (err) {
+    // Strategy B: Fallback to Supabase verification
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    
+    if (user && !error) {
+      req.userId = user.id;
+      req.userEmail = user.email;
+      return next();
+    }
+    
+    console.error("[PULSE AUTH] Verification failed:", error?.message || "Invalid local token");
+    res.status(401).json({ message: "Invalid or expired session." });
+  }
 };
 
 // 3. RATE LIMITER — in-memory, no external package needed
