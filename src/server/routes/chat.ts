@@ -124,7 +124,7 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
     }
 
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-pro-latest",
+      model: "gemini-1.5-pro", // Stable name
       systemInstruction: systemPrompt 
     });
     
@@ -139,7 +139,7 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
       history: geminiHistory,
     });
     
-    console.log(`[Nova Chat] Dispatching message to Gemini for ${user?.user_name || userId}`);
+    console.log(`[Nova Chat] Dispatching message to Gemini Pro for ${user?.user_name || userId}`);
     const result = await chat.sendMessage(String(message));
     const responseText = result.response.text();
 
@@ -152,14 +152,15 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
   } catch (err: any) {
     console.error("[Nova Chat Critical Error]:", {
       message: err.message,
-      stack: err.stack,
+      status: err.status || err.response?.status,
+      detail: err.response?.data || "No extra detail",
       userId: req.userId
     });
     
     // Fallback to Flash
     try {
       console.log("[Nova Chat] Attempting emergency fallback to Flash...");
-      const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+      const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       const result = await modelFlash.generateContent(`${req.body.message}\n\n(System Context: Critical recovery mode active. Be concise.)`);
       const text = result.response.text();
       return res.json({ 
@@ -171,7 +172,7 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
       console.error("[Nova Chat Fallback Failed]:", innerErr.message);
       return res.status(500).json({ 
         message: "Nova is currently recalibrating.", 
-        detail: err.message 
+        detail: `Primary error: ${err.message}. Fallback error: ${innerErr.message}` 
       });
     }
   }

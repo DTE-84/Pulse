@@ -30,10 +30,16 @@ export function createServer() {
 
   app.use(cors({
     origin: (origin: string | undefined, cb: Function) => {
-      // Allow server-to-server (no origin) in development only
-      if (!origin && process.env.NODE_ENV !== "production") return cb(null, true);
-      if (origin && ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
-      cb(new Error("CORS: Origin not permitted."));
+      // 1. Allow if no origin (e.g. server-to-server or same-origin on some browsers)
+      if (!origin) return cb(null, true);
+      
+      // 2. Allow if in explicit list
+      if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+      
+      // 3. Allow any Vercel domain in production for flexibility (optional but helpful)
+      if (origin.endsWith(".vercel.app")) return cb(null, true);
+
+      cb(new Error(`CORS: Origin ${origin} not permitted.`));
     },
     credentials: true,
     methods: ["GET", "POST", "PATCH", "DELETE"],
@@ -67,6 +73,16 @@ export function createServer() {
   app.post("/api/auth/signup", authLimiter, handleSignup);
   app.get("/api/auth/me", requireAuth, handleMe);
   app.patch("/api/auth/update", requireAuth, handleUpdateProfile);
+
+  // Global Error Handler
+  app.use((err: any, _req: any, res: any, _next: any) => {
+    console.error("[PULSE SERVER ERROR]:", err);
+    const status = err.message?.includes("CORS") ? 403 : 500;
+    res.status(status).json({
+      message: "Internal server error",
+      detail: process.env.NODE_ENV === "production" ? "Check server logs for details." : err.message,
+    });
+  });
 
   return app;
 }
