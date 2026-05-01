@@ -35,7 +35,7 @@ const Sidebar = () => {
   const { logout } = useAuth();
 
   return (
-    <aside className="hidden lg:flex flex-col w-72 xl:w-80 h-screen bg-[#0A0907] border-r border-white/5 sticky top-0 overflow-hidden transition-all duration-500">
+    <aside className="hidden lg:flex flex-col w-72 xl:w-80 h-screen bg-card border-r border-border sticky top-0 overflow-hidden transition-all duration-500">
       <div className="p-8">
         <Link to="/" className="flex items-center gap-4 mb-12 group">
           <div className="relative w-14 h-14 flex items-center justify-center">
@@ -59,7 +59,7 @@ const Sidebar = () => {
             </div>
           </div>
           <div className="flex flex-col">
-            <span className="text-2xl font-black tracking-tighter text-white leading-none uppercase">
+            <span className="text-2xl font-black tracking-tighter text-foreground leading-none uppercase">
               Pulse
             </span>
             <span className="text-[9px] font-black uppercase tracking-[0.4em] text-primary mt-1">
@@ -80,8 +80,8 @@ const Sidebar = () => {
                 className={cn(
                   "flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-bold transition-all group relative overflow-hidden",
                   isActive
-                    ? "bg-white/[0.03] text-primary border border-white/5 shadow-xl"
-                    : "text-muted-foreground hover:bg-white/[0.02] hover:text-white",
+                    ? "bg-muted text-primary border border-border shadow-md"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                 )}
               >
                 <item.icon
@@ -89,7 +89,7 @@ const Sidebar = () => {
                     "w-5 h-5 transition-colors",
                     isActive
                       ? "text-primary"
-                      : "text-muted-foreground group-hover:text-white",
+                      : "text-muted-foreground group-hover:text-foreground",
                   )}
                 />
                 {item.label}
@@ -114,25 +114,25 @@ const Sidebar = () => {
                 Early Access
               </span>
             </div>
-            <p className="text-[11px] font-bold text-white leading-relaxed">
+            <p className="text-[11px] font-bold text-foreground leading-relaxed">
               Secure your{" "}
               <span className="text-primary underline">Pre-Order Elite</span>{" "}
               membership today.
             </p>
-            <button className="w-full py-2 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/20 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">
+            <button className="w-full py-2 bg-primary text-primary-foreground border border-primary/20 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">
               Pre-Order Now
             </button>
           </div>
         </div>
       </div>
 
-      <div className="mt-auto p-8 border-t border-white/5 bg-black/20">
+      <div className="mt-auto p-8 border-t border-border bg-muted/20">
         <div
           onClick={() => {
             logout();
             navigate("/auth");
           }}
-          className="flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-2xl cursor-pointer group hover:bg-white/[0.08] transition-all mb-8"
+          className="flex items-center gap-4 p-4 bg-muted border border-border rounded-2xl cursor-pointer group hover:bg-muted/80 transition-all mb-8"
         >
           <div className="relative shrink-0">
             <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/20 group-hover:scale-110 transition-transform">
@@ -140,7 +140,7 @@ const Sidebar = () => {
             </div>
           </div>
           <div className="flex-1 overflow-hidden">
-            <div className="text-xs font-black truncate text-white uppercase tracking-widest">
+            <div className="text-xs font-black truncate text-foreground uppercase tracking-widest">
               Logout
             </div>
             <div className="text-[9px] text-primary/80 truncate font-bold uppercase tracking-tight">
@@ -151,10 +151,10 @@ const Sidebar = () => {
 
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 bg-zinc-900 border border-white/10 rounded flex items-center justify-center font-black text-[10px] text-white/40">
+            <div className="w-6 h-6 bg-muted border border-border rounded flex items-center justify-center font-black text-[10px] text-muted-foreground/40">
               DTE
             </div>
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20">
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/20">
               Solutions LLC
             </span>
           </div>
@@ -162,14 +162,14 @@ const Sidebar = () => {
             <a
               href="https://dte-solutions.icu/legal/terms.html"
               target="_blank"
-              className="text-[8px] font-bold uppercase tracking-widest text-white hover:text-primary transition-colors"
+              className="text-[8px] font-bold uppercase tracking-widest text-foreground hover:text-primary transition-colors"
             >
               Terms
             </a>
             <a
               href="https://dte-solutions.icu/legal/privacy.html"
               target="_blank"
-              className="text-[8px] font-bold uppercase tracking-widest text-white hover:text-primary transition-colors"
+              className="text-[8px] font-bold uppercase tracking-widest text-foreground hover:text-primary transition-colors"
             >
               Privacy
             </a>
@@ -207,14 +207,14 @@ const MobileNav = () => {
       {/* Secondary drawer */}
       <div
         className={cn(
-          "lg:hidden fixed left-4 right-4 z-50 bg-[#0A0907]/90 backdrop-blur-2xl border border-white/10 rounded-[2rem] transition-all duration-500 ease-out shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden",
+          "lg:hidden fixed left-4 right-4 z-50 bg-card/90 backdrop-blur-2xl border border-border rounded-[2rem] transition-all duration-500 ease-out shadow-[0_-20px_50px_rgba(0,0,0,0.1)] overflow-hidden",
           drawerOpen
             ? "bottom-24 opacity-100 translate-y-0"
             : "bottom-20 opacity-0 pointer-events-none translate-y-12",
         )}
       >
         <div className="p-3 space-y-1">
-          <div className="px-4 py-3 mb-2 border-b border-white/5">
+          <div className="px-4 py-3 mb-2 border-b border-border">
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/50">
               Pulse Command
             </span>
@@ -229,8 +229,8 @@ const MobileNav = () => {
                 className={cn(
                   "flex items-center justify-between px-5 py-4 rounded-2xl transition-all relative group",
                   isActive
-                    ? "bg-white/5 text-primary"
-                    : "text-white/70 hover:bg-white/[0.03] hover:text-white",
+                    ? "bg-muted text-primary"
+                    : "text-foreground/70 hover:bg-muted/50 hover:text-foreground",
                 )}
               >
                 <div className="flex items-center gap-4">
@@ -239,7 +239,7 @@ const MobileNav = () => {
                       "w-10 h-10 rounded-xl flex items-center justify-center border transition-all",
                       isActive
                         ? "bg-primary/20 border-primary/20"
-                        : "bg-white/5 border-white/5 group-hover:border-white/10",
+                        : "bg-muted border-border group-hover:border-border",
                     )}
                   >
                     <item.icon className="w-5 h-5" />
@@ -260,7 +260,7 @@ const MobileNav = () => {
       </div>
 
       {/* Primary tab bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0A0907]/95 backdrop-blur-2xl border-t border-white/5 z-50 flex items-center justify-around px-2 sm:px-4 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-3 min-h-[4rem]">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-2xl border-t border-border z-50 flex items-center justify-around px-2 sm:px-4 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-3 min-h-[4rem]">
         {primaryNav.map((item) => {
           const isActive =
             location.pathname === item.href ||
@@ -324,16 +324,16 @@ export const Layout = ({ children }: LayoutProps) => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex min-h-screen bg-[#050505] text-white font-sans selection:bg-primary/30">
+    <div className="flex min-h-screen bg-background text-foreground font-sans selection:bg-primary/30">
       <Sidebar />
 
       <main className="flex-1 flex flex-col min-w-0 transition-all duration-500">
         {/* Mobile Header */}
-        <header className="lg:hidden h-16 shrink-0 border-b border-white/5 px-4 sm:px-8 flex items-center justify-between sticky top-0 bg-[#0A0907]/80 backdrop-blur-md z-40">
+        <header className="lg:hidden h-16 shrink-0 border-b border-border px-4 sm:px-8 flex items-center justify-between sticky top-0 bg-background/80 backdrop-blur-md z-40">
           <div className="flex items-center gap-3">
             <div className="relative w-10 h-10 flex items-center justify-center">
               <div className="absolute inset-0 bg-primary/20 rounded-full animate-pulse" />
-              <div className="relative z-10 w-8 h-8 rounded-xl bg-black border border-primary/20 flex items-center justify-center overflow-hidden">
+              <div className="relative z-10 w-8 h-8 rounded-xl bg-background border border-primary/20 flex items-center justify-center overflow-hidden">
                 <img
                   src={`${import.meta.env.BASE_URL}icon-1024.png`}
                   srcSet={`
@@ -347,7 +347,7 @@ export const Layout = ({ children }: LayoutProps) => {
                 />
               </div>
             </div>
-            <span className="font-black tracking-tighter uppercase text-lg text-white leading-none">
+            <span className="font-black tracking-tighter uppercase text-lg text-foreground leading-none">
               Pulse
             </span>
           </div>
@@ -357,7 +357,7 @@ export const Layout = ({ children }: LayoutProps) => {
                 logout();
                 navigate("/auth");
               }}
-              className="w-9 h-9 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-red-500/10 transition-colors"
+              className="w-9 h-9 rounded-full bg-muted border border-border flex items-center justify-center hover:bg-red-500/10 transition-colors"
             >
               <LogOut className="w-4 h-4 text-primary hover:text-red-400" />
             </button>

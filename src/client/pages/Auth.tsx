@@ -73,7 +73,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 overflow-hidden relative selection:bg-primary/30">
+    <div className="min-h-screen bg-background flex items-center justify-center p-6 overflow-hidden relative selection:bg-primary/30 text-foreground">
       {/* Dynamic Background Elements */}
       <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-primary/10 blur-[140px] rounded-full animate-pulse" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-blue-500/5 blur-[140px] rounded-full" />
@@ -85,7 +85,7 @@ export default function AuthPage() {
             <div className="relative w-20 h-24 flex items-center justify-center">
               <div className="absolute inset-0 bg-transparent border border-primary/20 rounded-full animate-ping [animation-duration:4s]" />
               <div className="absolute inset-4 bg-transparent border border-primary/10 rounded-full animate-pulse [animation-duration:2s]" />
-              <div className="relative z-10 w-16 h-16 rounded-[2rem] bg-black border-2 border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[0_0_40px_rgba(45,237,156,0.2)] overflow-hidden">
+              <div className="relative z-10 w-16 h-16 rounded-[2rem] bg-background border-2 border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[0_0_40px_rgba(45,237,156,0.2)] overflow-hidden">
                 <img
                   src={`${import.meta.env.BASE_URL}PulseLogoTransp.png`}
                   sizes="64px"
@@ -95,13 +95,13 @@ export default function AuthPage() {
               </div>
             </div>
             <div>
-              <h1 className="text-6xl font-black tracking-tighter text-white uppercase leading-none">
+              <h1 className="text-6xl font-black tracking-tighter text-foreground uppercase leading-none">
                 Pulse
               </h1>
               <p className="text-primary font-bold tracking-[0.4em] uppercase text-xs mt-2 animate-pulse mb-4">
                 Advanced Financial Intelligence
               </p>
-              <p className="text-white/40 text-sm font-medium leading-relaxed max-w-[300px] border-l border-primary/20 pl-4 italic">
+              <p className="text-muted-foreground text-sm font-medium leading-relaxed max-w-[300px] border-l border-primary/20 pl-4 italic">
                 "Your financial rhythm isn't random — Pulse detects it, and Nova
                 helps you understand it."
               </p>
@@ -109,7 +109,7 @@ export default function AuthPage() {
           </div>
 
           <div className="space-y-8">
-            <h2 className="text-4xl font-bold text-white leading-tight tracking-tight">
+            <h2 className="text-4xl font-bold text-foreground leading-tight tracking-tight">
               Engineering <span className="text-primary italic">Precision</span>{" "}
               into your financial behavior.
             </h2>
@@ -133,11 +133,11 @@ export default function AuthPage() {
                 },
               ].map((feature, i) => (
                 <div key={i} className="flex gap-5 items-start group">
-                  <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center shrink-0 group-hover:border-primary/30 transition-colors">
+                  <div className="w-12 h-12 rounded-2xl bg-muted border border-border flex items-center justify-center shrink-0 group-hover:border-primary/30 transition-colors">
                     <feature.icon className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <h4 className="text-white font-bold text-lg mb-1 tracking-tight">
+                    <h4 className="text-foreground font-bold text-lg mb-1 tracking-tight">
                       {feature.title}
                     </h4>
                     <p className="text-muted-foreground leading-relaxed text-sm">
@@ -152,12 +152,12 @@ export default function AuthPage() {
 
         {/* Right Side: Auth Interface */}
         <div className="flex justify-center lg:justify-end">
-          <div className="w-full max-w-[480px] bg-[#0A0908] border border-white/5 rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 md:p-14 shadow-2xl relative overflow-hidden">
+          <div className="w-full max-w-[480px] bg-card border border-border rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 md:p-14 shadow-2xl relative overflow-hidden">
             {/* Header for Mobile */}
             <div className="lg:hidden flex flex-col items-center text-center mb-6 sm:mb-10">
               <div className="relative w-20 h-20 flex items-center justify-center mb-4">
                 <div className="absolute inset-0 bg-primary/20 rounded-full animate-pulse" />
-                <div className="relative z-10 w-14 h-14 rounded-2xl bg-black border border-primary/20 flex items-center justify-center shadow-2xl overflow-hidden">
+                <div className="relative z-10 w-14 h-14 rounded-2xl bg-background border border-primary/20 flex items-center justify-center shadow-2xl overflow-hidden">
                   <img
                     src={`${import.meta.env.BASE_URL}icon-1024.png`}
                     srcSet={`
@@ -175,17 +175,17 @@ export default function AuthPage() {
                   />
                 </div>
               </div>
-              <h1 className="text-3xl font-black text-white uppercase tracking-tighter">
+              <h1 className="text-3xl font-black text-foreground uppercase tracking-tighter">
                 Pulse
               </h1>
-              <p className="text-white/40 text-[10px] leading-relaxed max-w-[240px] italic mt-2">
+              <p className="text-muted-foreground text-[10px] leading-relaxed max-w-[240px] italic mt-2">
                 "Your financial rhythm isn't random — Pulse detects it, and Nova
                 helps you understand it."
               </p>
             </div>
 
             <div className="mb-6 sm:mb-10 text-center lg:text-left">
-              <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">
+              <h3 className="text-2xl font-bold text-foreground mb-2 tracking-tight">
                 {isLogin ? "Welcome Back" : "Initialize Profile"}
               </h3>
               <p className="text-muted-foreground font-medium text-sm">
@@ -205,7 +205,7 @@ export default function AuthPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     autoComplete="name"
-                    className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-4 sm:py-5 pl-14 pr-6 focus:outline-none focus:border-primary/40 focus:bg-white/[0.05] transition-all font-semibold text-white placeholder:text-muted-foreground/40"
+                    className="w-full bg-muted border border-border rounded-2xl py-4 sm:py-5 pl-14 pr-6 focus:outline-none focus:border-primary/40 focus:bg-background transition-all font-semibold text-foreground placeholder:text-muted-foreground/40"
                     required
                   />
                 </div>
@@ -219,7 +219,7 @@ export default function AuthPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
-                  className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-4 sm:py-5 pl-14 pr-6 focus:outline-none focus:border-primary/40 focus:bg-white/[0.05] transition-all font-semibold text-white placeholder:text-muted-foreground/40"
+                  className="w-full bg-muted border border-border rounded-2xl py-4 sm:py-5 pl-14 pr-6 focus:outline-none focus:border-primary/40 focus:bg-background transition-all font-semibold text-foreground placeholder:text-muted-foreground/40"
                   required
                 />
               </div>
@@ -232,13 +232,13 @@ export default function AuthPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete={isLogin ? "current-password" : "new-password"}
-                  className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-4 sm:py-5 pl-14 pr-14 focus:outline-none focus:border-primary/40 focus:bg-white/[0.05] transition-all font-semibold text-white placeholder:text-muted-foreground/40"
+                  className="w-full bg-muted border border-border rounded-2xl py-4 sm:py-5 pl-14 pr-14 focus:outline-none focus:border-primary/40 focus:bg-background transition-all font-semibold text-foreground placeholder:text-muted-foreground/40"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white transition-colors"
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -262,7 +262,7 @@ export default function AuthPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-primary text-background font-black py-4 sm:py-5 rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_40px_rgba(45,237,156,0.25)] uppercase tracking-[0.2em] text-xs disabled:opacity-50"
+                className="w-full bg-primary text-primary-foreground font-black py-4 sm:py-5 rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_40px_rgba(45,237,156,0.25)] uppercase tracking-[0.2em] text-xs disabled:opacity-50"
               >
                 {loading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -275,7 +275,7 @@ export default function AuthPage() {
               </button>
             </form>
 
-            <div className="mt-10 pt-10 border-t border-white/5 text-center">
+            <div className="mt-10 pt-10 border-t border-border text-center">
               <p className="text-sm font-medium text-muted-foreground">
                 {isLogin ? "New to Pulse?" : "Already have an account?"}
                 <button

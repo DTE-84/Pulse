@@ -120,7 +120,7 @@ const WealthVault = ({ stats }: any) => {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-4xl font-black text-white tracking-tighter"
+          className="text-4xl font-black text-foreground tracking-tighter"
         >
           {Math.round(savingsRate)}%
         </motion.div>
@@ -160,7 +160,7 @@ const StatCard = ({
   icon: Icon,
   colorClass,
 }: any) => (
-  <div className="bg-[#0A0907] border border-white/[0.03] rounded-3xl p-6 relative overflow-hidden group hover:bg-[#11100D] transition-all hover:border-white/10 shadow-2xl">
+  <div className="bg-card border border-border rounded-3xl p-6 relative overflow-hidden group hover:bg-muted/50 transition-all shadow-2xl">
     <div
       className={cn(
         "absolute top-0 left-0 w-1.5 h-full opacity-30 group-hover:opacity-100 transition-opacity",
@@ -175,14 +175,14 @@ const StatCard = ({
         <Icon className="w-4 h-4 text-primary opacity-40 group-hover:opacity-100 transition-all" />
       )}
     </div>
-    <div className="text-3xl font-black mb-3 tracking-tighter text-white">
+    <div className="text-3xl font-black mb-3 tracking-tighter text-foreground">
       {value}
     </div>
     <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
       <span
         className={cn(
           trend === "up" ? "text-red-400" : "text-primary",
-          "flex items-center gap-0.5 bg-white/5 px-2 py-0.5 rounded-full",
+          "flex items-center gap-0.5 bg-muted px-2 py-0.5 rounded-full",
         )}
       >
         {trend === "up" ? (
@@ -205,21 +205,21 @@ const TriggerCard = ({
   aiTip,
   colorClass,
 }: any) => (
-  <div className="bg-[#0A0907] border border-white/[0.03] rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 flex flex-col h-full group hover:border-white/10 transition-all hover:bg-[#0E0D0B] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden">
+  <div className="bg-card border border-border rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 flex flex-col h-full group hover:bg-muted/30 transition-all shadow-xl relative overflow-hidden">
     <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,13,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%]" />
 
     <div className="flex justify-between items-start mb-10 relative z-10">
       <div className="flex gap-6">
         <div
           className={cn(
-            "w-16 h-16 rounded-[2rem] flex items-center justify-center bg-white/[0.02] border border-white/5 shadow-2xl transition-all group-hover:scale-105 group-hover:border-primary/20 group-hover:bg-primary/5",
+            "w-16 h-16 rounded-[2rem] flex items-center justify-center bg-muted border border-border shadow-2xl transition-all group-hover:scale-105 group-hover:border-primary/20 group-hover:bg-primary/5",
             colorClass,
           )}
         >
           <Zap className="w-8 h-8" />
         </div>
         <div>
-          <h3 className="font-black text-2xl mb-1 text-white tracking-tighter">
+          <h3 className="font-black text-2xl mb-1 text-foreground tracking-tighter">
             {title}
           </h3>
           <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest leading-tight opacity-70">
@@ -233,13 +233,13 @@ const TriggerCard = ({
       </div>
     </div>
 
-    <div className="grid grid-cols-3 gap-3 sm:gap-6 mb-8 pt-6 border-t border-white/5">
+    <div className="grid grid-cols-3 gap-3 sm:gap-6 mb-8 pt-6 border-t border-border">
       {stats.map((stat: any, i: number) => (
         <div key={i}>
           <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">
             {stat.label}
           </div>
-          <div className="text-lg font-bold text-white">{stat.value}</div>
+          <div className="text-lg font-bold text-foreground">{stat.value}</div>
         </div>
       ))}
     </div>
@@ -255,7 +255,7 @@ const TriggerCard = ({
                   fill={
                     index === (stats.chartData || fallbackChartData).length - 1
                       ? chartColor
-                      : "rgba(255,255,255,0.03)"
+                      : "rgba(0,0,0,0.05)"
                   }
                   className="transition-all duration-500 hover:opacity-80"
                 />
@@ -267,7 +267,7 @@ const TriggerCard = ({
             axisLine={false}
             tickLine={false}
             tick={{
-              fill: "rgba(255,255,255,0.2)",
+              fill: "rgba(100,100,100,0.4)",
               fontSize: 11,
               fontWeight: 600,
             }}
@@ -278,7 +278,7 @@ const TriggerCard = ({
     </div>
 
     <div className="space-y-4 mt-auto">
-      <div className="bg-white/[0.01] border border-white/5 rounded-3xl p-5 relative hover:bg-white/[0.03] transition-colors">
+      <div className="bg-muted border border-border rounded-3xl p-5 relative hover:bg-muted/80 transition-colors">
         <div className="flex items-start gap-4">
           <div className="w-6 h-6 rounded-full bg-red-400/10 flex items-center justify-center shrink-0 mt-0.5">
             <AlertCircle className="w-3.5 h-3.5 text-red-400" />
@@ -299,7 +299,7 @@ const TriggerCard = ({
               <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-0.5">
                 Talk with Nova
               </p>
-              <p className="text-[12px] font-bold text-white group-hover/nova:text-primary transition-colors">
+              <p className="text-[12px] font-bold text-foreground group-hover/nova:text-primary transition-colors">
                 Explore this pattern further
               </p>
             </div>
@@ -451,13 +451,13 @@ export default function Index() {
   const monthlyTrendUp = (stats?.monthlyDiff || 0) > 0;
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-10">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-10 text-foreground">
       <div className="flex items-center gap-2 text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em] overflow-x-auto whitespace-nowrap scrollbar-hide">
-        <span className="hover:text-white cursor-pointer transition-colors">
+        <span className="hover:text-primary cursor-pointer transition-colors">
           Home
         </span>
         <ChevronRight className="w-3 h-3 opacity-30" />
-        <span className="hover:text-white cursor-pointer transition-colors">
+        <span className="hover:text-primary cursor-pointer transition-colors">
           Dashboard
         </span>
         <ChevronRight className="w-3 h-3 opacity-30" />
@@ -467,7 +467,7 @@ export default function Index() {
       <div className="flex flex-col gap-6">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">
+            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground">
               Your financial heartbeat
             </h1>
             {stats?.projection?.isHighVelocity && (
@@ -496,11 +496,11 @@ export default function Index() {
                   <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">
                     Nova’s insight
                   </span>
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-muted px-2 py-0.5 rounded-full">
                     {stats?.novaTone || "Balanced"} mode
                   </span>
                 </div>
-                <p className="text-sm md:text-base text-white font-medium leading-relaxed max-w-3xl italic">
+                <p className="text-sm md:text-base text-foreground font-medium leading-relaxed max-w-3xl italic">
                   “
                   {stats?.novaInsight ||
                     "I’m watching your spending patterns and progress. Sync data to give me more to work with."}
@@ -512,7 +512,7 @@ export default function Index() {
             <button
               onClick={runAnalysis}
               disabled={analyzing}
-              className="shrink-0 bg-primary text-background px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl disabled:opacity-50 flex items-center gap-2"
+              className="shrink-0 bg-primary text-primary-foreground px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl disabled:opacity-50 flex items-center gap-2"
             >
               {analyzing ? (
                 <RefreshCcw className="w-3.5 h-3.5 animate-spin" />
@@ -525,17 +525,17 @@ export default function Index() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-[#0A0907] border border-white/[0.03] rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 flex flex-col md:flex-row items-center gap-6 sm:gap-12 relative overflow-hidden group">
+          <div className="lg:col-span-2 bg-card border border-border rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 flex flex-col md:flex-row items-center gap-6 sm:gap-12 relative overflow-hidden group">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
             <WealthVault stats={stats} />
             <div className="flex-1 space-y-6">
               <div>
-                <h3 className="text-2xl font-black text-white tracking-tighter mb-2">
+                <h3 className="text-2xl font-black text-foreground tracking-tighter mb-2">
                   Vault Trajectory
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Nova is measuring your{" "}
-                  <span className="text-white font-bold">Savings Velocity</span>{" "}
+                  <span className="text-foreground font-bold">Savings Velocity</span>{" "}
                   against your deterministic baseline. Currently, you are
                   protecting{" "}
                   <span className="text-primary font-bold">
@@ -550,16 +550,16 @@ export default function Index() {
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                <div className="bg-muted rounded-2xl p-4 border border-border">
                   <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">
                     Projected Spend
                   </p>
-                  <p className="text-lg font-black text-white">
+                  <p className="text-lg font-black text-foreground">
                     $
                     {stats?.projection?.projectedSpend?.toLocaleString() || "0"}
                   </p>
                 </div>
-                <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                <div className="bg-muted rounded-2xl p-4 border border-border">
                   <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">
                     Daily Velocity
                   </p>
@@ -584,14 +584,14 @@ export default function Index() {
             </div>
           </div>
 
-          <div className="bg-[#0A0907] border border-white/[0.03] rounded-[3rem] p-10 flex flex-col justify-center space-y-6 relative overflow-hidden">
+          <div className="bg-card border border-border rounded-[3rem] p-10 flex flex-col justify-center space-y-6 relative overflow-hidden">
             <div className="flex items-center gap-3">
               <TrendingUp className="w-6 h-6 text-primary" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
                 Pulse Signal
               </span>
             </div>
-            <h2 className="text-3xl font-black text-white tracking-tighter leading-tight">
+            <h2 className="text-3xl font-black text-foreground tracking-tighter leading-tight">
               Catch drift before it becomes a pattern.
             </h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
@@ -599,7 +599,7 @@ export default function Index() {
               where Nova helps you notice the pattern early.
             </p>
             <div className="pt-4">
-              <div className="h-1 bg-white/5 rounded-full w-full overflow-hidden">
+              <div className="h-1 bg-muted rounded-full w-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: "65%" }}
@@ -641,7 +641,7 @@ export default function Index() {
                 {syncing ? "Syncing..." : "Sync transactions"}
               </button>
             </DialogTrigger>
-            <DialogContent className="bg-[#0A0907] border-white/10 text-white max-w-2xl">
+            <DialogContent className="bg-card border border-border text-foreground max-w-2xl">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-black tracking-tighter">
                   Transaction sync
@@ -659,7 +659,7 @@ export default function Index() {
                   <select
                     value={triggerId}
                     onChange={(e) => setTriggerId(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-primary/50"
+                    className="w-full bg-muted border border-border rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-primary/50 text-foreground"
                   >
                     <option value="0">No specific trigger</option>
                     <option value="1">Stress (High Risk)</option>
@@ -678,7 +678,7 @@ export default function Index() {
                     placeholder='[{"date": "2026-03-20", "amount": 150.00, "category": "Dining", "risk_category": "Lifestyle"}]'
                     value={ingestData}
                     onChange={(e) => setIngestData(e.target.value)}
-                    className="min-h-[150px] bg-white/5 border-white/10 font-mono text-xs"
+                    className="min-h-[150px] bg-muted border border-border font-mono text-xs text-foreground"
                   />
                 </div>
                 <p className="text-[10px] text-muted-foreground italic">
@@ -690,14 +690,14 @@ export default function Index() {
                 <Button
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
-                  className="rounded-full border-white/10 hover:bg-white/5"
+                  className="rounded-full border-border hover:bg-muted"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleIngest}
                   disabled={syncing}
-                  className="bg-primary text-black hover:bg-primary/80 rounded-full font-black uppercase tracking-widest px-8"
+                  className="bg-primary text-primary-foreground hover:bg-primary/80 rounded-full font-black uppercase tracking-widest px-8"
                 >
                   {syncing ? "Syncing..." : "Process data"}
                 </Button>
@@ -752,11 +752,11 @@ export default function Index() {
           <div className="space-y-4 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-3">
               <Crown className="w-6 h-6 text-yellow-400 animate-bounce" />
-              <Badge className="bg-primary text-background font-black uppercase tracking-[0.2em] px-4">
+              <Badge className="bg-primary text-primary-foreground font-black uppercase tracking-[0.2em] px-4">
                 Pre-Order Live
               </Badge>
             </div>
-            <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter">
+            <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tighter">
               Become a Founding Elite Member
             </h2>
             <p className="text-muted-foreground font-semibold max-w-xl leading-relaxed">
@@ -768,7 +768,7 @@ export default function Index() {
               behavior triggers at launch.
             </p>
           </div>
-          <button className="bg-primary text-background px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-[0_20px_40px_-10px_rgba(45,237,156,0.3)] flex items-center gap-3">
+          <button className="bg-primary text-primary-foreground px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-[0_20px_40px_-10px_rgba(45,237,156,0.3)] flex items-center gap-3">
             Secure Your Spot
             <ArrowRight className="w-4 h-4" />
           </button>
@@ -797,7 +797,7 @@ export default function Index() {
           />
         ))}
         {(!stats?.triggers || stats?.triggers?.length === 0) && (
-          <div className="col-span-2 p-12 bg-[#12110F] border border-dashed border-white/10 rounded-[2.5rem] text-center">
+          <div className="col-span-2 p-12 bg-card border border-dashed border-border rounded-[2.5rem] text-center">
             <Sparkles className="w-12 h-12 text-primary/20 mx-auto mb-4" />
             <p className="text-muted-foreground font-medium">
               Your spending rhythm is currently steady. No trigger patterns are

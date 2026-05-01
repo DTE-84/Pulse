@@ -193,13 +193,13 @@ export default function TriggersPage() {
   const [filter, setFilter] = useState("This Month");
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-10">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-10 text-foreground">
       <div className="flex items-center gap-2 text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em] overflow-x-auto whitespace-nowrap scrollbar-hide">
-        <span className="hover:text-white cursor-pointer transition-colors">
+        <span className="hover:text-primary cursor-pointer transition-colors">
           Home
         </span>
         <ChevronRight className="w-3 h-3 opacity-30" />
-        <span className="hover:text-white cursor-pointer transition-colors">
+        <span className="hover:text-primary cursor-pointer transition-colors">
           Insights
         </span>
         <ChevronRight className="w-3 h-3 opacity-30" />
@@ -209,7 +209,7 @@ export default function TriggersPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white uppercase">
+            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground uppercase">
               Behavioral Triggers
             </h1>
             <Badge
@@ -225,7 +225,7 @@ export default function TriggersPage() {
           </p>
         </div>
 
-        <div className="flex bg-white/5 border border-white/10 rounded-2xl p-1 shrink-0">
+        <div className="flex bg-muted border border-border rounded-2xl p-1 shrink-0">
           {["This Month", "Last 3 Mo", "All Time"].map((f) => (
             <button
               key={f}
@@ -233,8 +233,8 @@ export default function TriggersPage() {
               className={cn(
                 "px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
                 filter === f
-                  ? "bg-primary text-background shadow-lg shadow-primary/20"
-                  : "text-muted-foreground hover:text-white",
+                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {f}
@@ -332,17 +332,17 @@ export default function TriggersPage() {
       </div>
 
       {/* Vulnerability Heatmap */}
-      <div className="bg-[#0A0907] border border-white/[0.03] rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 md:p-12 relative overflow-hidden group hover:border-white/10 transition-all shadow-2xl">
+      <div className="bg-card border border-border rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 md:p-12 relative overflow-hidden group hover:border-border transition-all shadow-2xl">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-10">
           <div className="text-center md:text-left">
-            <h2 className="text-2xl font-black text-white tracking-tighter uppercase">
+            <h2 className="text-2xl font-black text-foreground tracking-tighter uppercase">
               Vulnerability Heatmap
             </h2>
             <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] mt-1">
               Impulse Risk Architecture
             </p>
           </div>
-          <div className="flex items-center gap-5 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground bg-white/5 px-6 py-3 rounded-full border border-white/5">
+          <div className="flex items-center gap-5 text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground bg-muted px-6 py-3 rounded-full border border-border">
             <div className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-sm bg-red-500/20" /> Low
             </div>
@@ -382,7 +382,7 @@ export default function TriggersPage() {
                       className="h-10 rounded-xl transition-all duration-300 cursor-crosshair group/cell relative"
                       style={{ backgroundColor: `rgba(239, 68, 68, ${v})` }}
                     >
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-black border border-white/10 rounded-xl text-[10px] font-black text-white opacity-0 group-hover/cell:opacity-100 transition-all pointer-events-none z-20 whitespace-nowrap shadow-2xl scale-90 group-hover/cell:scale-100">
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-card border border-border rounded-xl text-[10px] font-black text-foreground opacity-0 group-hover/cell:opacity-100 transition-all pointer-events-none z-20 whitespace-nowrap shadow-2xl scale-90 group-hover/cell:scale-100">
                         RISK INDEX: {Math.round(v * 100)}%
                       </div>
                     </div>
@@ -397,8 +397,8 @@ export default function TriggersPage() {
       {/* Bottom analytics row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-10">
         {/* Emotional Velocity */}
-        <div className="bg-[#0A0907] border border-white/[0.03] rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-10 flex flex-col group hover:border-white/10 transition-all">
-          <h3 className="text-xl font-black text-white mb-8 tracking-tighter uppercase flex items-center gap-3">
+        <div className="bg-card border border-border rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-10 flex flex-col group hover:border-border transition-all">
+          <h3 className="text-xl font-black text-foreground mb-8 tracking-tighter uppercase flex items-center gap-3">
             <Flame className="w-5 h-5 text-red-500" />
             Emotional Velocity
           </h3>
@@ -414,11 +414,11 @@ export default function TriggersPage() {
                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                     {e.n}
                   </span>
-                  <span className="text-[10px] font-black text-white">
+                  <span className="text-[10px] font-black text-foreground">
                     {e.p}%
                   </span>
                 </div>
-                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${e.p}%` }}
@@ -430,7 +430,7 @@ export default function TriggersPage() {
               </div>
             ))}
           </div>
-          <div className="mt-auto pt-8 border-t border-white/[0.05]">
+          <div className="mt-auto pt-8 border-t border-border">
             <p className="text-xs text-muted-foreground leading-relaxed italic">
               <span className="text-primary font-black not-italic uppercase tracking-widest mr-2">
                 Nova:
@@ -442,8 +442,8 @@ export default function TriggersPage() {
         </div>
 
         {/* Behavioral Resilience */}
-        <div className="bg-[#0A0907] border border-white/[0.03] rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-10 flex flex-col group hover:border-white/10 transition-all">
-          <h3 className="text-xl font-black text-white mb-8 tracking-tighter uppercase flex items-center gap-3">
+        <div className="bg-card border border-border rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 md:p-10 flex flex-col group hover:border-border transition-all">
+          <h3 className="text-xl font-black text-foreground mb-8 tracking-tighter uppercase flex items-center gap-3">
             <Sparkles className="w-5 h-5 text-primary" />
             Behavioral Resilience
           </h3>
@@ -480,14 +480,14 @@ export default function TriggersPage() {
             ].map((r) => (
               <div
                 key={r.label}
-                className="flex items-center gap-4 p-4 bg-white/[0.02] border border-white/5 rounded-2xl
-                              hover:bg-white/[0.04] hover:border-primary/20 transition-all cursor-pointer group/item"
+                className="flex items-center gap-4 p-4 bg-muted border border-border rounded-2xl
+                              hover:bg-muted/80 hover:border-primary/20 transition-all cursor-pointer group/item"
               >
                 <span className="text-2xl group-hover/item:scale-110 transition-transform">
                   {r.icon}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-black text-white tracking-tight uppercase">
+                  <div className="text-sm font-black text-foreground tracking-tight uppercase">
                     {r.label}
                   </div>
                   <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider truncate">

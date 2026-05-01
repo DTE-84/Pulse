@@ -49,33 +49,33 @@
   }
 
   .light {
-    --background: 0 0% 100%;
-    --foreground: 30 15% 3%;
+    --background: 34 33% 96%; /* Bone/Cream background */
+    --foreground: 30 15% 10%;
     
-    --card: 0 0% 98%;
-    --card-foreground: 30 15% 3%;
+    --card: 34 33% 98%; /* Lighter cream for cards */
+    --card-foreground: 30 15% 10%;
  
-    --popover: 0 0% 100%;
-    --popover-foreground: 30 15% 3%;
+    --popover: 34 33% 96%;
+    --popover-foreground: 30 15% 10%;
  
-    --primary: 153 85% 45%;
+    --primary: 153 85% 35%; /* Slightly darker green for better contrast on light */
     --primary-foreground: 0 0% 100%;
  
-    --secondary: 30 10% 96%;
+    --secondary: 34 10% 90%; /* Grayish bone */
     --secondary-foreground: 30 15% 10%;
  
-    --muted: 30 10% 96%;
-    --muted-foreground: 30 5% 45%;
+    --muted: 34 10% 90%;
+    --muted-foreground: 30 5% 40%;
  
-    --accent: 30 10% 96%;
+    --accent: 34 10% 90%;
     --accent-foreground: 30 15% 10%;
  
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 30 10% 90%;
-    --input: 30 10% 90%;
-    --ring: 153 85% 45%;
+    --border: 34 10% 85%; /* Soft gray border */
+    --input: 34 10% 85%;
+    --ring: 153 85% 35%;
   }
 }
 

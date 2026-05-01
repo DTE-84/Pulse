@@ -21,10 +21,10 @@ import { useTheme } from "@/components/theme-provider";
 const SettingGroup = ({ title, description, children }: any) => (
   <div className="space-y-6">
     <div className="space-y-1">
-      <h3 className="text-xl font-bold text-white tracking-tight">{title}</h3>
+      <h3 className="text-xl font-bold text-foreground tracking-tight">{title}</h3>
       <p className="text-sm text-muted-foreground font-medium">{description}</p>
     </div>
-    <div className="bg-[#0A0907] border border-white/[0.03] rounded-[2rem] overflow-hidden">
+    <div className="bg-card border border-border rounded-[2rem] overflow-hidden shadow-sm">
       {children}
     </div>
   </div>
@@ -39,16 +39,16 @@ const SettingItem = ({
 }: any) => (
   <div
     className={cn(
-      "flex items-center justify-between p-4 sm:p-6 gap-3 transition-colors hover:bg-white/[0.01]",
-      border && "border-b border-white/[0.03]",
+      "flex items-center justify-between p-4 sm:p-6 gap-3 transition-colors hover:bg-muted/50",
+      border && "border-b border-border",
     )}
   >
     <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-      <div className="w-10 h-10 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-center">
+      <div className="w-10 h-10 rounded-xl bg-muted border border-border flex items-center justify-center">
         <Icon className="w-5 h-5 text-primary" />
       </div>
       <div className="min-w-0">
-        <div className="text-sm font-bold text-white uppercase tracking-wider truncate">
+        <div className="text-sm font-bold text-foreground uppercase tracking-wider truncate">
           {label}
         </div>
         <div className="text-[11px] text-muted-foreground font-medium mt-0.5 truncate">
@@ -113,7 +113,7 @@ export default function Settings() {
           <ChevronRight className="w-3 h-3 opacity-30" />
           <span className="text-primary">Settings</span>
         </div>
-        <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">
+        <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground">
           Settings
         </h1>
         <p className="text-muted-foreground font-semibold text-sm">
@@ -126,7 +126,7 @@ export default function Settings() {
           title="Visual protocol"
           description="Customize the interface to match your environment."
         >
-          <div className="grid grid-cols-3 gap-0 divide-x divide-white/[0.03] border-b border-white/[0.03]">
+          <div className="grid grid-cols-3 gap-0 divide-x divide-border border-b border-border">
             {[
               { id: "light", icon: Sun, label: "Light" },
               { id: "dark", icon: Moon, label: "Dark" },
@@ -136,8 +136,8 @@ export default function Settings() {
                 key={m.id}
                 onClick={() => setTheme(m.id as any)}
                 className={cn(
-                  "flex flex-col items-center gap-3 py-8 transition-all hover:bg-white/[0.02]",
-                  theme === m.id ? "bg-white/[0.03] text-primary" : "text-muted-foreground"
+                  "flex flex-col items-center gap-3 py-8 transition-all hover:bg-muted/50",
+                  theme === m.id ? "bg-muted text-primary" : "text-muted-foreground"
                 )}
               >
                 <m.icon className={cn("w-6 h-6", theme === m.id ? "text-primary" : "text-muted-foreground")} />

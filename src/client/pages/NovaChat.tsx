@@ -172,13 +172,13 @@ export default function NovaChat() {
   return (
     <div className="flex h-full">
       <div className="flex flex-col flex-1 min-w-0">
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-white/5 shrink-0">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-border shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/20">
               <div className="w-3 h-3 rounded-full bg-primary animate-pulse" />
             </div>
             <div>
-              <h2 className="text-sm font-black text-white">Nova</h2>
+              <h2 className="text-sm font-black text-foreground">Nova</h2>
               <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
                 Behavioral AI
               </p>
@@ -187,11 +187,11 @@ export default function NovaChat() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="p-2 hover:bg-white/5 rounded-full transition-colors"
+              className="p-2 hover:bg-muted rounded-full transition-colors"
             >
               <Moon className="w-5 h-5 text-muted-foreground" />
             </button>
-            <button className="p-2 hover:bg-white/5 rounded-full transition-colors">
+            <button className="p-2 hover:bg-muted rounded-full transition-colors">
               <Info className="w-5 h-5 text-muted-foreground" />
             </button>
           </div>
@@ -210,7 +210,7 @@ export default function NovaChat() {
               )}
             >
               {msg.type === "insight" ? (
-                <div className="max-w-2xl bg-[#1A1816] border border-white/5 rounded-3xl p-6 space-y-6 shadow-2xl">
+                <div className="max-w-2xl bg-card border border-border rounded-3xl p-6 space-y-6 shadow-2xl">
                   <div className="flex items-center gap-2">
                     <Badge
                       variant="outline"
@@ -229,8 +229,8 @@ export default function NovaChat() {
                   className={cn(
                     "max-w-[80%] rounded-3xl p-4 text-sm leading-relaxed",
                     msg.role === "user"
-                      ? "bg-primary/10 border border-primary/20 text-white"
-                      : "bg-white/5 border border-white/10 text-muted-foreground",
+                      ? "bg-primary/10 border border-primary/20 text-foreground"
+                      : "bg-muted border border-border text-muted-foreground",
                   )}
                 >
                   {msg.content}
@@ -264,7 +264,7 @@ export default function NovaChat() {
                   if (chip === "Run Deep Scan") runDeepScan();
                   else setInput(chip);
                 }}
-                className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium hover:bg-white/10 transition-colors"
+                className="px-3 py-1.5 rounded-full bg-muted border border-border text-[11px] font-medium hover:bg-muted/80 transition-colors text-foreground"
               >
                 {chip}
               </button>
@@ -276,20 +276,20 @@ export default function NovaChat() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               placeholder="Message Nova..."
-              className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 pr-14 focus:outline-none focus:border-primary/50 transition-colors text-sm"
+              className="w-full bg-muted border border-border rounded-2xl py-4 px-6 pr-14 focus:outline-none focus:border-primary/50 transition-colors text-sm text-foreground placeholder:text-muted-foreground/50"
             />
             <button
               onClick={handleSend}
               className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-primary flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
             >
-              <Send className="w-5 h-5 text-background" />
+              <Send className="w-5 h-5 text-primary-foreground" />
             </button>
           </div>
         </div>
       </div>
 
       {/* Right Sidebar */}
-      <div className="hidden xl:flex flex-col w-80 shrink-0 bg-[#0F0E0D] border-l border-white/5 p-6 overflow-y-auto">
+      <div className="hidden xl:flex flex-col w-80 shrink-0 bg-card border-l border-border p-6 overflow-y-auto">
         <div className="mb-10">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
@@ -342,7 +342,7 @@ export default function NovaChat() {
                 className="flex items-center justify-between group cursor-pointer hover:translate-x-1 transition-transform"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center border border-border">
                     <Zap
                       className={cn(
                         "w-4 h-4",
@@ -351,7 +351,7 @@ export default function NovaChat() {
                     />
                   </div>
                   <div>
-                    <div className="text-[12px] font-bold">{t.name}</div>
+                    <div className="text-[12px] font-bold text-foreground">{t.name}</div>
                     <div className="text-[10px] text-muted-foreground">
                       Signal: {t.status}
                     </div>
@@ -359,7 +359,7 @@ export default function NovaChat() {
                 </div>
                 <div
                   className={cn(
-                    "text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/5",
+                    "text-[10px] font-bold px-1.5 py-0.5 rounded bg-muted border border-border",
                     t.status === "High" ? "text-red-400" : "text-primary",
                   )}
                 >
