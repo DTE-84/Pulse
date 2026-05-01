@@ -7,53 +7,84 @@ import { JWT_SECRET } from "../middleware/security";
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY || "");
 
 export const handleNovaChat: RequestHandler = async (req, res) => {
-  const { message, history } = req.body;
-
+  console.log("[Nova Chat] Request headers:", req.headers.authorization ? "Bearer [HIDDEN]" : "MISSING");
+  console.log("[Nova Chat] Request userId:", req.userId || "UNDEFINED");
+  
   try {
+    const { message, history } = req.body;
+
     const userId = req.userId;
-    if (!userId) return res.status(401).json({ message: "Authentication required." });
+    if (!userId) {
+      console.warn("[Nova Chat] Rejected: No userId found on request.");
+      return res.status(401).json({ message: "Authentication required." });
+    }
+
+    console.log(`[Nova Chat] Signal received from User: ${userId}`);
 
     // 1. Fetch User Context for High-Fidelity Personalization
-    const userRes = await query(
-      `SELECT user_name, baseline_spend, nova_tone, monthly_income FROM dim_users WHERE user_id = $1`,
-      [userId]
-    );
-    const user = userRes.rows[0];
+    let user;
+    try {
+      const userRes = await query(
+        `SELECT user_name, baseline_spend, nova_tone, monthly_income FROM dim_users WHERE user_id = $1`,
+        [userId]
+      );
+      user = userRes.rows[0];
+    } catch (dbErr: any) {
+      console.error("[Nova Chat] Database error (User Context):", dbErr.message);
+      throw new Error(`Telemetry Linkage Failed: ${dbErr.message}`);
+    }
 
     // Get spending for current month
-    const statsRes = await query(
-      `SELECT COALESCE(SUM(amount), 0) as current_month_spend, COUNT(*) as tx_count
-       FROM fact_transactions 
-       WHERE user_id = $1 AND purchase_date >= DATE_TRUNC('month', CURRENT_DATE)`,
-      [userId]
-    );
-    const currentMonthSpend = parseFloat(statsRes.rows[0].current_month_spend);
-    const txCount = parseInt(statsRes.rows[0].tx_count);
+    let currentMonthSpend = 0;
+    let txCount = 0;
+    try {
+      const statsRes = await query(
+        `SELECT COALESCE(SUM(amount), 0) as current_month_spend, COUNT(*) as tx_count
+         FROM fact_transactions 
+         WHERE user_id = $1 AND purchase_date >= DATE_TRUNC('month', CURRENT_DATE)`,
+        [userId]
+      );
+      currentMonthSpend = parseFloat(statsRes.rows[0].current_month_spend);
+      txCount = parseInt(statsRes.rows[0].tx_count);
+    } catch (dbErr: any) {
+      console.error("[Nova Chat] Database error (Spending Stats):", dbErr.message);
+    }
 
     // Get Top Spending Categories (as Behavioral Triggers)
-    const categoryRes = await query(
-      `SELECT c.category_name, SUM(f.amount) as total, COUNT(*) as count
-       FROM fact_transactions f
-       JOIN dim_categories c ON f.category_id = c.category_id
-       WHERE f.user_id = $1
-       GROUP BY c.category_name
-       ORDER BY total DESC LIMIT 3`,
-      [userId]
-    );
-    const topCategories = categoryRes.rows.map(r => `${r.category_name} ($${parseFloat(r.total).toFixed(2)})`).join(", ");
+    let topCategories = "";
+    try {
+      const categoryRes = await query(
+        `SELECT c.category_name, SUM(f.amount) as total, COUNT(*) as count
+         FROM fact_transactions f
+         JOIN dim_categories c ON f.category_id = c.category_id
+         WHERE f.user_id = $1
+         GROUP BY c.category_name
+         ORDER BY total DESC LIMIT 3`,
+        [userId]
+      );
+      topCategories = categoryRes.rows.map(r => `${r.category_name} ($${parseFloat(r.total).toFixed(2)})`).join(", ");
+    } catch (dbErr: any) {
+      console.error("[Nova Chat] Database error (Top Categories):", dbErr.message);
+    }
 
     // Get Behavioral Segment from View
-    const segmentRes = await query(
-      `SELECT behavioral_segment FROM view_user_segmentation WHERE user_name = $1`,
-      [user?.user_name]
-    );
-    const segment = segmentRes.rows[0]?.behavioral_segment || "Balanced Rhythm";
+    let segment = "Balanced Rhythm";
+    try {
+      const segmentRes = await query(
+        `SELECT behavioral_segment FROM view_user_segmentation WHERE user_name = $1`,
+        [user?.user_name]
+      );
+      segment = segmentRes.rows[0]?.behavioral_segment || "Balanced Rhythm";
+    } catch (dbErr: any) {
+      console.error("[Nova Chat] Database error (Segmentation View):", dbErr.message);
+      // Don't throw, just use default
+    }
 
     // Calculate Velocity and Drift
     const dayOfMonth = new Date().getDate();
     const monthlyBaseline = parseFloat(user?.baseline_spend || 2500);
     const dailyBaseline = monthlyBaseline / 30;
-    const currentVelocity = currentMonthSpend / dayOfMonth;
+    const currentVelocity = currentMonthSpend / (dayOfMonth || 1);
     const drift = currentMonthSpend - (dailyBaseline * dayOfMonth);
 
     // 2. Build the Senior Analyst Persona Prompt
@@ -87,46 +118,49 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
     `;
 
     // 3. Generate AI Response with History Support
-    // Use gemini-1.5-pro-latest for maximum reliability and systemInstruction support
+    if (!process.env.GOOGLE_GENAI_API_KEY) {
+      console.error("[Nova Chat] FATAL: GOOGLE_GENAI_API_KEY is missing from environment.");
+      return res.status(500).json({ error: "System Configuration Error", detail: "AI Key missing." });
+    }
+
     const model = genAI.getGenerativeModel({ 
       model: "gemini-1.5-pro-latest",
       systemInstruction: systemPrompt 
     });
     
-    // Map history to Gemini format (filter out system messages and map roles)
     const geminiHistory = (history || [])
       .filter((msg: any) => msg.role === "user" || msg.role === "assistant")
       .map((msg: any) => ({
         role: msg.role === "assistant" ? "model" : "user",
-        parts: [{ text: msg.content || "" }]
+        parts: [{ text: String(msg.content || "") }]
       }));
 
     const chat = model.startChat({
       history: geminiHistory,
     });
     
-    console.log(`[Nova] Processing request for ${user?.user_name || 'unknown'} (ID: ${userId})`);
-    const result = await chat.sendMessage(message);
+    console.log(`[Nova Chat] Dispatching message to Gemini for ${user?.user_name || userId}`);
+    const result = await chat.sendMessage(String(message));
     const responseText = result.response.text();
 
-    res.json({ 
+    return res.json({ 
       role: "assistant", 
       content: responseText,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
 
   } catch (err: any) {
-    console.error("[Nova Chat Error] Full context:", {
+    console.error("[Nova Chat Critical Error]:", {
       message: err.message,
       stack: err.stack,
-      userId: req.userId,
-      code: err.code
+      userId: req.userId
     });
     
-    // Fallback to flash if pro fails (e.g. quota or model not found)
+    // Fallback to Flash
     try {
+      console.log("[Nova Chat] Attempting emergency fallback to Flash...");
       const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
-      const result = await modelFlash.generateContent(`${req.body.message} (Note: System is in limited capacity mode)`);
+      const result = await modelFlash.generateContent(`${req.body.message}\n\n(System Context: Critical recovery mode active. Be concise.)`);
       const text = result.response.text();
       return res.json({ 
         role: "assistant", 
@@ -134,8 +168,8 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
     } catch (innerErr: any) {
-      console.error("[Nova Fallback Error]:", innerErr.message);
-      res.status(500).json({ 
+      console.error("[Nova Chat Fallback Failed]:", innerErr.message);
+      return res.status(500).json({ 
         message: "Nova is currently recalibrating.", 
         detail: err.message 
       });
