@@ -1,8 +1,5 @@
 import { RequestHandler } from "express";
 import { query } from "../db/db";
-import jwt from "jsonwebtoken";
-
-import { JWT_SECRET } from "../middleware/security";
 
 const buildNovaMessage = ({
   mode,

@@ -1,8 +1,6 @@
 import { RequestHandler } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { query } from "../db/db";
-import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../middleware/security";
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY || "");
 
@@ -103,7 +101,7 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
       throw new Error("GOOGLE_GENAI_API_KEY is missing from environment telemetry.");
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(systemPrompt);
     const report = result.response.text();
 

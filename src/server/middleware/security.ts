@@ -11,8 +11,8 @@ if (!_secret) {
 }
 const isDev = process.env.NODE_ENV !== "production";
 const minLen = isDev ? 16 : 32;
-if (_secret && _secret.length < minLen) { 
-  console.error(`[PULSE SECURITY] FATAL: JWT_SECRET too short (min ${minLen} chars for ${isDev ? "dev" : "prod"}).`); 
+if (_secret && _secret.length < minLen) {
+  console.error(`[PULSE SECURITY] FATAL: JWT_SECRET too short (min ${minLen} chars for ${isDev ? "dev" : "prod"}).`);
   if (process.env.NODE_ENV !== "production") process.exit(1);
 }
 export const JWT_SECRET: string = _secret || "temp-development-secret-only-for-fallback";

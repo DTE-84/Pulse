@@ -80,7 +80,8 @@ export function createServer() {
     const status = err.message?.includes("CORS") ? 403 : 500;
     res.status(status).json({
       message: "Internal server error",
-      detail: process.env.NODE_ENV === "production" ? "Check server logs for details." : err.message,
+      detail: err.message || "Unknown error occurred",
+      stack: process.env.NODE_ENV === "production" ? undefined : err.stack,
     });
   });
 

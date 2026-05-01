@@ -1,8 +1,6 @@
 import { RequestHandler } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { query } from "../db/db";
-import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../middleware/security";
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY || "");
 
@@ -120,11 +118,12 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
     // 3. Generate AI Response with History Support
     if (!process.env.GOOGLE_GENAI_API_KEY) {
       console.error("[Nova Chat] FATAL: GOOGLE_GENAI_API_KEY is missing from environment.");
-      return res.status(500).json({ error: "System Configuration Error", detail: "AI Key missing." });
+      return res.status(500).json({ error: "System Configuration Error", detail: "AI Key missing from Server Environment." });
     }
 
+    // Using Flash as primary to rule out Vercel Serverless timeouts (10s limit on Hobby)
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-pro", // Stable name
+      model: "gemini-1.5-flash", 
       systemInstruction: systemPrompt 
     });
     
@@ -139,8 +138,13 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
       history: geminiHistory,
     });
     
-    console.log(`[Nova Chat] Dispatching message to Gemini Pro for ${user?.user_name || userId}`);
+    console.log(`[Nova Chat] Dispatching message to Gemini Flash for ${user?.user_name || userId}`);
     const result = await chat.sendMessage(String(message));
+    
+    if (!result.response) {
+      throw new Error("Empty response from Gemini.");
+    }
+
     const responseText = result.response.text();
 
     return res.json({ 
@@ -157,23 +161,10 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
       userId: req.userId
     });
     
-    // Fallback to Flash
-    try {
-      console.log("[Nova Chat] Attempting emergency fallback to Flash...");
-      const modelFlash = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const result = await modelFlash.generateContent(`${req.body.message}\n\n(System Context: Critical recovery mode active. Be concise.)`);
-      const text = result.response.text();
-      return res.json({ 
-        role: "assistant", 
-        content: text,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      });
-    } catch (innerErr: any) {
-      console.error("[Nova Chat Fallback Failed]:", innerErr.message);
-      return res.status(500).json({ 
-        message: "Nova is currently recalibrating.", 
-        detail: `Primary error: ${err.message}. Fallback error: ${innerErr.message}` 
-      });
-    }
+    return res.status(500).json({ 
+      message: "Nova Uplink Interrupted", 
+      detail: err.message,
+      hint: "Verify GOOGLE_GENAI_API_KEY and check for Vercel timeouts."
+    });
   }
 };
