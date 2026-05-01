@@ -52,6 +52,46 @@ export function createServer() {
   app.get("/api/ping", (_req: any, res: any) => res.json({ message: process.env.PING_MESSAGE ?? "ping" }));
   app.get("/api/demo", handleDemo);
 
+  // Diagnostics
+  app.get("/api/health", async (_req: any, res: any) => {
+    const health: any = { 
+      status: "running", 
+      env: { 
+        node_env: process.env.NODE_ENV,
+        has_db: !!process.env.DATABASE_URL,
+        has_ai: !!process.env.GOOGLE_GENAI_API_KEY,
+        has_jwt: !!process.env.JWT_SECRET
+      },
+      checks: {} 
+    };
+    try {
+      const { query } = await import("./db/db");
+      await query("SELECT 1");
+      health.checks.database = "connected";
+    } catch (e: any) {
+      health.checks.database = "error: " + e.message;
+      health.status = "degraded";
+    }
+    res.json(health);
+  });
+
+  app.get("/api/test-ai", async (_req: any, res: any) => {
+    try {
+      const { GoogleGenerativeAI } = await import("@google/generative-ai");
+      const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY || "");
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const result = await model.generateContent("System health check. Reply with 'OK'.");
+      res.json({ message: "AI Response Received", response: result.response.text() });
+    } catch (e: any) {
+      console.error("[DIAGNOSTIC AI ERROR]:", e);
+      res.status(500).json({ 
+        error: "AI diagnostic failed", 
+        detail: e.message,
+        hint: "Check GOOGLE_GENAI_API_KEY in Vercel settings."
+      });
+    }
+  });
+
   // Stats — authenticated + rate-limited
   app.get("/api/stats", apiLimiter, requireAuth, handleStats);
 
