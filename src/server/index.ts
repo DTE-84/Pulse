@@ -3,13 +3,13 @@ import express from "express";
 import cors from "cors";
 
 // Static imports for routes
-import { handleDemo } from "./routes/demo.js";
-import { handleStats } from "./routes/stats.js";
-import { handleLogin, handleSignup, handleMe, handleUpdateProfile } from "./routes/auth.js";
-import { handleIngest } from "./routes/ingest.js";
-import { handleNovaChat } from "./routes/chat.js";
-import { handleAnalysis } from "./routes/analysis.js";
-import { handleGetGoals, handleCreateGoal } from "./routes/goals.js";
+import { handleDemo } from "./routes/demo";
+import { handleStats } from "./routes/stats";
+import { handleLogin, handleSignup, handleMe, handleUpdateProfile } from "./routes/auth";
+import { handleIngest } from "./routes/ingest";
+import { handleNovaChat } from "./routes/chat";
+import { handleAnalysis } from "./routes/analysis";
+import { handleGetGoals, handleCreateGoal } from "./routes/goals";
 
 // Static imports for middleware
 import {
@@ -18,7 +18,7 @@ import {
   authLimiter,
   ingestLimiter,
   apiLimiter,
-} from "./middleware/security.js";
+} from "./middleware/security";
 
 // Allowed origins — add your production domain here
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:5173,http://localhost:3000,https://pulse-nova-solutions.vercel.app,https://dte-solutions.icu")
@@ -66,7 +66,7 @@ export function createServer() {
       checks: {} 
     };
     try {
-      const { query } = await import("./db/db.js");
+      const { query } = await import("./db/db");
       await query("SELECT 1");
       health.checks.database = "connected";
     } catch (e: any) {
