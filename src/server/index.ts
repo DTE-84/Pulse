@@ -2,16 +2,20 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 
-// Static imports for routes
-import { handleDemo } from "./routes/demo";
-import { handleStats } from "./routes/stats";
-import { handleLogin, handleSignup, handleMe, handleUpdateProfile } from "./routes/auth";
-import { handleIngest } from "./routes/ingest";
-import { handleNovaChat } from "./routes/chat";
-import { handleAnalysis } from "./routes/analysis";
-import { handleGetGoals, handleCreateGoal } from "./routes/goals";
+// 1. Lazy-loaded routes to prevent boot crashes
+const handleDemo = (req: any, res: any) => import("./routes/demo").then(m => m.handleDemo(req, res));
+const handleStats = (req: any, res: any) => import("./routes/stats").then(m => m.handleStats(req, res));
+const handleLogin = (req: any, res: any) => import("./routes/auth").then(m => m.handleLogin(req, res));
+const handleSignup = (req: any, res: any) => import("./routes/auth").then(m => m.handleSignup(req, res));
+const handleMe = (req: any, res: any) => import("./routes/auth").then(m => m.handleMe(req, res));
+const handleUpdateProfile = (req: any, res: any) => import("./routes/auth").then(m => m.handleUpdateProfile(req, res));
+const handleIngest = (req: any, res: any) => import("./routes/ingest").then(m => m.handleIngest(req, res));
+const handleNovaChat = (req: any, res: any) => import("./routes/chat").then(m => m.handleNovaChat(req, res));
+const handleAnalysis = (req: any, res: any) => import("./routes/analysis").then(m => m.handleAnalysis(req, res));
+const handleGetGoals = (req: any, res: any) => import("./routes/goals").then(m => m.handleGetGoals(req, res));
+const handleCreateGoal = (req: any, res: any) => import("./routes/goals").then(m => m.handleCreateGoal(req, res));
 
-// Static imports for middleware
+// 2. Middleware (Pre-loaded as they are lightweight)
 import {
   securityHeaders,
   requireAuth,
@@ -20,7 +24,6 @@ import {
   apiLimiter,
 } from "./middleware/security";
 
-// Allowed origins — add your production domain here
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:5173,http://localhost:3000,https://pulse-nova-solutions.vercel.app,https://dte-solutions.icu")
   .split(",").map((o: string) => o.trim());
 
@@ -31,97 +34,36 @@ export function createServer() {
 
   app.use(cors({
     origin: (origin: string | undefined, cb: Function) => {
-      // 1. Allow if no origin (e.g. server-to-server or same-origin on some browsers)
       if (!origin) return cb(null, true);
-      
-      // 2. Allow if in explicit list
       if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
-      
-      // 3. Allow any Vercel domain in production for flexibility (optional but helpful)
       if (origin.endsWith(".vercel.app")) return cb(null, true);
-
-      cb(null, true); // Fallback: allow for debugging, can tighten later
+      cb(null, true); // Allow for now to debug
     },
     credentials: true,
     methods: ["GET", "POST", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }));
 
-  app.use(express.json({ limit: "1mb" })); // cap payload size
+  app.use(express.json({ limit: "1mb" }));
   app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
-  app.get("/api/ping", (_req, res) => res.json({ message: process.env.PING_MESSAGE ?? "ping" }));
-  app.get("/api/demo", handleDemo);
+  // Routes
+  app.get("/api/ping", (_req, res) => res.json({ message: "ping" }));
+  app.get("/api/demo", handleDemo as any);
+  app.get("/api/stats", apiLimiter, requireAuth, handleStats as any);
+  app.post("/api/nova/chat", apiLimiter, requireAuth, handleNovaChat as any);
+  app.post("/api/nova/analysis", apiLimiter, requireAuth, handleAnalysis as any);
+  app.get("/api/finance/goals", apiLimiter, requireAuth, handleGetGoals as any);
+  app.post("/api/finance/goals", apiLimiter, requireAuth, handleCreateGoal as any);
+  app.post("/api/finance/ingest", ingestLimiter, requireAuth, handleIngest as any);
+  app.post("/api/auth/login", authLimiter, handleLogin as any);
+  app.post("/api/auth/signup", authLimiter, handleSignup as any);
+  app.get("/api/auth/me", requireAuth, handleMe as any);
+  app.patch("/api/auth/update", requireAuth, handleUpdateProfile as any);
 
-  // Diagnostics
-  app.get("/api/health", async (_req, res) => {
-    const health: any = { 
-      status: "running", 
-      env: { 
-        node_env: process.env.NODE_ENV,
-        has_db: !!process.env.DATABASE_URL,
-        has_ai: !!process.env.GOOGLE_GENAI_API_KEY,
-        has_jwt: !!process.env.JWT_SECRET
-      },
-      checks: {} 
-    };
-    try {
-      const { query } = await import("./db/db");
-      await query("SELECT 1");
-      health.checks.database = "connected";
-    } catch (e: any) {
-      health.checks.database = "error: " + e.message;
-      health.status = "degraded";
-    }
-    res.json(health);
-  });
-
-  app.get("/api/test-ai", async (_req, res) => {
-    try {
-      const { GoogleGenerativeAI } = await import("@google/generative-ai");
-      const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY || "");
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const result = await model.generateContent("System health check. Reply with 'OK'.");
-      res.json({ message: "AI Response Received", response: result.response.text() });
-    } catch (e: any) {
-      console.error("[DIAGNOSTIC AI ERROR]:", e);
-      res.status(500).json({ 
-        error: "AI diagnostic failed", 
-        detail: e.message,
-        hint: "Check GOOGLE_GENAI_API_KEY in Vercel settings."
-      });
-    }
-  });
-
-  // Stats — authenticated + rate-limited
-  app.get("/api/stats", apiLimiter, requireAuth, handleStats);
-
-  // AI Chat — authenticated + rate-limited
-  app.post("/api/nova/chat", apiLimiter, requireAuth, handleNovaChat);
-
-  // AI Analysis — authenticated + rate-limited
-  app.post("/api/nova/analysis", apiLimiter, requireAuth, handleAnalysis);
-
-  // Goals
-  app.get("/api/finance/goals", apiLimiter, requireAuth, handleGetGoals);
-  app.post("/api/finance/goals", apiLimiter, requireAuth, handleCreateGoal);
-
-  // Ingest — authenticated + stricter rate limit
-  app.post("/api/finance/ingest", ingestLimiter, requireAuth, handleIngest);
-
-  // Auth routes — rate-limited to block brute force
-  app.post("/api/auth/login", authLimiter, handleLogin);
-  app.post("/api/auth/signup", authLimiter, handleSignup);
-  app.get("/api/auth/me", requireAuth, handleMe);
-  app.patch("/api/auth/update", requireAuth, handleUpdateProfile);
-
-  // Global Error Handler
   app.use((err: any, _req: any, res: any, _next: any) => {
     console.error("[PULSE SERVER ERROR]:", err);
-    res.status(500).json({
-      message: "Internal server error",
-      detail: err.message || "Unknown error occurred",
-    });
+    res.status(500).json({ message: "Internal server error", detail: err.message });
   });
 
   return app;
