@@ -20,7 +20,17 @@ export const JWT_SECRET: string = _secret || "temp-development-secret-only-for-f
 // Initialize Supabase Admin for token verification
 const supabaseUrl = process.env.VITE_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || "";
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+let _supabase: any;
+
+function getSupabase() {
+  if (!_supabase) {
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.warn("[PULSE SECURITY] Supabase URL or Anon Key is missing.");
+    }
+    _supabase = createClient(supabaseUrl, supabaseAnonKey);
+  }
+  return _supabase;
+}
 
 // 2. AUTH MIDDLEWARE — multi-protocol JWT verifier (Local + Supabase)
 declare global { namespace Express { interface Request { userId?: string; userEmail?: string; } } }
@@ -38,15 +48,21 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
     return next();
   } catch (err) {
     // Strategy B: Fallback to Supabase verification
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-    
-    if (user && !error) {
-      req.userId = user.id;
-      req.userEmail = user.email;
-      return next();
+    try {
+      const supabase = getSupabase();
+      const { data: { user }, error } = await supabase.auth.getUser(token);
+      
+      if (user && !error) {
+        req.userId = user.id;
+        req.userEmail = user.email;
+        return next();
+      }
+      
+      console.error("[PULSE AUTH] Verification failed:", error?.message || "Invalid local token");
+    } catch (sErr: any) {
+      console.error("[PULSE AUTH] Supabase client error:", sErr.message);
     }
     
-    console.error("[PULSE AUTH] Verification failed:", error?.message || "Invalid local token");
     res.status(401).json({ message: "Invalid or expired session." });
   }
 };
