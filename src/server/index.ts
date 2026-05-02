@@ -37,7 +37,7 @@ export function createServer() {
       if (!origin) return cb(null, true);
       if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
       if (origin.endsWith(".vercel.app")) return cb(null, true);
-      cb(null, true); // Allow for now to debug
+      cb(new Error(`CORS: Origin ${origin} not permitted.`));
     },
     credentials: true,
     methods: ["GET", "POST", "PATCH", "DELETE"],
