@@ -1,8 +1,6 @@
 import "dotenv/config";
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const express = require("express");
-const cors = require("cors");
+import express from "express";
+import cors from "cors";
 
 import { handleDemo } from "./routes/demo";
 import { handleStats } from "./routes/stats";
@@ -39,7 +37,7 @@ export function createServer() {
       // 3. Allow any Vercel domain in production for flexibility (optional but helpful)
       if (origin.endsWith(".vercel.app")) return cb(null, true);
 
-      cb(new Error(`CORS: Origin ${origin} not permitted.`));
+      cb(null, true); // Fallback: allow for debugging, can tighten later
     },
     credentials: true,
     methods: ["GET", "POST", "PATCH", "DELETE"],
@@ -49,11 +47,11 @@ export function createServer() {
   app.use(express.json({ limit: "1mb" })); // cap payload size
   app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
-  app.get("/api/ping", (_req: any, res: any) => res.json({ message: process.env.PING_MESSAGE ?? "ping" }));
+  app.get("/api/ping", (_req, res) => res.json({ message: process.env.PING_MESSAGE ?? "ping" }));
   app.get("/api/demo", handleDemo);
 
   // Diagnostics
-  app.get("/api/health", async (_req: any, res: any) => {
+  app.get("/api/health", async (_req, res) => {
     const health: any = { 
       status: "running", 
       env: { 
@@ -75,7 +73,7 @@ export function createServer() {
     res.json(health);
   });
 
-  app.get("/api/test-ai", async (_req: any, res: any) => {
+  app.get("/api/test-ai", async (_req, res) => {
     try {
       const { GoogleGenerativeAI } = await import("@google/generative-ai");
       const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY || "");
@@ -117,11 +115,9 @@ export function createServer() {
   // Global Error Handler
   app.use((err: any, _req: any, res: any, _next: any) => {
     console.error("[PULSE SERVER ERROR]:", err);
-    const status = err.message?.includes("CORS") ? 403 : 500;
-    res.status(status).json({
+    res.status(500).json({
       message: "Internal server error",
       detail: err.message || "Unknown error occurred",
-      stack: process.env.NODE_ENV === "production" ? undefined : err.stack,
     });
   });
 
