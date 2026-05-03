@@ -1,5 +1,7 @@
-import { createServer } from "../src/server/index";
-
-const app = createServer();
-
-export default app;
+export default function (req: any, res: any) {
+  res.status(200).json({ 
+    message: "Pulse API Index (Native)",
+    endpoints: ["/api/ping", "/api/health", "/api/nova/chat"],
+    status: "online"
+  });
+}

@@ -2,9 +2,8 @@ import { RequestHandler } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { query } from "../db/db";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY || "");
-
 export const handleNovaChat: RequestHandler = async (req, res) => {
+  const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY || "");
   console.log("[Nova Chat] Request headers:", req.headers.authorization ? "Bearer [HIDDEN]" : "MISSING");
   console.log("[Nova Chat] Request userId:", req.userId || "UNDEFINED");
   
