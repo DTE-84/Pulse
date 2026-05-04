@@ -120,9 +120,9 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
       return res.status(500).json({ error: "System Configuration Error", detail: "AI Key missing from Server Environment." });
     }
 
-    // Using Flash as primary to rule out Vercel Serverless timeouts (10s limit on Hobby)
+    // Using Pro for maximum reasoning accuracy and complex behavioral mapping
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash", 
+      model: "gemini-1.5-pro", 
       systemInstruction: systemPrompt 
     });
     

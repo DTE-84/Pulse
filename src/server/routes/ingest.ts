@@ -26,16 +26,16 @@ export const handleIngest = async (req: Request, res: Response) => {
   // 1. AI-Driven Data Integrity: Auto-Categorization & Risk Scoring
   let enrichedTransactions = transactions;
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
     const prompt = `
       You are Nova's Behavioral Data Wrangler. 
-      Analyze the following transactions and ensure they have a 'category' and 'risk_category'.
+      Analyze the following transactions and ensure they have a 'category' and 'risk_level'.
       
       Categories: Dining, Groceries, Transport, Entertainment, Utilities, Rent, Shopping, Healthcare, Misc.
-      Risk Levels (Categorical to Ordinal): Essential, Lifestyle, Impulse, Critical.
+      Risk Levels (Categorical to Ordinal Mapping): Low, Medium, High, Critical.
       
-      Return ONLY a valid JSON array of objects with the fields: date, amount, category, risk_category.
-      Keep existing data if it's already accurate.
+      Return ONLY a valid JSON array of objects with the fields: date, amount, category, risk_level.
+      Maintain absolute Data Integrity. If a category is ambiguous, use 'Misc'.
       
       Transactions: ${JSON.stringify(transactions)}
     `;
@@ -59,12 +59,12 @@ export const handleIngest = async (req: Request, res: Response) => {
   }
 
   // Build CSV with sanitized values
-  const headers = "date,amount,category,risk_category,trigger_id";
+  const headers = "date,amount,category,risk_level,trigger_id";
   const rows = enrichedTransactions.map((t: any) => [
     sanitizeCsvField(t.date),
     sanitizeCsvField(t.amount),
     sanitizeCsvField(t.category || "Misc"),
-    sanitizeCsvField(t.risk_category || "Lifestyle"),
+    sanitizeCsvField(t.risk_level || "Medium"),
     sanitizeCsvField(t.trigger_id || ""),
   ].join(",")).join("\n");
 
@@ -96,14 +96,14 @@ export const handleIngest = async (req: Request, res: Response) => {
     for (const line of lines) {
       const parts = line.split(",");
       if (parts.length < 5) continue;
-      const [date, amount, category, risk_category, trigger_id] = parts;
+      const [date, amount, category, risk_level, trigger_id] = parts;
 
       let catResult = await query("SELECT category_id FROM dim_categories WHERE category_name = $1", [category]);
       let categoryId: number;
       if (catResult.rows.length === 0) {
         const newCat = await query(
           "INSERT INTO dim_categories (category_name, risk_level) VALUES ($1, $2) RETURNING category_id",
-          [category, risk_category || "Medium"]
+          [category, risk_level || "Medium"]
         );
         categoryId = newCat.rows[0].category_id;
       } else {

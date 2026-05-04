@@ -28,14 +28,14 @@ def pulse_wrangler(input_csv):
     # 3. Categorical to Ordinal: Behavioral Risk Mapping
     # High-fidelity mapping of spending risk levels
     risk_mapping = {
-        'Essential': 1,
-        'Lifestyle': 2,
-        'Impulse': 3,
+        'Low': 1,
+        'Medium': 2,
+        'High': 3,
         'Critical': 4
     }
     
-    if 'risk_category' in df.columns:
-        df['behavioral_ordinal'] = df['risk_category'].map(risk_mapping).fillna(2)
+    if 'risk_level' in df.columns:
+        df['behavioral_ordinal'] = df['risk_level'].map(risk_mapping).fillna(2)
         print("[+] Ordinal transformation complete: Spending Risk mapped to numerical scale.")
 
     # 4. Behavioral Velocity Calculation
