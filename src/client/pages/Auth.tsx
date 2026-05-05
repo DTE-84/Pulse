@@ -83,14 +83,11 @@ export default function AuthPage() {
         <div className="hidden lg:flex flex-col space-y-10">
           <div className="flex items-center gap-6 group">
             <div className="relative w-20 h-24 flex items-center justify-center">
-              <div className="absolute inset-0 bg-transparent border border-primary/20 rounded-full animate-ping [animation-duration:4s]" />
-              <div className="absolute inset-4 bg-transparent border border-primary/10 rounded-full animate-pulse [animation-duration:2s]" />
-              <div className="relative z-10 w-16 h-16 rounded-[2rem] bg-background border-2 border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[0_0_40px_rgba(45,237,156,0.2)] overflow-hidden">
+              <div className="relative z-10 w-20 h-20 flex items-center justify-center group-hover:scale-110 transition-transform filter drop-shadow-[0_0_20px_rgba(45,237,156,0.25)] overflow-hidden">
                 <img
-                  src={`${import.meta.env.BASE_URL}PulseLogoTransp.png`}
-                  sizes="64px"
+                  src={`${import.meta.env.BASE_URL}pulsesolologo.png`}
                   alt="Pulse"
-                  className="w-12 h-12 object-contain filter drop-shadow-[0_0_12px_rgba(45,237,156,0.5)]"
+                  className="w-20 h-20 object-contain"
                 />
               </div>
             </div>
@@ -157,21 +154,11 @@ export default function AuthPage() {
             <div className="lg:hidden flex flex-col items-center text-center mb-6 sm:mb-10">
               <div className="relative w-20 h-20 flex items-center justify-center mb-4">
                 <div className="absolute inset-0 bg-primary/20 rounded-full animate-pulse" />
-                <div className="relative z-10 w-14 h-14 rounded-2xl bg-background border border-primary/20 flex items-center justify-center shadow-2xl overflow-hidden">
+                <div className="relative z-10 w-20 h-20 flex items-center justify-center shadow-2xl overflow-hidden">
                   <img
-                    src={`${import.meta.env.BASE_URL}icon-1024.png`}
-                    srcSet={`
-                      ${import.meta.env.BASE_URL}icon-29@2x.png 58w,
-                      ${import.meta.env.BASE_URL}icon-29@3x.png 87w,
-                      ${import.meta.env.BASE_URL}icon-40@2x.png 80w,
-                      ${import.meta.env.BASE_URL}icon-60@2x.png 120w,
-                      ${import.meta.env.BASE_URL}icon-60@3x.png 180w,
-                      ${import.meta.env.BASE_URL}icon-76@2x.png 152w,
-                      ${import.meta.env.BASE_URL}icon-83.5@2x.png 167w
-                    `}
-                    sizes="48px"
+                    src={`${import.meta.env.BASE_URL}pulsesolologo.png`}
                     alt="Pulse"
-                    className="w-10 h-10 object-contain"
+                    className="w-20 h-20 object-contain"
                   />
                 </div>
               </div>

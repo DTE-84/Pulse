@@ -39,22 +39,12 @@ const Sidebar = () => {
       <div className="p-8">
         <Link to="/" className="flex items-center gap-4 mb-12 group">
           <div className="relative w-14 h-14 flex items-center justify-center">
-            {/* SENTIENT PULSE LAYERS */}
-            <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping [animation-duration:3s]" />
-            <div className="absolute inset-2 bg-primary/10 rounded-full animate-pulse [animation-duration:2s]" />
-
             {/* LOGO CONTAINER */}
-            <div className="relative z-10 w-12 h-12 rounded-full bg-black border border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(45,237,156,0.15)] overflow-hidden">
+            <div className="relative z-10 w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform">
               <img
-                src={`${import.meta.env.BASE_URL}icon-1024.png`}
-                srcSet={`
-                  ${import.meta.env.BASE_URL}icon-29@2x.png 58w,
-                  ${import.meta.env.BASE_URL}icon-60@2x.png 120w,
-                  ${import.meta.env.BASE_URL}icon-1024.png 1024w
-                `}
-                sizes="40px"
+                src={`${import.meta.env.BASE_URL}pulsesolologo.png`}
                 alt="Pulse"
-                className="w-8 h-8 object-contain"
+                className="w-12 h-12 object-contain filter drop-shadow-[0_0_15px_rgba(45,237,156,0.3)]"
               />
             </div>
           </div>
@@ -332,18 +322,11 @@ export const Layout = ({ children }: LayoutProps) => {
         <header className="lg:hidden h-16 shrink-0 border-b border-border px-4 sm:px-8 flex items-center justify-between sticky top-0 bg-background/80 backdrop-blur-md z-40">
           <div className="flex items-center gap-3">
             <div className="relative w-10 h-10 flex items-center justify-center">
-              <div className="absolute inset-0 bg-primary/20 rounded-full animate-pulse" />
-              <div className="relative z-10 w-8 h-8 rounded-xl bg-background border border-primary/20 flex items-center justify-center overflow-hidden">
+              <div className="relative z-10 w-10 h-10 flex items-center justify-center overflow-hidden">
                 <img
-                  src={`${import.meta.env.BASE_URL}icon-1024.png`}
-                  srcSet={`
-                    ${import.meta.env.BASE_URL}icon-29@2x.png 58w,
-                    ${import.meta.env.BASE_URL}icon-60@2x.png 120w,
-                    ${import.meta.env.BASE_URL}icon-1024.png 1024w
-                  `}
-                  sizes="32px"
+                  src={`${import.meta.env.BASE_URL}pulsesolologo.png`}
                   alt="Pulse"
-                  className="w-6 h-6 object-contain"
+                  className="w-10 h-10 object-contain"
                 />
               </div>
             </div>

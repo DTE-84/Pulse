@@ -153,11 +153,11 @@ export default function Onboarding() {
             <div className="flex-1 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-1000">
               <div className="relative mb-12">
                 <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150 animate-pulse" />
-                <div className="w-24 h-24 bg-zinc-900 border-4 border-primary rounded-3xl flex items-center justify-center relative z-10 shadow-2xl rotate-12">
+                <div className="w-24 h-24 flex items-center justify-center relative z-10 drop-shadow-[0_0_20px_rgba(45,237,156,0.3)]">
                   <img 
-                    src={`${import.meta.env.BASE_URL}PulseLogoTransp.png`} 
+                    src={`${import.meta.env.BASE_URL}pulsesolologo.png`} 
                     alt="Logo" 
-                    className="w-10 h-10 object-contain" 
+                    className="w-24 h-24 object-contain" 
                   />
                 </div>
               </div>
