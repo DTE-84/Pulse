@@ -29,20 +29,27 @@ const StatCard = ({
   <div className="bg-[#0A0907] border border-white/[0.03] rounded-3xl p-6 relative overflow-hidden group hover:bg-[#11100D] transition-all hover:border-white/10 shadow-2xl">
     <div
       className={cn(
-        "absolute top-0 left-0 w-1.5 h-full opacity-30 group-hover:opacity-100 transition-opacity",
+        "absolute top-0 left-0 w-1 h-full opacity-30 group-hover:opacity-100 transition-opacity",
         colorClass,
       )}
     />
+    
+    {/* Telemetry Pulse Animation */}
+    <div className="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-20 transition-opacity">
+       <div className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
+    </div>
+
     <div className="flex justify-between items-start mb-4">
       <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.25em]">
         {label}
       </span>
       {Icon && (
-        <Icon className="w-4 h-4 text-primary opacity-40 group-hover:opacity-100 transition-all" />
+        <Icon className="w-4 h-4 text-primary opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all" />
       )}
     </div>
-    <div className="text-3xl font-black mb-3 tracking-tighter text-white">
+    <div className="text-3xl font-black mb-3 tracking-tighter text-white flex items-baseline gap-1">
       {value}
+      <span className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-tighter">Nodes</span>
     </div>
     <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
       <span
@@ -58,7 +65,7 @@ const StatCard = ({
         )}
         {trendValue}
       </span>
-      <span className="text-muted-foreground/40 italic">vs baseline</span>
+      <span className="text-muted-foreground/40 italic">Signal Drift</span>
     </div>
   </div>
 );
@@ -77,13 +84,19 @@ const TriggerCard = ({
   colorClass,
 }: any) => (
   <div className="bg-[#0A0907] border border-white/[0.03] rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 flex flex-col h-full group hover:border-white/10 transition-all hover:bg-[#0E0D0B] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden">
+    {/* High-Fidelity Severity Glow */}
+    <div className={cn(
+      "absolute -top-24 -right-24 w-48 h-48 rounded-full blur-[80px] opacity-0 group-hover:opacity-10 transition-opacity pointer-events-none",
+      severity === "HIGH" ? "bg-red-500" : severity === "MED" ? "bg-yellow-500" : "bg-primary"
+    )} />
+    
     <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,13,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%]" />
 
     {/* Header */}
     <div className="flex items-start gap-4 mb-8 relative z-10">
       <div
         className={cn(
-          "w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 bg-white/[0.02] border border-white/5 shadow-2xl transition-all group-hover:scale-105",
+          "w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 bg-white/[0.02] border border-white/5 shadow-2xl transition-all group-hover:scale-105 group-hover:border-primary/20",
           colorClass,
         )}
       >
@@ -97,15 +110,18 @@ const TriggerCard = ({
           {desc}
         </p>
       </div>
-      <div className="flex items-center gap-2 text-[9px] font-black text-primary bg-primary/10 px-3 py-1.5 rounded-full uppercase tracking-[0.2em] border border-primary/20 shrink-0">
+      <div className={cn(
+        "flex items-center gap-2 text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-[0.2em] border shrink-0 transition-all",
+        severity === "HIGH" ? "text-red-400 bg-red-400/10 border-red-400/20" : 
+        severity === "MED" ? "text-yellow-400 bg-yellow-400/10 border-yellow-400/20" : 
+        "text-primary bg-primary/10 border-primary/20"
+      )}>
         <div
           className={cn(
-            "w-1.5 h-1.5 rounded-full animate-pulse shadow-[0_0_8px_rgba(45,237,156,1)]",
-            severity === "HIGH"
-              ? "bg-red-500"
-              : severity === "MED"
-                ? "bg-yellow-500"
-                : "bg-primary",
+            "w-1.5 h-1.5 rounded-full animate-pulse",
+            severity === "HIGH" ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,1)]" : 
+            severity === "MED" ? "bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,1)]" : 
+            "bg-primary shadow-[0_0_8px_rgba(45,237,156,1)]",
           )}
         />
         {severity}
@@ -113,37 +129,39 @@ const TriggerCard = ({
     </div>
 
     {/* Stats row */}
-    <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8 pt-6 border-t border-white/5">
+    <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8 pt-6 border-t border-white/5 relative z-10">
       {[
-        { val: `$${amount}`, label: "This Cycle", color: "text-white" },
-        { val: `${count}×`, label: "Signals", color: "text-primary" },
-        { val: peak, label: "Peak Day", color: "text-blue-400" },
+        { val: `$${amount}`, label: "Current Cycle", color: "text-white" },
+        { val: `${count}×`, label: "Trigger Signal", color: "text-primary" },
+        { val: peak, label: "Peak Alpha", color: "text-blue-400" },
       ].map(({ val, label, color }) => (
         <div key={label}>
-          <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">
+          <div className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1.5 opacity-50">
             {label}
           </div>
-          <div className={cn("text-lg font-bold", color)}>{val}</div>
+          <div className={cn("text-lg font-black tracking-tight", color)}>{val}</div>
         </div>
       ))}
     </div>
 
     {/* Timeline bars */}
-    <div className="mb-8 h-12">
-      <div className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] mb-3">
-        Pattern Heat // 7D
+    <div className="mb-8 h-12 relative z-10">
+      <div className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.25em] mb-3 opacity-50">
+        Pattern Intensity // 7D Telemetry
       </div>
       <div className="flex items-end gap-1.5 h-8">
         {timeline.map((v: number, i: number) => (
           <div
             key={i}
-            className="flex-1 rounded-sm transition-all duration-500 bg-primary/20"
+            className="flex-1 rounded-sm transition-all duration-700 bg-primary/20 hover:scale-x-110"
             style={{
               height: `${Math.max(15, (v / Math.max(...timeline)) * 100)}%`,
               backgroundColor:
                 v > 0
                   ? severity === "HIGH"
                     ? "#ef4444"
+                    : severity === "MED"
+                    ? "#f59e0b"
                     : "#2DED9C"
                   : "rgba(255,255,255,0.05)",
               opacity: v > 0 ? 0.4 + (v / Math.max(...timeline)) * 0.6 : 0.1,
@@ -154,37 +172,35 @@ const TriggerCard = ({
     </div>
 
     {/* Brain insight */}
-    <div className="bg-white/[0.01] border border-white/5 rounded-3xl p-5 relative hover:bg-white/[0.03] transition-colors mb-4 mt-auto">
+    <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 relative hover:bg-white/[0.04] transition-all mb-4 mt-auto group/insight">
       <div className="flex items-start gap-4">
-        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-          <Brain className="w-3.5 h-3.5 text-primary" />
+        <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-0.5 border border-primary/10 group-hover/insight:border-primary/30 transition-colors">
+          <Brain className="w-4 h-4 text-primary" />
         </div>
         <p
-          className="text-xs leading-relaxed text-muted-foreground font-medium"
+          className="text-[11px] leading-relaxed text-muted-foreground font-semibold"
           dangerouslySetInnerHTML={{ __html: insight }}
         />
       </div>
     </div>
 
     {/* Nova strip */}
-    <div className="bg-primary/5 border border-primary/10 rounded-3xl p-5 flex items-center justify-between group/nova cursor-pointer hover:bg-primary/10 transition-all">
+    <div className="bg-primary/5 border border-primary/10 rounded-2xl p-5 flex items-center justify-between group/nova cursor-pointer hover:bg-primary/10 transition-all shadow-inner">
       <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0 border border-primary/20">
-          <div className="w-4 h-4 rounded-full bg-primary shadow-[0_0_15px_rgba(45,237,156,1)]" />
+        <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0 border border-primary/20 group-hover/nova:scale-105 transition-transform">
+          <div className="w-4 h-4 rounded-full bg-primary animate-pulse shadow-[0_0_15px_rgba(45,237,156,1)]" />
         </div>
         <div>
-          <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-0.5">
-            Nova Suggestion
+          <p className="text-[9px] font-black text-primary uppercase tracking-[0.25em] mb-0.5">
+            Nova Protocol Suggestion
           </p>
           <p
-            className="text-[12px] font-bold text-white group-hover/nova:text-primary transition-colors"
+            className="text-[12px] font-black text-white group-hover/nova:text-primary transition-colors uppercase tracking-tight"
             dangerouslySetInnerHTML={{ __html: novaSuggestion }}
           />
         </div>
       </div>
-      <button className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline shrink-0">
-        Act
-      </button>
+      <ArrowRight className="w-4 h-4 text-primary opacity-0 group-hover/nova:opacity-100 group-hover/nova:translate-x-1 transition-all" />
     </div>
   </div>
 );

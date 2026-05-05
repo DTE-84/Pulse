@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Check, 
   ChevronRight, 
@@ -9,10 +9,21 @@ import {
   CreditCard,
   Crown,
   Star,
-  ArrowRight
+  ArrowRight,
+  Shield,
+  Lock,
+  Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
 
 const plans = [
   {
@@ -61,12 +72,37 @@ const plans = [
       "Custom trigger development"
     ],
     cta: "Pre-Order Now",
-    popular: false
+    popular: false,
+    elite: true
   }
 ];
 
 export default function SubscriptionPage() {
   const [isAnnual, setIsAnnual] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [slotsLeft, setSlotsLeft] = useState(14); // Sense of urgency
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Subtle simulation of slots decreasing
+    const timer = setTimeout(() => {
+      if (slotsLeft > 3) setSlotsLeft(prev => prev - 1);
+    }, 15000);
+    return () => clearTimeout(timer);
+  }, [slotsLeft]);
+
+  const handleCheckout = () => {
+    setIsCheckingOut(true);
+    setTimeout(() => {
+      setIsCheckingOut(false);
+      setSelectedPlan(null);
+      toast({
+        title: "Uplink Secure",
+        description: "Your Pre-Order has been registered. Welcome to the Elite Nexus.",
+      });
+    }, 2500);
+  };
 
   return (
     <div className="p-8 md:p-12 max-w-7xl mx-auto space-y-12">
@@ -122,12 +158,19 @@ export default function SubscriptionPage() {
             key={i} 
             className={cn(
               "bg-[#12110F] border border-white/5 rounded-[2.5rem] p-10 flex flex-col h-full relative transition-all group hover:bg-[#151412] hover:border-white/10",
-              plan.popular ? "ring-2 ring-primary/30 shadow-[0_0_50px_rgba(45,237,156,0.1)] scale-105 z-10" : "scale-100"
+              plan.popular ? "ring-2 ring-primary/30 shadow-[0_0_50px_rgba(45,237,156,0.1)] scale-105 z-10" : "scale-100",
+              plan.elite ? "border-yellow-500/20 bg-gradient-to-b from-yellow-500/[0.02] to-transparent" : ""
             )}
           >
             {plan.popular && (
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-background text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(45,237,156,0.5)]">
                 Most Popular
+              </div>
+            )}
+            
+            {plan.elite && (
+               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(234,179,8,0.3)]">
+                Early Access
               </div>
             )}
             
@@ -143,10 +186,19 @@ export default function SubscriptionPage() {
 
             <div className="mb-10 flex items-baseline gap-2">
               <span className="text-5xl font-black text-white leading-none">
-                {plan.price === "$0" ? plan.price : isAnnual ? `$${parseInt(plan.price.replace('$','')) * 0.8 * 12}` : plan.price}
+                {plan.price === "$0" ? plan.price : isAnnual ? `$${Math.round(parseFloat(plan.price.replace('$','')) * 0.8 * 12)}` : plan.price}
               </span>
               <span className="text-muted-foreground font-black text-sm uppercase tracking-widest">{isAnnual && plan.name !== "Standard" ? "/year" : plan.period}</span>
             </div>
+
+            {plan.elite && (
+              <div className="mb-6 flex items-center gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl">
+                <Clock className="w-4 h-4 text-yellow-500 animate-pulse" />
+                <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest">
+                  Only {slotsLeft} Founding Slots Remaining
+                </span>
+              </div>
+            )}
 
             <div className="space-y-4 mb-12 flex-1 pt-6 border-t border-white/5">
               {plan.features.map((feature, fi) => (
@@ -160,10 +212,13 @@ export default function SubscriptionPage() {
             </div>
 
             <button 
+              onClick={() => setSelectedPlan(plan)}
               className={cn(
                 "w-full py-4 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 uppercase tracking-widest",
                 plan.popular 
                   ? "bg-primary text-background shadow-[0_0_30px_rgba(45,237,156,0.2)] hover:scale-[1.02] active:scale-[0.98]" 
+                  : plan.elite
+                  ? "bg-yellow-500 text-black shadow-[0_0_30px_rgba(234,179,8,0.2)] hover:scale-[1.02] active:scale-[0.98]"
                   : "bg-white/5 text-white hover:bg-white/10 hover:text-white"
               )}
             >
@@ -197,6 +252,90 @@ export default function SubscriptionPage() {
           </div>
         </div>
       </div>
+
+      {/* High-Fidelity Checkout Modal */}
+      <Dialog open={!!selectedPlan} onOpenChange={() => setSelectedPlan(null)}>
+        <DialogContent className="max-w-[440px] bg-[#0A0908] border border-white/10 rounded-[2.5rem] p-0 overflow-hidden shadow-2xl">
+          <div className="p-8 space-y-8">
+            <DialogHeader className="space-y-4 text-center">
+              <div className="mx-auto w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                {selectedPlan?.name === "Elite" ? <Crown className="w-8 h-8 text-yellow-500" /> : <Sparkles className="w-8 h-8 text-primary" />}
+              </div>
+              <div>
+                <DialogTitle className="text-2xl font-black text-white uppercase tracking-tighter">
+                  Secure Pre-Order
+                </DialogTitle>
+                <DialogDescription className="text-xs font-semibold text-muted-foreground mt-2">
+                  Initialize your {selectedPlan?.name} membership uplink.
+                </DialogDescription>
+              </div>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="p-5 bg-white/[0.03] border border-white/5 rounded-2xl flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Plan Selected</div>
+                  <div className="text-sm font-black text-white uppercase tracking-tight">{selectedPlan?.name} Membership</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Total</div>
+                  <div className="text-xl font-black text-white leading-none">
+                    {isAnnual ? `$${Math.round(parseFloat(selectedPlan?.price.replace('$','')) * 0.8 * 12)}` : selectedPlan?.price}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="relative group">
+                  <CreditCard className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <input 
+                    placeholder="Card Number" 
+                    className="w-full bg-white/[0.02] border border-white/5 rounded-2xl py-4 pl-14 pr-6 focus:outline-none focus:border-primary/40 transition-all font-semibold text-white placeholder:text-muted-foreground/30 text-sm"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                   <input 
+                    placeholder="MM / YY" 
+                    className="w-full bg-white/[0.02] border border-white/5 rounded-2xl py-4 px-6 focus:outline-none focus:border-primary/40 transition-all font-semibold text-white placeholder:text-muted-foreground/30 text-sm text-center"
+                  />
+                  <input 
+                    placeholder="CVC" 
+                    className="w-full bg-white/[0.02] border border-white/5 rounded-2xl py-4 px-6 focus:outline-none focus:border-primary/40 transition-all font-semibold text-white placeholder:text-muted-foreground/30 text-sm text-center"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 px-2">
+                <Shield className="w-4 h-4 text-primary" />
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                  AES-256 Bit Encrypted Uplink
+                </span>
+              </div>
+            </div>
+
+            <button 
+              onClick={handleCheckout}
+              disabled={isCheckingOut}
+              className="w-full py-5 bg-primary text-background font-black rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_40px_rgba(45,237,156,0.25)] uppercase tracking-[0.2em] text-xs disabled:opacity-50"
+            >
+              {isCheckingOut ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <Lock className="w-4 h-4" />
+                  Complete Pre-Order
+                </>
+              )}
+            </button>
+          </div>
+          
+          <div className="bg-white/5 p-4 text-center border-t border-white/5">
+             <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest opacity-40">
+               Secured by DTE Systems Ecosystem Logic
+             </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

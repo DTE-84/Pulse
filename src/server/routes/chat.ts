@@ -120,9 +120,9 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
       return res.status(500).json({ error: "System Configuration Error", detail: "AI Key missing from Server Environment." });
     }
 
-    // Using Pro for maximum reasoning accuracy and complex behavioral mapping
+    // Using 2.5 Flash for high-speed behavioral reasoning in chat
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-pro", 
+      model: "gemini-2.5-flash", 
       systemInstruction: systemPrompt 
     });
     
@@ -137,7 +137,7 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
       history: geminiHistory,
     });
     
-    console.log(`[Nova Chat] Dispatching message to Gemini Flash for ${user?.user_name || userId}`);
+    console.log(`[Nova Chat] Dispatching message to Gemini 2.5 Flash for ${user?.user_name || userId}`);
     const result = await chat.sendMessage(String(message));
     
     if (!result.response) {

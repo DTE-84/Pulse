@@ -101,8 +101,8 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
       throw new Error("GOOGLE_GENAI_API_KEY is missing from environment telemetry.");
     }
 
-    // Using Gemini 1.5 Pro for High-Fidelity Behavioral Analysis and Goal Logic
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    // Using Gemini 2.5 Pro for High-Fidelity Behavioral Analysis and Goal Logic
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
     const result = await model.generateContent(systemPrompt);
     const report = result.response.text();
 

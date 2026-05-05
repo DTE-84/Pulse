@@ -26,7 +26,7 @@ export const handleIngest = async (req: Request, res: Response) => {
   // 1. AI-Driven Data Integrity: Auto-Categorization & Risk Scoring
   let enrichedTransactions = transactions;
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const prompt = `
       You are Nova's Behavioral Data Wrangler. 
       Analyze the following transactions and ensure they have a 'category' and 'risk_level'.
