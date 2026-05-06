@@ -59,7 +59,7 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
          ORDER BY total DESC LIMIT 3`,
         [userId]
       );
-      topCategories = categoryRes.rows.map(r => `${r.category_name} ($${parseFloat(r.total).toFixed(2)})`).join(", ");
+      topCategories = categoryRes.rows.map((r: any) => `${r.category_name} ($${parseFloat(r.total).toFixed(2)})`).join(", ");
     } catch (dbErr: any) {
       console.error("[Nova Chat] Database error (Top Categories):", dbErr.message);
     }

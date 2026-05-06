@@ -1,6 +1,6 @@
 import { query } from "../src/server/db/db";
 
-export default async function (req: any, res: any) {
+export default async function (_req: any, res: any) {
   const health: any = { 
     status: "running", 
     env: { 

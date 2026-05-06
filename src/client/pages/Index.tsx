@@ -249,7 +249,7 @@ const TriggerCard = ({
         <BarChart data={stats.chartData || fallbackChartData}>
           <Bar dataKey="value" radius={[6, 6, 6, 6]}>
             {(stats.chartData || fallbackChartData).map(
-              (entry: any, index: number) => (
+              (_entry: any, index: number) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={

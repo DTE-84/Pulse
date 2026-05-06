@@ -11,7 +11,7 @@ async function check() {
     const res = await pool.query("SELECT column_name FROM information_schema.columns WHERE table_name = 'dim_users'");
     console.log("Columns in dim_users:", res.rows.map(r => r.column_name).join(", "));
     process.exit(0);
-  } catch (err) {
+  } catch (err: any) {
     console.error("DB Check Failed:", err.message);
     process.exit(1);
   }

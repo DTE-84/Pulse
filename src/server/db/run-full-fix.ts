@@ -44,7 +44,7 @@ async function runFullFix() {
     `);
 
     // Let's just verify what we have now.
-    const res = await pool.query("SELECT * FROM dim_users LIMIT 1");
+    await pool.query("SELECT * FROM dim_users LIMIT 1");
     console.log("✅ Table state checked.");
     
   } catch (err) {

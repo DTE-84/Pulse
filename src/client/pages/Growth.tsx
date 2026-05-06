@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   TrendingUp,
   ChevronRight,
@@ -9,7 +9,6 @@ import {
   LineChart as LineChartIcon,
   Sparkles,
   Target,
-  ArrowRight,
   Plus,
 } from "lucide-react";
 import {
@@ -35,12 +34,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 export default function GrowthPage() {
   const [timeframe, setTimeframe] = useState("10m");
   const [goals, setGoals] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   // Create Goal State
@@ -61,8 +60,6 @@ export default function GrowthPage() {
       setStats(statsRes.data);
     } catch (err) {
       console.error("Failed to fetch growth data:", err);
-    } finally {
-      setLoading(false);
     }
   };
 

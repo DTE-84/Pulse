@@ -99,7 +99,7 @@ export const handleStats: RequestHandler = async (req, res) => {
       [userId]
     );
 
-    const chartData = chartRes.rows.map((row) => ({
+    const chartData = chartRes.rows.map((row: any) => ({
       day: row.day.charAt(0).toUpperCase(),
       value: parseFloat(row.value),
     }));

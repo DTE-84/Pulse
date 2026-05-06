@@ -115,7 +115,7 @@ export const authAPI = {
     } = await supabase.auth.getUser();
     if (!user) throw new Error("Not authenticated");
 
-    let { data: profile, error } = await supabase
+    let { data: profile, error: _error } = await supabase
       .from("dim_users")
       .select("*")
       .eq("user_id", user.id)

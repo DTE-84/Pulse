@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { 
   Check, 
   ChevronRight, 
   Sparkles, 
   ShieldCheck, 
-  Zap, 
   Clock, 
   CreditCard,
   Crown,

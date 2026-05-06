@@ -1,17 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { 
-  Mail, 
-  Users, 
   Send, 
   Upload, 
-  CheckCircle2, 
-  AlertCircle,
-  BarChart3,
-  ChevronRight,
-  Loader2,
-  Sparkles,
-  Search,
-  FileText
+  BarChart3, 
+  ChevronRight, 
+  Loader2, 
+  Sparkles, 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -54,7 +48,7 @@ export default function Outreach() {
   const [sending, setSending] = useState(false);
   const [leadsCount, setLeadsCount] = useState(0);
 
-  const handleFileUpload = (e: any) => {
+  const handleFileUpload = (_e: any) => {
     const count = Math.floor(Math.random() * 500) + 100; // Simulated count
     setLeadsCount(count);
     toast({

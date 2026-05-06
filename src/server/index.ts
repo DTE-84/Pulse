@@ -3,17 +3,17 @@ import express from "express";
 import cors from "cors";
 
 // 1. Lazy-loaded routes to prevent boot crashes
-const handleDemo = (req: any, res: any) => import("./routes/demo").then(m => m.handleDemo(req, res));
-const handleStats = (req: any, res: any) => import("./routes/stats").then(m => m.handleStats(req, res));
+const handleDemo = (req: any, res: any, next: any) => import("./routes/demo").then(m => m.handleDemo(req, res, next));
+const handleStats = (req: any, res: any, next: any) => import("./routes/stats").then(m => m.handleStats(req, res, next));
 const handleLogin = (req: any, res: any) => import("./routes/auth").then(m => m.handleLogin(req, res));
 const handleSignup = (req: any, res: any) => import("./routes/auth").then(m => m.handleSignup(req, res));
 const handleMe = (req: any, res: any) => import("./routes/auth").then(m => m.handleMe(req, res));
 const handleUpdateProfile = (req: any, res: any) => import("./routes/auth").then(m => m.handleUpdateProfile(req, res));
 const handleIngest = (req: any, res: any) => import("./routes/ingest").then(m => m.handleIngest(req, res));
-const handleNovaChat = (req: any, res: any) => import("./routes/chat").then(m => m.handleNovaChat(req, res));
-const handleAnalysis = (req: any, res: any) => import("./routes/analysis").then(m => m.handleAnalysis(req, res));
-const handleGetGoals = (req: any, res: any) => import("./routes/goals").then(m => m.handleGetGoals(req, res));
-const handleCreateGoal = (req: any, res: any) => import("./routes/goals").then(m => m.handleCreateGoal(req, res));
+const handleNovaChat = (req: any, res: any, next: any) => import("./routes/chat").then(m => m.handleNovaChat(req, res, next));
+const handleAnalysis = (req: any, res: any, next: any) => import("./routes/analysis").then(m => m.handleAnalysis(req, res, next));
+const handleGetGoals = (req: any, res: any, next: any) => import("./routes/goals").then(m => m.handleGetGoals(req, res, next));
+const handleCreateGoal = (req: any, res: any, next: any) => import("./routes/goals").then(m => m.handleCreateGoal(req, res, next));
 
 // 2. Middleware (Pre-loaded as they are lightweight)
 import {

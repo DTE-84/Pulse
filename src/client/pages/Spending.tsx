@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  ArrowUpRight,
-  ArrowDownRight,
   ChevronRight,
   Search,
   Filter,
@@ -22,13 +20,8 @@ import {
   History,
 } from "lucide-react";
 import {
-  BarChart,
-  Bar,
   ResponsiveContainer,
   Cell,
-  XAxis,
-  YAxis,
-  Tooltip as RechartsTooltip,
   PieChart,
   Pie,
 } from "recharts";
@@ -61,7 +54,7 @@ const categoryData = [
 
 export default function SpendingPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
-  const [stats, setStats] = useState<any>(null);
+  const [_stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
 
