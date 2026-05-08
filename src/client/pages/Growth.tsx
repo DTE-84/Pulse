@@ -96,7 +96,7 @@ export default function GrowthPage() {
   };
 
   const getGoalIcon = (name: string) => {
-    const n = name.toLowerCase();
+    const n = (name || "").toLowerCase();
     if (n.includes("emergency") || n.includes("fund")) return PiggyBank;
     if (n.includes("house") || n.includes("home") || n.includes("car"))
       return Wallet;

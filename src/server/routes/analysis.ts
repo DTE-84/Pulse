@@ -115,14 +115,30 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
 
     console.log("[Nova Analysis] Engaging Gemini 1.5 Flash...");
     const apiKey = process.env.GOOGLE_GENAI_API_KEY;
-    if (!apiKey) throw new Error("GOOGLE_GENAI_API_KEY is missing from environment.");
+    let report = "";
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent(systemPrompt);
-    const report = result.response.text();
+    if (!apiKey) {
+      console.warn("[Nova Analysis] GOOGLE_GENAI_API_KEY missing. Activating Deterministic Fallback.");
+      report = generateFallbackReport(user?.user_name, currentSpend, savingsImprovement, topTrigger?.trigger_name, goalInsight);
+    } else {
+      try {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        
+        const result = await model.generateContent(systemPrompt);
+        
+        if (!result || !result.response) {
+          throw new Error("Empty response from Gemini.");
+        }
+        
+        report = result.response.text();
+        console.log("[Nova Analysis] Deep Scan Successful.");
+      } catch (aiErr: any) {
+        console.error("[Nova Analysis] AI Uplink Failed:", aiErr.message);
+        report = generateFallbackReport(user?.user_name, currentSpend, savingsImprovement, topTrigger?.trigger_name, goalInsight);
+      }
+    }
 
-    console.log("[Nova Analysis] Deep Scan Successful.");
     res.json({
       report,
       summary: {
@@ -139,7 +155,27 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
     res.status(500).json({ 
       error: "Nova Uplink Interrupted", 
       detail: err.message,
-      hint: "Verify Gemini API Key and DB connectivity." 
+      hint: "Verify DB connectivity." 
     });
   }
 };
+
+/**
+ * Deterministic Fallback: Generates a structured report based on telemetry
+ * when the AI service is unreachable.
+ */
+function generateFallbackReport(
+  name: string = "Subject", 
+  spend: number, 
+  savings: number, 
+  trigger: string | null, 
+  goal: string
+): string {
+  const trend = savings >= 0 ? "positive" : "concerning";
+  const velocity = spend > 0 ? "active" : "dormant";
+  
+  return `Telemetry scan for ${name} complete. Your current spending velocity is ${velocity} at $${spend.toFixed(2)}. ` +
+         `We've detected a ${trend} savings delta of $${Math.abs(savings).toFixed(2)} compared to last month. ` +
+         `${trigger ? `Primary catalyst identified: ${trigger}.` : "Behavioral rhythm remains stable."} ` +
+         `${goal || "No immediate goal drift detected."} Protocol: Initiate 'Brain Defrag' to optimize monthly trajectory.`;
+}
