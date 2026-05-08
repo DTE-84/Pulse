@@ -1,7 +1,5 @@
-export default function (_req: any, res: any) {
-  res.status(200).json({ 
-    message: "Pulse API Index (Native)",
-    endpoints: ["/api/ping", "/api/health", "/api/nova/chat"],
-    status: "online"
-  });
-}
+import { createServer } from "../src/server/index";
+
+// Export the Express server as a Vercel serverless function
+const app = createServer();
+export default app;

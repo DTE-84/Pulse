@@ -79,7 +79,7 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
 
     // Calculate Velocity and Drift
     const dayOfMonth = new Date().getDate();
-    const monthlyBaseline = parseFloat(user?.baseline_spend || 2500);
+    const monthlyBaseline = parseFloat(user?.baseline_spend || "2500");
     const dailyBaseline = monthlyBaseline / 30;
     const currentVelocity = currentMonthSpend / (dayOfMonth || 1);
     const drift = currentMonthSpend - (dailyBaseline * dayOfMonth);
@@ -120,9 +120,9 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
       return res.status(500).json({ error: "System Configuration Error", detail: "AI Key missing from Server Environment." });
     }
 
-    // Using 2.5 Flash for high-speed behavioral reasoning in chat
+    // Using 1.5 Flash for high-speed behavioral reasoning in chat
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash", 
+      model: "gemini-1.5-flash", 
       systemInstruction: systemPrompt 
     });
     

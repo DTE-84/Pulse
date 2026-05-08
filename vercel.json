@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/nova/chat", "destination": "/api/nova-chat" },
+    { "source": "/api/(.*)", "destination": "/api/index" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "buildCommand": "npm run build",
