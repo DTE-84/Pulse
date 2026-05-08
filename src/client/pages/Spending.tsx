@@ -86,13 +86,13 @@ export default function SpendingPage() {
     return CreditCard;
   };
 
-  const filteredTransactions = selectedCategory
+  const filteredTransactions = selectedCategory && selectedCategory.name
     ? transactions.filter((tx) =>
-        tx.category_name
-          ?.toLowerCase()
+        (tx.category_name || "")
+          .toLowerCase()
           .includes(selectedCategory.name.toLowerCase()),
       )
-    : [];
+    : transactions;
   return (
     <div className="p-4 sm:p-8 md:p-12 max-w-7xl mx-auto space-y-12 text-foreground">
       <div className="flex items-center gap-3 text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">

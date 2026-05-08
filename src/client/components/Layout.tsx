@@ -42,7 +42,7 @@ const Sidebar = () => {
             {/* LOGO CONTAINER */}
             <div className="relative z-10 w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform">
               <img
-                src={`${import.meta.env.BASE_URL}pulsesolologo.png`}
+                src={`${import.meta.env.BASE_URL}PulseNovaLogoTrans.png`}
                 alt="Pulse"
                 className="w-12 h-12 object-contain filter drop-shadow-[0_0_15px_rgba(45,237,156,0.3)]"
               />
@@ -324,7 +324,7 @@ export const Layout = ({ children }: LayoutProps) => {
             <div className="relative w-10 h-10 flex items-center justify-center">
               <div className="relative z-10 w-10 h-10 flex items-center justify-center overflow-hidden">
                 <img
-                  src={`${import.meta.env.BASE_URL}pulsesolologo.png`}
+                  src={`${import.meta.env.BASE_URL}PulseNovaLogoTrans.png`}
                   alt="Pulse"
                   className="w-10 h-10 object-contain"
                 />

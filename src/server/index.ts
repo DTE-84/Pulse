@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
 import cors from "cors";
 
 // 1. Direct Imports for Core Routes (Eliminate lazy-load bundling issues)

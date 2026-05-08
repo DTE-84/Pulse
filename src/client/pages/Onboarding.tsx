@@ -155,7 +155,7 @@ export default function Onboarding() {
                 <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150 animate-pulse" />
                 <div className="w-24 h-24 flex items-center justify-center relative z-10 drop-shadow-[0_0_20px_rgba(45,237,156,0.3)]">
                   <img 
-                    src={`${import.meta.env.BASE_URL}pulsesolologo.png`} 
+                    src={`${import.meta.env.BASE_URL}PulseNovaLogoTrans.png`} 
                     alt="Logo" 
                     className="w-24 h-24 object-contain" 
                   />

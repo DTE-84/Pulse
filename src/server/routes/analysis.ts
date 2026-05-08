@@ -3,70 +3,86 @@ import { query } from "../db/db";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const handleAnalysis: RequestHandler = async (req, res) => {
-  console.log("[Nova Analysis] Deep Scan Initiated for User:", req.userId);
+  const userId = req.userId;
+  console.log(`[Nova Deep Scan] Initiated for User: ${userId}`);
 
   try {
-    const userId = req.userId;
     if (!userId) {
-      console.error("[Nova Analysis] Error: No userId on request.");
       return res.status(401).json({ message: "Authentication required." });
     }
 
-    // 1. Fetch User Profile
+    // 1. Fetch High-Fidelity Telemetry
     console.log("[Nova Analysis] Querying dim_users...");
-    const userRes = await query(
-      `SELECT user_name, baseline_spend, monthly_income FROM dim_users WHERE user_id = $1`,
-      [userId]
-    );
-    const user = userRes.rows[0];
-
-    if (!user) {
-      console.warn("[Nova Analysis] Subject not found in dim_users. Using fallback persona.");
+    let user;
+    try {
+      const userRes = await query(
+        `SELECT user_name, baseline_spend, monthly_income FROM dim_users WHERE user_id = $1`,
+        [userId]
+      );
+      user = userRes.rows[0];
+    } catch (dbErr: any) {
+      console.error("[Nova Analysis] DB Error (dim_users):", dbErr.message);
+      return res.status(500).json({ error: "Telemetry Linkage Failed", detail: dbErr.message });
     }
 
-    // 2. Fetch Telemetry
+    // 2. Fetch Spending Data
     console.log("[Nova Analysis] Querying fact_transactions...");
-    const currentMonthRes = await query(
-      `SELECT COALESCE(SUM(amount), 0) as spend FROM fact_transactions 
-       WHERE user_id = $1 AND purchase_date >= DATE_TRUNC('month', CURRENT_DATE)`,
-      [userId]
-    );
-    const lastMonthRes = await query(
-      `SELECT COALESCE(SUM(amount), 0) as spend FROM fact_transactions 
-       WHERE user_id = $1 AND purchase_date >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month') 
-       AND purchase_date < DATE_TRUNC('month', CURRENT_DATE)`,
-      [userId]
-    );
+    let currentSpend = 0;
+    let lastMonthSpend = 0;
+    try {
+      const currentMonthRes = await query(
+        `SELECT COALESCE(SUM(amount), 0) as spend FROM fact_transactions 
+         WHERE user_id = $1 AND purchase_date >= DATE_TRUNC('month', CURRENT_DATE)`,
+        [userId]
+      );
+      const lastMonthRes = await query(
+        `SELECT COALESCE(SUM(amount), 0) as spend FROM fact_transactions 
+         WHERE user_id = $1 AND purchase_date >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month') 
+         AND purchase_date < DATE_TRUNC('month', CURRENT_DATE)`,
+        [userId]
+      );
+      currentSpend = parseFloat(currentMonthRes.rows[0]?.spend || "0");
+      lastMonthSpend = parseFloat(lastMonthRes.rows[0]?.spend || "0");
+    } catch (dbErr: any) {
+      console.error("[Nova Analysis] DB Error (fact_transactions):", dbErr.message);
+    }
 
-    const currentSpend = parseFloat(currentMonthRes.rows[0]?.spend || "0");
-    const lastMonthSpend = parseFloat(lastMonthRes.rows[0]?.spend || "0");
     const income = parseFloat(user?.monthly_income || "5200");
-    
     const currentSavings = income - currentSpend;
     const lastMonthSavings = income - lastMonthSpend;
     const savingsImprovement = currentSavings - lastMonthSavings;
 
-    // Fetch Active Goals
+    // 3. Fetch Active Goals
     console.log("[Nova Analysis] Querying dim_goals...");
-    const goalsRes = await query(
-      `SELECT goal_name, target_amount, current_progress FROM dim_goals WHERE user_id = $1`,
-      [userId]
-    );
-    const goals = goalsRes.rows;
+    let goals = [];
+    try {
+      const goalsRes = await query(
+        `SELECT goal_name, target_amount, current_progress FROM dim_goals WHERE user_id = $1`,
+        [userId]
+      );
+      goals = goalsRes.rows;
+    } catch (dbErr: any) {
+      console.error("[Nova Analysis] DB Error (dim_goals):", dbErr.message);
+    }
 
-    // Fetch Emotional Trigger Concentration
+    // 4. Fetch Emotional Catalyst
     console.log("[Nova Analysis] Querying dim_triggers...");
-    const triggerRes = await query(
-      `SELECT t.trigger_name, SUM(f.amount) as total
-       FROM fact_transactions f
-       JOIN dim_triggers t ON f.trigger_id = t.trigger_id
-       WHERE f.user_id = $1 AND f.purchase_date >= NOW() - INTERVAL '30 days'
-       GROUP BY t.trigger_name ORDER BY total DESC LIMIT 1`,
-      [userId]
-    );
-    const topTrigger = triggerRes.rows[0];
+    let topTrigger;
+    try {
+      const triggerRes = await query(
+        `SELECT t.trigger_name, SUM(f.amount) as total
+         FROM fact_transactions f
+         JOIN dim_triggers t ON f.trigger_id = t.trigger_id
+         WHERE f.user_id = $1 AND f.purchase_date >= NOW() - INTERVAL '30 days'
+         GROUP BY t.trigger_name ORDER BY total DESC LIMIT 1`,
+        [userId]
+      );
+      topTrigger = triggerRes.rows[0];
+    } catch (dbErr: any) {
+      console.error("[Nova Analysis] DB Error (dim_triggers):", dbErr.message);
+    }
 
-    // 3. Build AI Insight
+    // 5. Build AI Insight
     let goalInsight = "";
     if (goals.length > 0 && savingsImprovement > 0) {
       const primaryGoal = goals[0];
@@ -82,31 +98,31 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
 
     const systemPrompt = `
       You are Nova, the Senior Behavioral Analyst.
-      Analyze this telemetry:
+      Analyze this telemetry with precision:
       - Subject: ${user?.user_name || 'Anonymous Subject'}
       - Monthly Income: $${income.toFixed(2)}
       - Current Spend: $${currentSpend.toFixed(2)}
       - Last Month Spend: $${lastMonthSpend.toFixed(2)}
       - Savings Improvement: $${savingsImprovement.toFixed(2)}
       - Top Catalyst: ${topTrigger ? topTrigger.trigger_name : 'Stable Rhythm'}
-      - Goal Progress: ${goalInsight || 'Deterministic trajectory maintained.'}
+      - Goal Logic: ${goalInsight || 'Deterministic trajectory maintained.'}
 
-      Requirements:
+      Report Requirements:
       1. Use clinical, high-fidelity terminology (Behavioral Velocity, Spending Drift).
-      2. Max 4 sentences. Be impactful.
-      3. Suggest one "Brain Defrag" protocol.
+      2. Keep it to 4 concise sentences.
+      3. Suggest one "Brain Defrag" protocol to optimize velocity.
     `;
 
-    console.log("[Nova Analysis] Engaging Gemini 1.5 Pro...");
+    console.log("[Nova Analysis] Engaging Gemini 1.5 Flash...");
     const apiKey = process.env.GOOGLE_GENAI_API_KEY;
-    if (!apiKey) throw new Error("GOOGLE_GENAI_API_KEY is undefined in server environment.");
+    if (!apiKey) throw new Error("GOOGLE_GENAI_API_KEY is missing from environment.");
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(systemPrompt);
     const report = result.response.text();
 
-    console.log("[Nova Analysis] Deep Scan Complete.");
+    console.log("[Nova Analysis] Deep Scan Successful.");
     res.json({
       report,
       summary: {
@@ -119,11 +135,11 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
     });
 
   } catch (err: any) {
-    console.error("[Nova Analysis CRASH]:", err.message);
+    console.error("[Nova Analysis CRITICAL FAILURE]:", err.message);
     res.status(500).json({ 
-      error: "Nova Deep Scan Interrupted", 
+      error: "Nova Uplink Interrupted", 
       detail: err.message,
-      hint: "Check DATABASE_URL and GOOGLE_GENAI_API_KEY on server." 
+      hint: "Verify Gemini API Key and DB connectivity." 
     });
   }
 };
