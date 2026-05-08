@@ -1,21 +1,17 @@
 import "dotenv/config";
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 
-// 1. Lazy-loaded routes to prevent boot crashes
-const handleDemo = (req: any, res: any, next: any) => import("./routes/demo").then(m => m.handleDemo(req, res, next));
-const handleStats = (req: any, res: any, next: any) => import("./routes/stats").then(m => m.handleStats(req, res, next));
-const handleLogin = (req: any, res: any) => import("./routes/auth").then(m => m.handleLogin(req, res));
-const handleSignup = (req: any, res: any) => import("./routes/auth").then(m => m.handleSignup(req, res));
-const handleMe = (req: any, res: any) => import("./routes/auth").then(m => m.handleMe(req, res));
-const handleUpdateProfile = (req: any, res: any) => import("./routes/auth").then(m => m.handleUpdateProfile(req, res));
-const handleIngest = (req: any, res: any) => import("./routes/ingest").then(m => m.handleIngest(req, res));
-const handleNovaChat = (req: any, res: any, next: any) => import("./routes/chat").then(m => m.handleNovaChat(req, res, next));
-const handleAnalysis = (req: any, res: any, next: any) => import("./routes/analysis").then(m => m.handleAnalysis(req, res, next));
-const handleGetGoals = (req: any, res: any, next: any) => import("./routes/goals").then(m => m.handleGetGoals(req, res, next));
-const handleCreateGoal = (req: any, res: any, next: any) => import("./routes/goals").then(m => m.handleCreateGoal(req, res, next));
+// 1. Direct Imports for Core Routes (Eliminate lazy-load bundling issues)
+import { handleDemo } from "./routes/demo";
+import { handleStats } from "./routes/stats";
+import { handleLogin, handleSignup, handleMe, handleUpdateProfile } from "./routes/auth";
+import { handleIngest } from "./routes/ingest";
+import { handleNovaChat } from "./routes/chat";
+import { handleAnalysis } from "./routes/analysis";
+import { handleGetGoals, handleCreateGoal } from "./routes/goals";
 
-// 2. Middleware (Pre-loaded as they are lightweight)
+// 2. Middleware
 import {
   securityHeaders,
   requireAuth,
@@ -47,8 +43,8 @@ export function createServer() {
   app.use(express.json({ limit: "1mb" }));
   app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
-  // Routes
-  app.get("/api/ping", (_req, res) => res.json({ message: "ping" }));
+  // High-Fidelity Routing Table
+  app.get("/api/ping", (_req, res) => res.json({ message: "ping", status: "Deterministic Uplink Active" }));
   app.get("/api/demo", handleDemo as any);
   app.get("/api/stats", apiLimiter, requireAuth, handleStats as any);
   app.post("/api/nova/chat", apiLimiter, requireAuth, handleNovaChat as any);
@@ -61,9 +57,22 @@ export function createServer() {
   app.get("/api/auth/me", requireAuth, handleMe as any);
   app.patch("/api/auth/update", requireAuth, handleUpdateProfile as any);
 
+  // Diagnostic Endpoint (Internal Security Node)
+  app.get("/api/debug/system", requireAuth, async (req, res) => {
+    res.json({
+      userId: req.userId,
+      env: {
+        has_gemini_key: !!process.env.GOOGLE_GENAI_API_KEY,
+        has_supabase_url: !!process.env.VITE_SUPABASE_URL,
+        node_env: process.env.NODE_ENV
+      },
+      timestamp: new Date().toISOString()
+    });
+  });
+
   app.use((err: any, _req: any, res: any, _next: any) => {
-    console.error("[PULSE SERVER ERROR]:", err);
-    res.status(500).json({ message: "Internal server error", detail: err.message });
+    console.error("[PULSE SERVER CRASH]:", err.message);
+    res.status(500).json({ message: "Nova Uplink Interrupted", detail: err.message });
   });
 
   return app;
