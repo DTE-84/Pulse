@@ -639,6 +639,13 @@ const handleAnalysis = async (req, res) => {
     } catch (dbErr) {
       console.error("[Nova Analysis] DB Error (fact_transactions):", dbErr.message);
     }
+    if (currentSpend === 0 && lastMonthSpend === 0) {
+      console.warn(`[Nova Analysis] Insufficient telemetry for User: ${userId}`);
+      return res.status(400).json({
+        message: "Insufficient telemetry for a deep scan. Please sync your transaction data to initialize high-fidelity analysis.",
+        hint: "Use the 'Sync Data' node on the dashboard."
+      });
+    }
     const income = parseFloat(user?.monthly_income || "5200");
     const currentSavings = income - currentSpend;
     const lastMonthSavings = income - lastMonthSpend;

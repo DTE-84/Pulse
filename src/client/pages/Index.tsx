@@ -410,12 +410,13 @@ export default function Index() {
       // Refresh stats to get latest novaInsight
       const statsRes = await statsAPI.get();
       setStats(statsRes.data);
-    } catch (err) {
+    } catch (err: any) {
       setAnalyzing(false);
+      const errorMsg = err.response?.data?.message || "Nova encountered a signal deviation during the scan.";
       toast({
         variant: "destructive",
         title: "Analysis failed",
-        description: "Nova encountered a signal deviation during the scan.",
+        description: errorMsg,
       });
     }
   };

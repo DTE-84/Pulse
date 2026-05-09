@@ -151,16 +151,18 @@ export default function NovaChat() {
         {
           role: "assistant",
           type: "insight",
-          content: res.data.analysis,
+          content: res.data.report,
           timestamp: new Date().toLocaleTimeString(),
         },
       ]);
-    } catch {
+    } catch (err: any) {
+      console.error("[Nova] Deep Scan error:", err);
+      const errorMsg = err.response?.data?.message || "Deep scan failed. Please ensure your bank data is synced and try again.";
       setChatMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: "Deep scan failed. Please try again.",
+          content: errorMsg,
           timestamp: new Date().toLocaleTimeString(),
         },
       ]);
