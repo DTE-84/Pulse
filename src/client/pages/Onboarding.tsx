@@ -47,9 +47,9 @@ export default function Onboarding() {
     try {
       const payload = {
         intentions: goals,
-        baseline_spend: monthlySpend[0], 
-        nova_tone: novaTone,              
-        onboarding_completed: true,     
+        baselineSpend: monthlySpend[0], 
+        novaTone: novaTone,              
+        onboardingCompleted: true,     
       };
 
       await authAPI.updateProfile(payload);

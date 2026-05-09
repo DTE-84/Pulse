@@ -213,6 +213,11 @@ export const authAPI = {
 
     return { data };
   },
+
+  deleteAccount: async () => {
+    const response = await API.delete("/api/auth/delete");
+    return response.data;
+  },
 };
 
 export const transactionsAPI = {

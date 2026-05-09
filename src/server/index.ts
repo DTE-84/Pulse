@@ -5,7 +5,7 @@ import cors from "cors";
 // 1. Direct Imports for Core Routes (Eliminate lazy-load bundling issues)
 import { handleDemo } from "./routes/demo";
 import { handleStats } from "./routes/stats";
-import { handleLogin, handleSignup, handleMe, handleUpdateProfile } from "./routes/auth";
+import { handleLogin, handleSignup, handleMe, handleUpdateProfile, handleDeleteAccount } from "./routes/auth";
 import { handleIngest } from "./routes/ingest";
 import { handleNovaChat } from "./routes/chat";
 import { handleAnalysis } from "./routes/analysis";
@@ -60,6 +60,7 @@ export function createServer() {
   app.post("/api/auth/signup", authLimiter, handleSignup as any);
   app.get("/api/auth/me", requireAuth, handleMe as any);
   app.patch("/api/auth/update", requireAuth, handleUpdateProfile as any);
+  app.delete("/api/auth/delete", requireAuth, handleDeleteAccount as any);
 
   // Diagnostic Endpoint (Internal Security Node)
   app.get("/api/debug/system", requireAuth, async (req, res) => {

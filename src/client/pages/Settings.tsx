@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   User,
   Shield,
@@ -67,6 +68,7 @@ const modeDescriptions: Record<string, string> = {
 };
 
 export default function Settings() {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const [protocol, setProtocol] = useState(
@@ -246,7 +248,12 @@ export default function Settings() {
             label="Account details"
             description="Manage your login information and future account preferences."
             rightElement={
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              <button 
+                onClick={() => navigate("/profile")}
+                className="w-10 h-10 rounded-xl bg-muted border border-border flex items-center justify-center hover:bg-muted/80 transition-colors"
+              >
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </button>
             }
             border={false}
           />

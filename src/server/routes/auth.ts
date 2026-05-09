@@ -87,3 +87,11 @@ export const handleUpdateProfile = async (req: Request, res: Response) => {
     res.json({ message: "Profile updated.", user: result.rows[0] });
   } catch { res.status(500).json({ message: "Update error." }); }
 };
+
+export const handleDeleteAccount = async (req: Request, res: Response) => {
+  try {
+    // Note: CASCADE in DB should handle transactions, goals, etc.
+    await query("DELETE FROM dim_users WHERE user_id = $1", [req.userId]);
+    res.json({ message: "Account successfully terminated." });
+  } catch { res.status(500).json({ message: "Termination error." }); }
+};
