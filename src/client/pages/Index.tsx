@@ -763,7 +763,7 @@ export default function Index() {
             <p className="text-muted-foreground font-semibold max-w-xl leading-relaxed">
               Lock in the{" "}
               <span className="text-primary underline underline-offset-4 decoration-primary/30">
-                Early-Bird $9.99/mo rate
+                Early-Bird $14.99/mo rate
               </span>{" "}
                Get exclusive access to the investor network and custom
               behavior triggers at launch.
