@@ -8,7 +8,7 @@ export const handleGetGoals: RequestHandler = async (req, res) => {
 
     const result = await query(
       `SELECT goal_id, goal_name as name, target_amount as target, current_progress as current, deadline 
-       FROM dim_goals WHERE user_id = $1 ORDER BY created_at DESC`,
+       FROM dim_goals WHERE user_id = $1 ORDER BY updated_at DESC`,
       [userId]
     );
 

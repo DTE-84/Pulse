@@ -23,6 +23,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { paymentsAPI } from "@/lib/api";
 
 const plans = [
   {
@@ -115,20 +116,24 @@ export default function SubscriptionPage() {
     }, 150000000); // Intentionally long or just use a real redirect logic
   };
 
-  const handleStripeRedirect = () => {
+  const handleStripeRedirect = async () => {
+    if (!selectedPlan) return;
     setIsCheckingOut(true);
-    
-    // Placeholder for actual Stripe Checkout URL
-    // const STRIPE_URL = selectedPlan?.name === "Elite" ? "https://buy.stripe.com/..." : "...";
-    
-    setTimeout(() => {
-       setIsCheckingOut(false);
-       setSelectedPlan(null);
-       toast({
-        title: "Uplink Secure",
-        description: "Pre-order signal received. Welcome to the Elite Nexus.",
+    try {
+      const { url } = await paymentsAPI.createSession(selectedPlan.name, isAnnual);
+      if (url) {
+        window.location.href = url;
+      } else {
+        throw new Error("No redirect URL received.");
+      }
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Checkout Error",
+        description: "Could not established analytical link to payment gateway.",
       });
-    }, 2000);
+      setIsCheckingOut(false);
+    }
   };
 
   return (

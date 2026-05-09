@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS public.dim_users (
     onboarding_completed BOOLEAN DEFAULT FALSE,
     avatar_url TEXT,
     is_demo BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 2. Dimension: Categories (Behavioral Taxonomy)
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS public.threads (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     title TEXT,
     created_by uuid REFERENCES public.dim_users(user_id) ON DELETE CASCADE,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 6. Fact: Messages (AI Interaction Logs)
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS public.messages (
     user_id uuid REFERENCES public.dim_users(user_id) ON DELETE SET NULL,
     content TEXT NOT NULL,
     role VARCHAR(20) DEFAULT 'user', -- user, assistant, system
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 7. Dimension: Goals (Target Nodes)
@@ -70,14 +70,44 @@ CREATE TABLE IF NOT EXISTS public.dim_goals (
     target_amount DECIMAL(12, 2) NOT NULL,
     current_progress DECIMAL(12, 2) DEFAULT 0,
     deadline DATE,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- 8. Dimension: Plaid Items (Metadata - Safe for RLS/Client)
+CREATE TABLE IF NOT EXISTS public.plaid_items (
+    item_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid REFERENCES public.dim_users(user_id) ON DELETE CASCADE,
+    plaid_item_id TEXT UNIQUE NOT NULL,
+    institution_name TEXT,
+    status TEXT DEFAULT 'active',
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 9. Security: Plaid Secrets (Encrypted Tokens - Internal Use Only)
+CREATE TABLE IF NOT EXISTS public.plaid_secrets (
+    secret_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    item_id uuid UNIQUE REFERENCES public.plaid_items(item_id) ON DELETE CASCADE,
+    access_token_encrypted TEXT NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS and Policies
+ALTER TABLE public.plaid_items ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view own plaid items" ON public.plaid_items FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own plaid items" ON public.plaid_items FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own plaid items" ON public.plaid_items FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can delete own plaid items" ON public.plaid_items FOR DELETE USING (auth.uid() = user_id);
+
+-- Update Transactions for External Traceability
+ALTER TABLE public.fact_transactions ADD COLUMN IF NOT EXISTS external_id TEXT UNIQUE;
+ALTER TABLE public.fact_transactions ADD COLUMN IF NOT EXISTS merchant_name TEXT;
 
 -- Performance & Integrity Indexes
 CREATE INDEX IF NOT EXISTS idx_fact_transactions_user_id ON public.fact_transactions(user_id);
 CREATE INDEX IF NOT EXISTS idx_fact_transactions_date ON public.fact_transactions(purchase_date);
 CREATE INDEX IF NOT EXISTS idx_messages_thread_id ON public.messages(thread_id);
 CREATE INDEX IF NOT EXISTS idx_dim_goals_user_id ON public.dim_goals(user_id);
+CREATE INDEX IF NOT EXISTS idx_plaid_items_user_id ON public.plaid_items(user_id);
 
 -- Insert Default Values for Signal Clarity
 INSERT INTO public.dim_categories (category_name, risk_level) VALUES

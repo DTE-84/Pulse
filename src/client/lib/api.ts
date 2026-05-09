@@ -220,6 +220,24 @@ export const authAPI = {
   },
 };
 
+export const paymentsAPI = {
+  createSession: async (planName: string, isAnnual: boolean) => {
+    const response = await API.post("/api/payments/create-session", { planName, isAnnual });
+    return response.data;
+  },
+};
+
+export const plaidAPI = {
+  createLinkToken: async () => {
+    const response = await API.post("/api/plaid/create-link-token");
+    return response.data;
+  },
+  exchangeToken: async (publicToken: string, institutionName: string) => {
+    const response = await API.post("/api/plaid/exchange-token", { publicToken, institutionName });
+    return response.data;
+  },
+};
+
 export const transactionsAPI = {
   getAll: async (params?: any) => {
     const {
@@ -283,7 +301,7 @@ export const goalsAPI = {
       .from("dim_goals")
       .select("*")
       .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+      .order("updated_at", { ascending: false });
     if (error) throw error;
     const mapped = data.map((g) => ({
       goal_id: g.goal_id,

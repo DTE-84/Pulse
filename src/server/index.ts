@@ -11,6 +11,8 @@ import { handleNovaChat } from "./routes/chat";
 import { handleAnalysis } from "./routes/analysis";
 import { handleGetGoals, handleCreateGoal } from "./routes/goals";
 import { handleStripeWebhook } from "./routes/webhooks";
+import { createCheckoutSession } from "./routes/payments";
+import { createLinkToken, exchangePublicToken } from "./routes/plaid";
 
 // 2. Middleware
 import {
@@ -49,6 +51,12 @@ export function createServer() {
 
   // High-Fidelity Routing Table
   app.get("/api/ping", (_req, res) => res.json({ message: "ping", status: "Deterministic Uplink Active" }));
+  
+  // Financial Uplink Routes
+  app.post("/api/payments/create-session", requireAuth, createCheckoutSession as any);
+  app.post("/api/plaid/create-link-token", requireAuth, createLinkToken as any);
+  app.post("/api/plaid/exchange-token", requireAuth, exchangePublicToken as any);
+
   app.get("/api/demo", handleDemo as any);
   app.get("/api/stats", apiLimiter, requireAuth, handleStats as any);
   app.post("/api/nova/chat", apiLimiter, requireAuth, handleNovaChat as any);

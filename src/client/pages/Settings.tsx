@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { useTheme } from "@/components/theme-provider";
+import { PlaidLinkButton } from "@/components/PlaidLink";
 
 const SettingGroup = ({ title, description, children }: any) => (
   <div className="space-y-6">
@@ -223,6 +224,16 @@ export default function Settings() {
             description="Sensitive financial data is protected with bank-grade security practices."
             rightElement={
               <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(45,237,156,0.5)]" />
+            }
+          />
+          <SettingItem
+            icon={Cpu}
+            label="Bank connections"
+            description="Link your financial institutions for live telemetry ingestion."
+            rightElement={
+              <PlaidLinkButton 
+                className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 text-[9px] font-black uppercase tracking-widest h-9 px-4 rounded-xl"
+              />
             }
           />
           <SettingItem

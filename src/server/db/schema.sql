@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS "dim_users" (
     initial_balance DECIMAL(10, 2) DEFAULT 15000.00,
     nova_tone VARCHAR(50) DEFAULT 'Balanced',
     avatar_url TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 2. Dimension: Categories (Behavioral Taxonomy)
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS "threads" (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     title TEXT,
     created_by INT REFERENCES "dim_users"(user_id) ON DELETE SET NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 5. Fact: Messages (AI Interaction Logs)
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS "messages" (
     user_id INT REFERENCES "dim_users"(user_id) ON DELETE SET NULL,
     content TEXT NOT NULL,
     role VARCHAR(20) DEFAULT 'user', -- user, system, assistant
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Performance & Integrity Indexes
@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS "dim_goals" (
     target_amount DECIMAL(12, 2) NOT NULL,
     current_progress DECIMAL(12, 2) DEFAULT 0,
     deadline DATE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Update Fact table to include Trigger linkage
