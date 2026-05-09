@@ -28,7 +28,7 @@ const plans = [
   {
     name: "Standard",
     price: "$9.99",
-    period: "Forever",
+    period: "/MO",
     description: "Essential tools for basic financial tracking.",
     features: [
       "Basic bank connection (1 account)",

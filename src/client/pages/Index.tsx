@@ -765,7 +765,7 @@ export default function Index() {
               <span className="text-primary underline underline-offset-4 decoration-primary/30">
                 Early-Bird $9.99/mo rate
               </span>{" "}
-              forever. Get exclusive access to the investor network and custom
+               Get exclusive access to the investor network and custom
               behavior triggers at launch.
             </p>
           </div>
