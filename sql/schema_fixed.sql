@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS public.dim_users (
     nova_tone VARCHAR(50) DEFAULT 'Balanced',
     onboarding_completed BOOLEAN DEFAULT FALSE,
     avatar_url TEXT,
+    is_demo BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

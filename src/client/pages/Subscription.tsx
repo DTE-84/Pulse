@@ -58,7 +58,7 @@ const plans = [
   },
   {
     name: "Elite",
-    price: "$19.99",
+    price: "$14.99",
     period: "/mo",
     description: "Secure the early-bird pre-order rate. Full Elite benefits at launch.",
     features: [
@@ -93,14 +93,42 @@ export default function SubscriptionPage() {
 
   const handleCheckout = () => {
     setIsCheckingOut(true);
+    
+    // In production, this will redirect to Stripe Checkout
+    console.log("[PulseAi] Initializing Stripe Checkout for:", selectedPlan?.name);
+    
     setTimeout(() => {
       setIsCheckingOut(false);
       setSelectedPlan(null);
       toast({
-        title: "Uplink Secure",
-        description: "Your Pre-Order has been registered. Welcome to the Elite Nexus.",
+        title: "Redirecting to Stripe",
+        description: "Establishing secure uplink to payment gateway...",
       });
-    }, 2500);
+      
+      // Simulate successful redirect/return
+      setTimeout(() => {
+        toast({
+          title: "Uplink Secure",
+          description: "Your Pre-Order has been registered. Welcome to the Elite Nexus.",
+        });
+      }, 2000);
+    }, 150000000); // Intentionally long or just use a real redirect logic
+  };
+
+  const handleStripeRedirect = () => {
+    setIsCheckingOut(true);
+    
+    // Placeholder for actual Stripe Checkout URL
+    // const STRIPE_URL = selectedPlan?.name === "Elite" ? "https://buy.stripe.com/..." : "...";
+    
+    setTimeout(() => {
+       setIsCheckingOut(false);
+       setSelectedPlan(null);
+       toast({
+        title: "Uplink Secure",
+        description: "Pre-order signal received. Welcome to the Elite Nexus.",
+      });
+    }, 2000);
   };
 
   return (
@@ -284,24 +312,17 @@ export default function SubscriptionPage() {
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="relative group">
-                  <CreditCard className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                  <input 
-                    placeholder="Card Number" 
-                    className="w-full bg-white/[0.02] border border-white/5 rounded-2xl py-4 pl-14 pr-6 focus:outline-none focus:border-primary/40 transition-all font-semibold text-white placeholder:text-muted-foreground/30 text-sm"
-                  />
+              <div className="p-6 bg-primary/5 border border-primary/20 rounded-2xl space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                    <ShieldCheck className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="text-[10px] font-black text-white uppercase tracking-widest">Secure Checkout via Stripe</div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                   <input 
-                    placeholder="MM / YY" 
-                    className="w-full bg-white/[0.02] border border-white/5 rounded-2xl py-4 px-6 focus:outline-none focus:border-primary/40 transition-all font-semibold text-white placeholder:text-muted-foreground/30 text-sm text-center"
-                  />
-                  <input 
-                    placeholder="CVC" 
-                    className="w-full bg-white/[0.02] border border-white/5 rounded-2xl py-4 px-6 focus:outline-none focus:border-primary/40 transition-all font-semibold text-white placeholder:text-muted-foreground/30 text-sm text-center"
-                  />
-                </div>
+                <p className="text-[10px] font-semibold text-muted-foreground leading-relaxed">
+                  You will be redirected to Stripe's secure portal to complete your pre-order. 
+                  Pulse never stores your credit card details.
+                </p>
               </div>
 
               <div className="flex items-center gap-3 px-2">
@@ -313,7 +334,7 @@ export default function SubscriptionPage() {
             </div>
 
             <button 
-              onClick={handleCheckout}
+              onClick={handleStripeRedirect}
               disabled={isCheckingOut}
               className="w-full py-5 bg-primary text-background font-black rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_40px_rgba(45,237,156,0.25)] uppercase tracking-[0.2em] text-xs disabled:opacity-50"
             >
@@ -322,7 +343,7 @@ export default function SubscriptionPage() {
               ) : (
                 <>
                   <Lock className="w-4 h-4" />
-                  Complete Pre-Order
+                  Proceed to Secure Checkout
                 </>
               )}
             </button>

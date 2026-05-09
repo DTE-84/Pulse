@@ -13,6 +13,17 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
       return res.status(401).json({ message: "Authentication required." });
     }
 
+    // Input Validation
+    if (!message || typeof message !== "string") {
+      return res.status(400).json({ message: "Invalid payload: message is required and must be a string." });
+    }
+    if (history && !Array.isArray(history)) {
+      return res.status(400).json({ message: "Invalid payload: history must be an array." });
+    }
+    if (message.length > 2000) {
+      return res.status(400).json({ message: "Message exceeds 2000 character limit." });
+    }
+
     // 1. Fetch User Context
     console.log("[Nova Chat] Querying user telemetry...");
     let user;
@@ -119,11 +130,12 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
     });
 
   } catch (err: any) {
+    const isProd = process.env.NODE_ENV === "production";
     console.error("[Nova Chat CRITICAL FAILURE]:", err.message);
     return res.status(500).json({ 
       message: "Nova Uplink Interrupted", 
-      detail: err.message,
-      hint: "Verify Gemini API Key and DB connectivity."
+      detail: isProd ? "The analytical link could not be established." : err.message,
+      hint: isProd ? undefined : "Verify Gemini API Key and DB connectivity."
     });
   }
 };

@@ -10,6 +10,7 @@ import { handleIngest } from "./routes/ingest";
 import { handleNovaChat } from "./routes/chat";
 import { handleAnalysis } from "./routes/analysis";
 import { handleGetGoals, handleCreateGoal } from "./routes/goals";
+import { handleStripeWebhook } from "./routes/webhooks";
 
 // 2. Middleware
 import {
@@ -39,6 +40,9 @@ export function createServer() {
     methods: ["GET", "POST", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }));
+
+  // Stripe Webhook needs raw body before express.json()
+  app.post("/api/webhooks/stripe", express.raw({ type: 'application/json' }), handleStripeWebhook as any);
 
   app.use(express.json({ limit: "1mb" }));
   app.use(express.urlencoded({ extended: true, limit: "1mb" }));
@@ -71,8 +75,14 @@ export function createServer() {
   });
 
   app.use((err: any, _req: any, res: any, _next: any) => {
+    const isProd = process.env.NODE_ENV === "production";
     console.error("[PULSE SERVER CRASH]:", err.message);
-    res.status(500).json({ message: "Nova Uplink Interrupted", detail: err.message });
+    
+    res.status(err.status || 500).json({ 
+      message: "Nova Uplink Interrupted", 
+      detail: isProd ? "Internal Signal Error. Our engineers have been alerted." : err.message,
+      code: err.code || "INTERNAL_ERROR"
+    });
   });
 
   return app;

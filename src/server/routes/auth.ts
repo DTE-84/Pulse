@@ -17,13 +17,13 @@ export const handleMe = async (req: Request, res: Response) => {
   // requireAuth middleware already validated token and set req.userId
   try {
     const result = await query(
-      "SELECT user_id, user_name, email, baseline_spend, nova_tone FROM dim_users WHERE user_id = $1",
+      "SELECT user_id, user_name, email, baseline_spend, nova_tone, is_demo FROM dim_users WHERE user_id = $1",
       [req.userId]
     );
     const user = result.rows[0];
     if (!user) return res.status(404).json({ message: "User not found." });
     res.json({ id: user.user_id, email: user.email, name: user.user_name,
-      baselineSpend: user.baseline_spend, novaTone: user.nova_tone, onboardingCompleted: true });
+      baselineSpend: user.baseline_spend, novaTone: user.nova_tone, onboardingCompleted: true, isDemo: user.is_demo });
   } catch { res.status(500).json({ message: "Internal error." }); }
 };
 
@@ -33,7 +33,7 @@ export const handleLogin = async (req: Request, res: Response) => {
   if (err) return res.status(400).json({ message: err });
   try {
     const result = await query(
-      "SELECT user_id, user_name, email, password, baseline_spend, nova_tone FROM dim_users WHERE email = $1",
+      "SELECT user_id, user_name, email, password, baseline_spend, nova_tone, is_demo FROM dim_users WHERE email = $1",
       [email.toLowerCase().trim()]
     );
     const user = result.rows[0];
@@ -43,7 +43,7 @@ export const handleLogin = async (req: Request, res: Response) => {
     if (!user || !match) return res.status(401).json({ message: "Invalid credentials." });
     const token = jwt.sign({ id: user.user_id, email: user.email }, JWT_SECRET, { expiresIn: "7d" });
     res.json({ token, user: { id: user.user_id, email: user.email, name: user.user_name,
-      baselineSpend: user.baseline_spend, novaTone: user.nova_tone, onboardingCompleted: true } });
+      baselineSpend: user.baseline_spend, novaTone: user.nova_tone, onboardingCompleted: true, isDemo: user.is_demo } });
   } catch (e: any) {
     if (e.code === "ECONNREFUSED") return res.status(503).json({ message: "Database unavailable." });
     res.status(500).json({ message: "Authentication error." });
@@ -61,12 +61,12 @@ export const handleSignup = async (req: Request, res: Response) => {
     if (existing.rows.length > 0) return res.status(400).json({ message: "An account with that email already exists." });
     const hashed = await bcrypt.hash(password, 12); // 12 rounds for production
     const result = await query(
-      "INSERT INTO dim_users (user_name, email, password) VALUES ($1, $2, $3) RETURNING user_id, user_name, email",
-      [name.trim().slice(0, 100), email.toLowerCase().trim(), hashed]
+      "INSERT INTO dim_users (user_name, email, password, is_demo) VALUES ($1, $2, $3, $4) RETURNING user_id, user_name, email, is_demo",
+      [name.trim().slice(0, 100), email.toLowerCase().trim(), hashed, false]
     );
     const u = result.rows[0];
     const token = jwt.sign({ id: u.user_id, email: u.email }, JWT_SECRET, { expiresIn: "7d" });
-    res.status(201).json({ token, user: { id: u.user_id, email: u.email, name: u.user_name, onboardingCompleted: false } });
+    res.status(201).json({ token, user: { id: u.user_id, email: u.email, name: u.user_name, onboardingCompleted: false, isDemo: u.is_demo } });
   } catch (e: any) {
     if (e.code === "ECONNREFUSED") return res.status(503).json({ message: "Database unavailable." });
     res.status(500).json({ message: "Signup error." });
@@ -80,7 +80,7 @@ export const handleUpdateProfile = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "novaTone must be Gentle, Balanced, or Driven." });
   try {
     const result = await query(
-      "UPDATE dim_users SET user_name = COALESCE($1, user_name), baseline_spend = COALESCE($2, baseline_spend), nova_tone = COALESCE($3, nova_tone) WHERE user_id = $4 RETURNING user_id, user_name, email, baseline_spend, nova_tone",
+      "UPDATE dim_users SET user_name = COALESCE($1, user_name), baseline_spend = COALESCE($2, baseline_spend), nova_tone = COALESCE($3, nova_tone) WHERE user_id = $4 RETURNING user_id, user_name, email, baseline_spend, nova_tone, is_demo",
       [name?.trim().slice(0,100) || null, baselineSpend || null, novaTone || null, req.userId]
     );
     if (result.rows.length === 0) return res.status(404).json({ message: "User not found." });
