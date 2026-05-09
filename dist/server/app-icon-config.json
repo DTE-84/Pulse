@@ -1,0 +1,17 @@
+{
+  "name": "Pulse",
+  "displayName": "Pulse",
+  "icon": "./pulse-logo-circular.svg",
+  "ios": {
+    "icon": "./pulse-logo-circular.svg",
+    "bundleIdentifier": "com.pulse.app"
+  },
+  "android": {
+    "icon": "./pulse-logo-circular.svg",
+    "package": "com.pulse.app",
+    "adaptiveIcon": {
+      "foregroundImage": "./pulse-logo-circular.svg",
+      "backgroundColor": "#12100D"
+    }
+  }
+}
