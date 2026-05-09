@@ -45,7 +45,7 @@ const plans = [
     period: "/mo",
     description: "Harness the full power of Nova AI.",
     features: [
-      "Unlimited bank connections",
+      "Two bank connections",
       "Real-time Nova AI trigger detection",
       "Stress Index analysis",
       "Behavioral coaching with Nova",
@@ -64,7 +64,7 @@ const plans = [
     features: [
       "Everything in Pro",
       "Early-Bird Locked Rate ($14.99 vs $19.99)",
-      "1-on-1 coaching with financial experts",
+      "Priority support",
       "Tax optimization strategies",
       "Wealth management reporting",
       "Exclusive access to investor network",
