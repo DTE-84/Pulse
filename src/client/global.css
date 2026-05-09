@@ -49,32 +49,32 @@
   }
 
   .light {
-    --background: 34 33% 96%; /* Bone/Cream background */
+    --background: 34 20% 92%; /* Slightly deeper Bone/Cream for contrast */
     --foreground: 30 15% 10%;
     
-    --card: 34 33% 98%; /* Lighter cream for cards */
+    --card: 0 0% 100%; /* Pure white cards to pop off the cream background */
     --card-foreground: 30 15% 10%;
  
-    --popover: 34 33% 96%;
+    --popover: 0 0% 100%;
     --popover-foreground: 30 15% 10%;
  
-    --primary: 153 85% 35%; /* Slightly darker green for better contrast on light */
+    --primary: 153 85% 35%; /* High-fidelity green for light mode */
     --primary-foreground: 0 0% 100%;
  
-    --secondary: 34 10% 90%; /* Grayish bone */
+    --secondary: 34 10% 88%; /* Grayish bone */
     --secondary-foreground: 30 15% 10%;
  
-    --muted: 34 10% 90%;
-    --muted-foreground: 30 5% 40%;
+    --muted: 34 10% 85%;
+    --muted-foreground: 30 5% 35%;
  
-    --accent: 34 10% 90%;
+    --accent: 34 10% 85%;
     --accent-foreground: 30 15% 10%;
  
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 34 10% 85%; /* Soft gray border */
-    --input: 34 10% 85%;
+    --border: 34 10% 82%; /* Slightly stronger border definition */
+    --input: 34 10% 82%;
     --ring: 153 85% 35%;
   }
 }
@@ -84,7 +84,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-300;
     font-family: "Outfit", sans-serif; /* Using Outfit for body text for optimal readability */
     font-feature-settings: "rlig" 1, "calt" 1;
   }
@@ -104,5 +104,17 @@
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* High-Fidelity Depth for Light Mode */
+  .light .glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+  }
+
+  .light .neo-shadow {
+    box-shadow: 0 10px 50px -15px rgba(0, 0, 0, 0.08);
   }
 }

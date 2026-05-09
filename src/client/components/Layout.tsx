@@ -35,7 +35,7 @@ const Sidebar = () => {
   const { logout } = useAuth();
 
   return (
-    <aside className="hidden lg:flex flex-col w-72 xl:w-80 h-screen bg-card border-r border-border sticky top-0 overflow-hidden transition-all duration-500">
+    <aside className="hidden lg:flex flex-col w-72 xl:w-80 h-screen bg-card border-r border-border sticky top-0 overflow-hidden transition-all duration-500 neo-shadow">
       <div className="p-8">
         <Link to="/" className="flex items-center gap-4 mb-12 group">
           <div className="relative w-14 h-14 flex items-center justify-center">
@@ -144,24 +144,23 @@ const Sidebar = () => {
             <div className="w-6 h-6 bg-muted border border-border rounded flex items-center justify-center font-black text-[10px] text-muted-foreground/40">
               DTE
             </div>
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/20">
-              Solutions LLC
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/30">
+              © 2026 DTE Solutions LLC
             </span>
           </div>
           <div className="flex gap-4 opacity-30">
+            <Link
+              to="/legal"
+              className="text-[8px] font-bold uppercase tracking-widest text-foreground hover:text-primary transition-colors"
+            >
+              Legal Protocol
+            </Link>
             <a
-              href="https://dte-solutions.icu/legal/terms.html"
+              href="https://dte-solutions.icu"
               target="_blank"
               className="text-[8px] font-bold uppercase tracking-widest text-foreground hover:text-primary transition-colors"
             >
-              Terms
-            </a>
-            <a
-              href="https://dte-solutions.icu/legal/privacy.html"
-              target="_blank"
-              className="text-[8px] font-bold uppercase tracking-widest text-foreground hover:text-primary transition-colors"
-            >
-              Privacy
+              The Hub
             </a>
           </div>
         </div>
@@ -250,7 +249,7 @@ const MobileNav = () => {
       </div>
 
       {/* Primary tab bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-2xl border-t border-border z-50 flex items-center justify-around px-2 sm:px-4 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-3 min-h-[4rem]">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-2xl border-t border-border z-50 flex items-center justify-around px-2 sm:px-4 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-3 min-h-[4rem] neo-shadow">
         {primaryNav.map((item) => {
           const isActive =
             location.pathname === item.href ||

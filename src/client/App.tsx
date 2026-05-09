@@ -19,6 +19,7 @@ import OnboardingPage from "./pages/Onboarding";
 import SubscriptionPage from "./pages/Subscription";
 import SettingsPage from "./pages/Settings";
 import ProfilePage from "./pages/Profile";
+import LegalPage from "./pages/Legal";
 import OutreachPage from "./pages/Outreach";
 import TriggersPage from "./pages/Triggers";
 import NotFound from "./pages/NotFound";
@@ -55,6 +56,7 @@ const App = () => (
                     <Route path="/growth" element={<GrowthPage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/legal" element={<LegalPage />} />
                     <Route path="/outreach" element={<OutreachPage />} />
                     <Route path="/triggers" element={<TriggersPage />} />
                     <Route path="/reports" element={<ReportsPage />} />
