@@ -59,7 +59,7 @@ const plans = [
   },
   {
     name: "Elite",
-    price: "$14.99",
+    price: "$19.99",
     period: "/mo",
     description: "Secure the early-bird pre-order rate. Full Elite benefits at launch.",
     features: [
@@ -75,9 +75,9 @@ const plans = [
     popular: false,
     elite: true
   }
-];
+  ];
 
-export default function SubscriptionPage() {
+  export default function SubscriptionPage() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
@@ -94,10 +94,10 @@ export default function SubscriptionPage() {
 
   const handleCheckout = () => {
     setIsCheckingOut(true);
-    
+
     // In production, this will redirect to Stripe Checkout
     console.log("[PulseAi] Initializing Stripe Checkout for:", selectedPlan?.name);
-    
+
     setTimeout(() => {
       setIsCheckingOut(false);
       setSelectedPlan(null);
@@ -105,7 +105,7 @@ export default function SubscriptionPage() {
         title: "Redirecting to Stripe",
         description: "Establishing secure uplink to payment gateway...",
       });
-      
+
       // Simulate successful redirect/return
       setTimeout(() => {
         toast({
@@ -120,7 +120,7 @@ export default function SubscriptionPage() {
     if (!selectedPlan) return;
     setIsCheckingOut(true);
     try {
-      const { url } = await paymentsAPI.createSession(selectedPlan.name, isAnnual);
+      const { url = "" } = await paymentsAPI.createSession(selectedPlan.name, isAnnual);
       if (url) {
         window.location.href = url;
       } else {
@@ -151,16 +151,16 @@ export default function SubscriptionPage() {
           </Badge>
           <h1 className="text-5xl font-black tracking-tighter text-white leading-tight">
             Choose your <br />
-            <span className="text-primary underline underline-offset-8 decoration-primary/20">level of mastery.</span>
+            <span className="text-primary underline underline-offset-8 decoration-primary/20">level of mastery.</span> 
           </h1>
           <p className="text-muted-foreground font-semibold text-lg max-w-xl leading-snug">
-            Unlock Nova AI's full potential and transform your relationship with money. 
+            Unlock Nova AI's full potential and transform your relationship with money.
             Join thousands of users who have saved an average of $640/month.
           </p>
         </div>
 
         <div className="bg-white/5 border border-white/10 p-2 rounded-2xl flex items-center shrink-0">
-          <button 
+          <button
             onClick={() => setIsAnnual(false)}
             className={cn(
               "px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
@@ -169,7 +169,7 @@ export default function SubscriptionPage() {
           >
             Monthly
           </button>
-          <button 
+          <button
             onClick={() => setIsAnnual(true)}
             className={cn(
               "px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all relative",
@@ -186,8 +186,8 @@ export default function SubscriptionPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-6">
         {plans.map((plan, i) => (
-          <div 
-            key={i} 
+          <div
+            key={i}
             className={cn(
               "bg-[#12110F] border border-white/5 rounded-[2.5rem] p-10 flex flex-col h-full relative transition-all group hover:bg-[#151412] hover:border-white/10",
               plan.popular ? "ring-2 ring-primary/30 shadow-[0_0_50px_rgba(45,237,156,0.1)] scale-105 z-10" : "scale-100",
@@ -199,20 +199,20 @@ export default function SubscriptionPage() {
                 Most Popular
               </div>
             )}
-            
+
             {plan.elite && (
                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(234,179,8,0.3)]">
-                Early Access
+                Only {slotsLeft} Founding Slots Remaining
               </div>
             )}
-            
+
             <div className="flex justify-between items-start mb-8">
               <div>
-                <h3 className="text-xl font-black text-white mb-2 uppercase tracking-tight flex items-center gap-2">
+                <h3 className="text-xl font-black text-white mb-2 uppercase tracking-tight flex items-center gap-2">   
                   {plan.name === "Elite" ? <Crown className="w-5 h-5 text-yellow-400 fill-yellow-400" /> : plan.name === "Pro" ? <Sparkles className="w-5 h-5 text-primary fill-primary" /> : <Star className="w-5 h-5 text-muted-foreground" />}
                   {plan.name}
                 </h3>
-                <p className="text-xs text-muted-foreground font-semibold h-10 overflow-hidden">{plan.description}</p>
+                <p className="text-xs text-muted-foreground font-semibold h-10 overflow-hidden">{plan.description}</p> 
               </div>
             </div>
 
@@ -243,12 +243,12 @@ export default function SubscriptionPage() {
               ))}
             </div>
 
-            <button 
+            <button
               onClick={() => setSelectedPlan(plan)}
               className={cn(
                 "w-full py-4 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 uppercase tracking-widest",
-                plan.popular 
-                  ? "bg-primary text-background shadow-[0_0_30px_rgba(45,237,156,0.2)] hover:scale-[1.02] active:scale-[0.98]" 
+                plan.popular
+                  ? "bg-primary text-background shadow-[0_0_30px_rgba(45,237,156,0.2)] hover:scale-[1.02] active:scale-[0.98]"
                   : plan.elite
                   ? "bg-yellow-500 text-black shadow-[0_0_30px_rgba(234,179,8,0.2)] hover:scale-[1.02] active:scale-[0.98]"
                   : "bg-white/5 text-white hover:bg-white/10 hover:text-white"
@@ -269,7 +269,7 @@ export default function SubscriptionPage() {
              <h3 className="text-2xl font-black text-white">The Pulse Guarantee</h3>
           </div>
           <p className="text-muted-foreground font-semibold leading-relaxed">
-            Not satisfied? Cancel anytime during your 14-day trial with zero commitments. 
+            Not satisfied? Cancel anytime during your 14-day trial with zero commitments.
             All your data remains encrypted and exportable whenever you need it.
           </p>
         </div>
@@ -310,13 +310,12 @@ export default function SubscriptionPage() {
                   <div className="text-sm font-black text-white uppercase tracking-tight">{selectedPlan?.name} Membership</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Total</div>
+                  <div className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Total</div>      
                   <div className="text-xl font-black text-white leading-none">
-                    {isAnnual ? `$${Math.round(parseFloat(selectedPlan?.price.replace('$','')) * 0.8 * 12)}` : selectedPlan?.price}
+                    {selectedPlan?.name === "Elite" ? (isAnnual ? "$143" : "$14.99") : (isAnnual ? `$${Math.round(parseFloat(selectedPlan?.price.replace('$','')) * 0.8 * 12)}` : selectedPlan?.price)}
                   </div>
                 </div>
               </div>
-
               <div className="p-6 bg-primary/5 border border-primary/20 rounded-2xl space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">

@@ -322,6 +322,15 @@ export default function Index() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [triggerId, setTriggerId] = useState<string>("0"); // Default to no trigger
   const { isAuthenticated, loading: authLoading } = useAuth();
+  const [slotsLeft, setSlotsLeft] = useState(14);
+
+  useEffect(() => {
+    // Subtle simulation of slots decreasing
+    const timer = setTimeout(() => {
+      if (slotsLeft > 3) setSlotsLeft(prev => prev - 1);
+    }, 15000);
+    return () => clearTimeout(timer);
+  }, [slotsLeft]);
 
   const handleIngest = async () => {
     if (!ingestData.trim()) {
@@ -754,11 +763,11 @@ export default function Index() {
             <div className="flex items-center justify-center md:justify-start gap-3">
               <Crown className="w-6 h-6 text-yellow-400 animate-bounce" />
               <Badge className="bg-primary text-primary-foreground font-black uppercase tracking-[0.2em] px-4">
-                Pre-Order Live
+                Only {slotsLeft} Founding Slots Remaining
               </Badge>
             </div>
             <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tighter">
-              Become a Founding Elite Member
+              Pre-Order to get Elite for $14.99 for Life
             </h2>
             <p className="text-muted-foreground font-semibold max-w-xl leading-relaxed">
               Lock in the{" "}
