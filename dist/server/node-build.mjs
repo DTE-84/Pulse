@@ -11,6 +11,8 @@ import { createClient } from "@supabase/supabase-js";
 import fs from "fs";
 import { spawn } from "child_process";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import Stripe from "stripe";
+import { Configuration, PlaidEnvironments, PlaidApi, CountryCode, Products } from "plaid";
 const handleDemo = (_req, res) => {
   const response = {
     message: "Hello from Express server"
@@ -24,9 +26,13 @@ function getPool() {
     if (!process.env.DATABASE_URL) {
       console.warn("[PULSE DB] DATABASE_URL is missing.");
     }
+    const isProd = true;
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
+      ssl: {
+        rejectUnauthorized: isProd
+        // Strictly verify in production
+      }
     });
   }
   return pool;
@@ -199,14 +205,13 @@ const handleStats = async (req, res) => {
   }
 };
 const _secret = process.env.JWT_SECRET;
-if (!_secret) {
-  console.error("[PULSE SECURITY] FATAL: JWT_SECRET not set.");
-}
 const minLen = 32;
-if (_secret && _secret.length < minLen) {
-  console.error(`[PULSE SECURITY] FATAL: JWT_SECRET too short (min ${minLen} chars for ${"prod"}).`);
+if (!_secret || _secret.length < minLen) {
+  console.error(`[PULSE SECURITY] FATAL: JWT_SECRET is ${!_secret ? "missing" : "too short"}.`);
+  console.error(`Production requires min ${minLen} characters.`);
+  process.exit(1);
 }
-const JWT_SECRET = _secret || "temp-development-secret-only-for-fallback";
+const JWT_SECRET = _secret;
 const supabaseUrl = process.env.VITE_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || "";
 let _supabase;
@@ -303,14 +308,22 @@ const securityHeaders = (_req, res, next) => {
 function validateAuthInput(email, password) {
   if (typeof email !== "string" || !email.includes("@") || email.length > 254)
     return "A valid email address is required.";
-  if (typeof password !== "string" || password.length < 8)
+  if (typeof password !== "string")
+    return "Password is required.";
+  if (password.length < 8)
     return "Password must be at least 8 characters.";
+  if (!/[A-Z]/.test(password))
+    return "Password must contain at least one uppercase letter.";
+  if (!/[a-z]/.test(password))
+    return "Password must contain at least one lowercase letter.";
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password))
+    return "Password must contain at least one special character.";
   return null;
 }
 const handleMe = async (req, res) => {
   try {
     const result = await query(
-      "SELECT user_id, user_name, email, baseline_spend, nova_tone FROM dim_users WHERE user_id = $1",
+      "SELECT user_id, user_name, email, baseline_spend, nova_tone, is_demo FROM dim_users WHERE user_id = $1",
       [req.userId]
     );
     const user = result.rows[0];
@@ -321,7 +334,8 @@ const handleMe = async (req, res) => {
       name: user.user_name,
       baselineSpend: user.baseline_spend,
       novaTone: user.nova_tone,
-      onboardingCompleted: true
+      onboardingCompleted: true,
+      isDemo: user.is_demo
     });
   } catch {
     res.status(500).json({ message: "Internal error." });
@@ -333,7 +347,7 @@ const handleLogin = async (req, res) => {
   if (err) return res.status(400).json({ message: err });
   try {
     const result = await query(
-      "SELECT user_id, user_name, email, password, baseline_spend, nova_tone FROM dim_users WHERE email = $1",
+      "SELECT user_id, user_name, email, password, baseline_spend, nova_tone, is_demo FROM dim_users WHERE email = $1",
       [email.toLowerCase().trim()]
     );
     const user = result.rows[0];
@@ -347,7 +361,8 @@ const handleLogin = async (req, res) => {
       name: user.user_name,
       baselineSpend: user.baseline_spend,
       novaTone: user.nova_tone,
-      onboardingCompleted: true
+      onboardingCompleted: true,
+      isDemo: user.is_demo
     } });
   } catch (e) {
     if (e.code === "ECONNREFUSED") return res.status(503).json({ message: "Database unavailable." });
@@ -365,12 +380,12 @@ const handleSignup = async (req, res) => {
     if (existing.rows.length > 0) return res.status(400).json({ message: "An account with that email already exists." });
     const hashed = await bcrypt.hash(password, 12);
     const result = await query(
-      "INSERT INTO dim_users (user_name, email, password) VALUES ($1, $2, $3) RETURNING user_id, user_name, email",
-      [name.trim().slice(0, 100), email.toLowerCase().trim(), hashed]
+      "INSERT INTO dim_users (user_name, email, password, is_demo) VALUES ($1, $2, $3, $4) RETURNING user_id, user_name, email, is_demo",
+      [name.trim().slice(0, 100), email.toLowerCase().trim(), hashed, false]
     );
     const u = result.rows[0];
     const token = jwt.sign({ id: u.user_id, email: u.email }, JWT_SECRET, { expiresIn: "7d" });
-    res.status(201).json({ token, user: { id: u.user_id, email: u.email, name: u.user_name, onboardingCompleted: false } });
+    res.status(201).json({ token, user: { id: u.user_id, email: u.email, name: u.user_name, onboardingCompleted: false, isDemo: u.is_demo } });
   } catch (e) {
     if (e.code === "ECONNREFUSED") return res.status(503).json({ message: "Database unavailable." });
     res.status(500).json({ message: "Signup error." });
@@ -383,13 +398,21 @@ const handleUpdateProfile = async (req, res) => {
     return res.status(400).json({ message: "novaTone must be Gentle, Balanced, or Driven." });
   try {
     const result = await query(
-      "UPDATE dim_users SET user_name = COALESCE($1, user_name), baseline_spend = COALESCE($2, baseline_spend), nova_tone = COALESCE($3, nova_tone) WHERE user_id = $4 RETURNING user_id, user_name, email, baseline_spend, nova_tone",
+      "UPDATE dim_users SET user_name = COALESCE($1, user_name), baseline_spend = COALESCE($2, baseline_spend), nova_tone = COALESCE($3, nova_tone) WHERE user_id = $4 RETURNING user_id, user_name, email, baseline_spend, nova_tone, is_demo",
       [name?.trim().slice(0, 100) || null, baselineSpend || null, novaTone || null, req.userId]
     );
     if (result.rows.length === 0) return res.status(404).json({ message: "User not found." });
     res.json({ message: "Profile updated.", user: result.rows[0] });
   } catch {
     res.status(500).json({ message: "Update error." });
+  }
+};
+const handleDeleteAccount = async (req, res) => {
+  try {
+    await query("DELETE FROM dim_users WHERE user_id = $1", [req.userId]);
+    res.json({ message: "Account successfully terminated." });
+  } catch {
+    res.status(500).json({ message: "Termination error." });
   }
 };
 const __filename$2 = fileURLToPath(import.meta.url);
@@ -504,6 +527,15 @@ const handleNovaChat = async (req, res) => {
     if (!userId) {
       return res.status(401).json({ message: "Authentication required." });
     }
+    if (!message || typeof message !== "string") {
+      return res.status(400).json({ message: "Invalid payload: message is required and must be a string." });
+    }
+    if (history && !Array.isArray(history)) {
+      return res.status(400).json({ message: "Invalid payload: history must be an array." });
+    }
+    if (message.length > 2e3) {
+      return res.status(400).json({ message: "Message exceeds 2000 character limit." });
+    }
     console.log("[Nova Chat] Querying user telemetry...");
     let user;
     try {
@@ -595,8 +627,8 @@ const handleNovaChat = async (req, res) => {
     console.error("[Nova Chat CRITICAL FAILURE]:", err.message);
     return res.status(500).json({
       message: "Nova Uplink Interrupted",
-      detail: err.message,
-      hint: "Verify Gemini API Key and DB connectivity."
+      detail: "The analytical link could not be established.",
+      hint: void 0
     });
   }
 };
@@ -754,7 +786,7 @@ const handleGetGoals = async (req, res) => {
     if (!userId) return res.status(401).json({ error: "Unauthorized access." });
     const result = await query(
       `SELECT goal_id, goal_name as name, target_amount as target, current_progress as current, deadline 
-       FROM dim_goals WHERE user_id = $1 ORDER BY created_at DESC`,
+       FROM dim_goals WHERE user_id = $1 ORDER BY updated_at DESC`,
       [userId]
     );
     res.json(result.rows);
@@ -782,6 +814,116 @@ const handleCreateGoal = async (req, res) => {
     res.status(500).json({ error: "Failed to create goal." });
   }
 };
+const handleStripeWebhook = async (req, res) => {
+  const sig = req.headers["stripe-signature"];
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!sig || !endpointSecret) {
+    console.error("[Stripe Webhook] Missing signature or secret.");
+    return res.status(400).send("Webhook Error: Missing signature or secret.");
+  }
+  req.body;
+  console.log("[Stripe Webhook] Event Received.");
+  res.json({ received: true });
+};
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+  apiVersion: "2023-10-16"
+});
+const createCheckoutSession = async (req, res) => {
+  const { planName, isAnnual } = req.body;
+  const userId = req.userId;
+  if (!userId) return res.status(401).json({ message: "Authentication required." });
+  const prices = {
+    "Elite_Monthly": process.env.STRIPE_PRICE_ELITE_MONTHLY || "",
+    "Elite_Annual": process.env.STRIPE_PRICE_ELITE_ANNUAL || "",
+    "Pro_Monthly": process.env.STRIPE_PRICE_PRO_MONTHLY || "",
+    "Pro_Annual": process.env.STRIPE_PRICE_PRO_ANNUAL || ""
+  };
+  const priceKey = `${planName}_${isAnnual ? "Annual" : "Monthly"}`;
+  const priceId = prices[priceKey];
+  if (!priceId && true) {
+    return res.status(400).json({ message: "Invalid plan selection or price ID missing." });
+  }
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price: priceId || "price_dummy_for_dev",
+          // Fallback for dev testing
+          quantity: 1
+        }
+      ],
+      mode: "subscription",
+      success_url: `${process.env.APP_BASE_URL || "http://localhost:5173"}/subscription?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.APP_BASE_URL || "http://localhost:5173"}/subscription?canceled=true`,
+      client_reference_id: userId,
+      metadata: {
+        userId,
+        planName
+      }
+    });
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error("[Stripe] Checkout Error:", err.message);
+    res.status(500).json({ message: "Could not establish secure payment uplink." });
+  }
+};
+const configuration = new Configuration({
+  basePath: PlaidEnvironments[process.env.PLAID_ENV || "sandbox"],
+  baseOptions: {
+    headers: {
+      "PLAID-CLIENT-ID": process.env.PLAID_CLIENT_ID,
+      "PLAID-SECRET": process.env.PLAID_SECRET
+    }
+  }
+});
+const client = new PlaidApi(configuration);
+const createLinkToken = async (req, res) => {
+  const userId = req.userId;
+  if (!userId) return res.status(401).json({ message: "Authentication required." });
+  try {
+    const response = await client.linkTokenCreate({
+      user: { client_user_id: userId },
+      client_name: "Pulse Ai",
+      products: [Products.Transactions],
+      country_codes: [CountryCode.Us],
+      language: "en"
+    });
+    res.json(response.data);
+  } catch (err) {
+    console.error("[Plaid] Link Token Error:", err.response?.data || err.message);
+    res.status(500).json({ message: "Could not initialize bank linkage." });
+  }
+};
+const exchangePublicToken = async (req, res) => {
+  const { publicToken, institutionName } = req.body;
+  const userId = req.userId;
+  if (!userId) return res.status(401).json({ message: "Authentication required." });
+  try {
+    const response = await client.itemPublicTokenExchange({
+      public_token: publicToken
+    });
+    const { access_token, item_id } = response.data;
+    const itemResult = await query(
+      `INSERT INTO public.plaid_items (user_id, plaid_item_id, institution_name)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (plaid_item_id) DO UPDATE SET status = 'active', updated_at = NOW()
+       RETURNING item_id`,
+      [userId, item_id, institutionName]
+    );
+    const internalItemId = itemResult.rows[0].item_id;
+    await query(
+      `INSERT INTO public.plaid_secrets (item_id, access_token_encrypted)
+       VALUES ($1, $2)
+       ON CONFLICT (item_id) DO UPDATE SET access_token_encrypted = EXCLUDED.access_token_encrypted`,
+      [internalItemId, access_token]
+    );
+    res.json({ message: "Bank successfully linked to Pulse telemetry." });
+  } catch (err) {
+    console.error("[Plaid] Exchange Error:", err.response?.data || err.message);
+    res.status(500).json({ message: "Could not established analytical link to bank." });
+  }
+};
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:5173,http://localhost:3000,https://pulse-nova-solutions.vercel.app,https://dte-solutions.icu").split(",").map((o) => o.trim());
 function createServer() {
   const app2 = express__default();
@@ -797,9 +939,13 @@ function createServer() {
     methods: ["GET", "POST", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
   }));
+  app2.post("/api/webhooks/stripe", express__default.raw({ type: "application/json" }), handleStripeWebhook);
   app2.use(express__default.json({ limit: "1mb" }));
   app2.use(express__default.urlencoded({ extended: true, limit: "1mb" }));
   app2.get("/api/ping", (_req, res) => res.json({ message: "ping", status: "Deterministic Uplink Active" }));
+  app2.post("/api/payments/create-session", requireAuth, createCheckoutSession);
+  app2.post("/api/plaid/create-link-token", requireAuth, createLinkToken);
+  app2.post("/api/plaid/exchange-token", requireAuth, exchangePublicToken);
   app2.get("/api/demo", handleDemo);
   app2.get("/api/stats", apiLimiter, requireAuth, handleStats);
   app2.post("/api/nova/chat", apiLimiter, requireAuth, handleNovaChat);
@@ -811,6 +957,7 @@ function createServer() {
   app2.post("/api/auth/signup", authLimiter, handleSignup);
   app2.get("/api/auth/me", requireAuth, handleMe);
   app2.patch("/api/auth/update", requireAuth, handleUpdateProfile);
+  app2.delete("/api/auth/delete", requireAuth, handleDeleteAccount);
   app2.get("/api/debug/system", requireAuth, async (req, res) => {
     res.json({
       userId: req.userId,
@@ -824,7 +971,11 @@ function createServer() {
   });
   app2.use((err, _req, res, _next) => {
     console.error("[PULSE SERVER CRASH]:", err.message);
-    res.status(500).json({ message: "Nova Uplink Interrupted", detail: err.message });
+    res.status(err.status || 500).json({
+      message: "Nova Uplink Interrupted",
+      detail: "Internal Signal Error. Our engineers have been alerted.",
+      code: err.code || "INTERNAL_ERROR"
+    });
   });
   return app2;
 }
