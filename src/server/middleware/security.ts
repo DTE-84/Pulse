@@ -4,18 +4,16 @@ import { createClient } from "@supabase/supabase-js";
 
 // 1. JWT SECRET GUARD — server exits if not set or too short
 const _secret = process.env.JWT_SECRET;
-if (!_secret) { 
-  console.error("[PULSE SECURITY] FATAL: JWT_SECRET not set.");
-  // Don't exit in serverless environment, just let the request fail
-  if (process.env.NODE_ENV !== "production") process.exit(1);
+const isProd = process.env.NODE_ENV === "production";
+const minLen = isProd ? 32 : 16;
+
+if (!_secret || _secret.length < minLen) { 
+  console.error(`[PULSE SECURITY] FATAL: JWT_SECRET is ${!_secret ? "missing" : "too short"}.`);
+  console.error(`Production requires min ${minLen} characters.`);
+  process.exit(1);
 }
-const isDev = process.env.NODE_ENV !== "production";
-const minLen = isDev ? 16 : 32;
-if (_secret && _secret.length < minLen) {
-  console.error(`[PULSE SECURITY] FATAL: JWT_SECRET too short (min ${minLen} chars for ${isDev ? "dev" : "prod"}).`);
-  if (process.env.NODE_ENV !== "production") process.exit(1);
-}
-export const JWT_SECRET: string = _secret || "temp-development-secret-only-for-fallback";
+
+export const JWT_SECRET: string = _secret;
 
 // Initialize Supabase Admin for token verification
 const supabaseUrl = process.env.VITE_SUPABASE_URL || "";

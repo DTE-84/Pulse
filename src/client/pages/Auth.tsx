@@ -28,8 +28,29 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const validatePassword = (pass: string) => {
+    if (pass.length < 8) return "Password must be at least 8 characters.";
+    if (!/[A-Z]/.test(pass)) return "Include at least one uppercase letter.";
+    if (!/[a-z]/.test(pass)) return "Include at least one lowercase letter.";
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pass)) return "Include at least one special character.";
+    return null;
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isLogin) {
+      const passwordError = validatePassword(password);
+      if (passwordError) {
+        toast({
+          variant: "destructive",
+          title: "Security Requirement",
+          description: passwordError,
+        });
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -234,6 +255,17 @@ export default function AuthPage() {
                   )}
                 </button>
               </div>
+
+              {!isLogin && (
+                <div className="px-2 space-y-1">
+                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
+                    Security Policy:
+                  </p>
+                  <p className="text-[9px] font-medium text-muted-foreground/60 leading-relaxed">
+                    Min 8 characters • 1 Uppercase • 1 Lowercase • 1 Special Character
+                  </p>
+                </div>
+              )}
 
               {isLogin && (
                 <div className="flex justify-end px-2">

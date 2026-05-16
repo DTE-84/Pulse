@@ -12,14 +12,16 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-180.png"],
       manifest: {
-        name: "Pulse Financial App",
+        name: "Pulse Financial AI",
         short_name: "Pulse",
-        description: "Behavioral financial intelligence for spending rhythm and habit insights.",
+        description: "Sophisticated behavioral financial intelligence and habit tracking.",
         start_url: "/",
         scope: "/",
         display: "standalone",
+        orientation: "portrait",
         background_color: "#050505",
         theme_color: "#050505",
+        categories: ["finance", "lifestyle"],
         icons: [
           {
             src: "icons/icon-192.png",
@@ -38,6 +40,12 @@ export default defineConfig({
             sizes: "512x512",
             type: "image/png",
             purpose: "any"
+          },
+          {
+            src: "icons/icon-512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable"
           },
           {
             src: "icons/icon-180.png",

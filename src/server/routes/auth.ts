@@ -8,8 +8,22 @@ import { JWT_SECRET } from "../middleware/security";
 function validateAuthInput(email: unknown, password: unknown): string | null {
   if (typeof email !== "string" || !email.includes("@") || email.length > 254)
     return "A valid email address is required.";
-  if (typeof password !== "string" || password.length < 8)
+  
+  if (typeof password !== "string")
+    return "Password is required.";
+
+  if (password.length < 8)
     return "Password must be at least 8 characters.";
+  
+  if (!/[A-Z]/.test(password))
+    return "Password must contain at least one uppercase letter.";
+  
+  if (!/[a-z]/.test(password))
+    return "Password must contain at least one lowercase letter.";
+  
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password))
+    return "Password must contain at least one special character.";
+
   return null;
 }
 

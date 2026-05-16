@@ -10,9 +10,14 @@ function getPool() {
     if (!process.env.DATABASE_URL) {
       console.warn("[PULSE DB] DATABASE_URL is missing.");
     }
+    
+    const isProd = process.env.NODE_ENV === "production";
+    
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false },
+      ssl: { 
+        rejectUnauthorized: isProd // Strictly verify in production
+      },
     });
   }
   return pool;
