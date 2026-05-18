@@ -133,73 +133,93 @@ export default function SpendingPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Category Breakdown Card */}
-        <div className="lg:col-span-1 bg-card border border-border rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-10 space-y-8 flex flex-col items-center justify-center">
-          <div className="w-full text-center">
-            <h3 className="text-lg font-black text-foreground uppercase tracking-widest mb-2 flex items-center justify-center gap-3">
-              <PieChartIcon className="w-5 h-5 text-primary" />
-              Categories
-            </h3>
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">
-              Percentage of total spend
-            </p>
-          </div>
+      <div className="flex flex-col gap-12">
+        {/* Category Overview Card */}
+        <div className="bg-card border border-border rounded-[2.5rem] p-8 md:p-12 space-y-12 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+          
+          <div className="flex flex-col items-center justify-center text-center space-y-8">
+            <div className="space-y-2">
+              <h3 className="text-xl font-black text-foreground uppercase tracking-widest flex items-center justify-center gap-3">
+                <PieChartIcon className="w-6 h-6 text-primary" />
+                Spending Allocation
+              </h3>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] opacity-60">
+                Behavioral weight by category
+              </p>
+            </div>
 
-          <div className="h-64 w-full relative">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={categoryData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={8}
-                  dataKey="value"
-                >
-                  {categoryData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={entry.color}
-                      stroke="none"
-                    />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-3xl font-black text-foreground">$3.2k</span>
-              <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">
-                Total
-              </span>
+            <div className="h-72 w-72 relative group">
+              <div className="absolute inset-0 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categoryData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={80}
+                    outerRadius={120}
+                    paddingAngle={8}
+                    dataKey="value"
+                    animationBegin={0}
+                    animationDuration={1500}
+                  >
+                    {categoryData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.color}
+                        stroke="none"
+                        className="hover:opacity-80 transition-opacity cursor-pointer"
+                        onClick={() => setSelectedCategory(entry)}
+                      />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-4xl font-black text-foreground tracking-tighter">$3.2k</span>
+                <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">
+                  Total Volume
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="w-full space-y-4 pt-6 border-t border-border">
-            {categoryData.map((cat, i) => (
-              <div
-                key={i}
-                onClick={() => setSelectedCategory(cat)}
-                className="flex items-center justify-between group cursor-pointer hover:bg-muted p-2 rounded-xl transition-all"
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-3 h-3 rounded-full"
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6 pt-12 border-t border-border/50">
+            {categoryData.map((cat, i) => {
+              const Icon = getIcon(cat.name);
+              return (
+                <div
+                  key={i}
+                  onClick={() => setSelectedCategory(cat)}
+                  className="group bg-muted/30 border border-border p-6 rounded-[2rem] flex flex-col items-center text-center gap-4 cursor-pointer hover:bg-muted hover:border-primary/30 transition-all hover:-translate-y-1"
+                >
+                  <div 
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg transition-transform group-hover:scale-110"
                     style={{ backgroundColor: cat.color }}
-                  />
-                  <span className="text-xs font-bold text-foreground">
-                    {cat.name}
-                  </span>
+                  >
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                      {cat.name}
+                    </p>
+                    <p className="text-xl font-black text-foreground">
+                      {cat.value}%
+                    </p>
+                  </div>
+                  <div className="w-full h-1 bg-border rounded-full mt-2 overflow-hidden">
+                    <div 
+                      className="h-full rounded-full transition-all duration-1000"
+                      style={{ 
+                        backgroundColor: cat.color,
+                        width: `${cat.value}%` 
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-[11px] font-black text-foreground/80">
-                    {cat.value}%
-                  </span>
-                  <ChevronRight className="w-3 h-3 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -273,40 +293,52 @@ export default function SpendingPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Transactions List */}
-        <div className="lg:col-span-2 bg-card border border-border rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-10 space-y-6 sm:space-y-10">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-black text-foreground uppercase tracking-tighter">
-              Recent Transactions
-            </h3>
-            <button className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest">
-              View All Historical
+        {/* Transactions List (Full Width) */}
+        <div className="bg-card border border-border rounded-[2.5rem] md:rounded-[3.5rem] p-8 md:p-12 space-y-10 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-12 opacity-[0.02] pointer-events-none">
+            <History className="w-64 h-64 text-foreground" />
+          </div>
+
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+            <div className="space-y-1">
+              <h3 className="text-3xl font-black text-foreground uppercase tracking-tighter">
+                Recent Transactions
+              </h3>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+                Live behavioral telemetry feed
+              </p>
+            </div>
+            <button className="w-full md:w-auto bg-muted border border-border px-8 py-4 rounded-2xl text-[10px] font-black text-primary hover:bg-primary/10 hover:border-primary/20 transition-all uppercase tracking-widest">
+              View Historical Archive
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 relative z-10">
             {transactions.map((tx) => {
               const Icon = getIcon(tx.category_name || "");
               const isExpense = parseFloat(tx.amount) > 0;
               return (
                 <div
                   key={tx.transaction_id}
-                  className="group flex items-center justify-between p-5 rounded-3xl hover:bg-muted border border-transparent hover:border-border transition-all"
+                  className="group flex items-center justify-between p-6 rounded-[2.5rem] bg-muted/20 border border-transparent hover:border-border hover:bg-muted/50 transition-all"
                 >
-                  <div className="flex items-center gap-5 flex-1">
+                  <div className="flex items-center gap-6 flex-1">
                     <div
                       className={cn(
-                        "w-14 h-14 rounded-2xl bg-muted border border-border flex items-center justify-center group-hover:scale-105 transition-transform text-primary",
+                        "w-16 h-16 rounded-[1.5rem] bg-card border border-border flex items-center justify-center group-hover:scale-105 transition-transform text-primary shadow-sm",
                       )}
                     >
-                      <Icon className="w-7 h-7" />
+                      <Icon className="w-8 h-8" />
                     </div>
                     <div className="overflow-hidden">
-                      <div className="text-base font-bold text-foreground mb-0.5 truncate">
+                      <div className="text-lg font-bold text-foreground mb-1 truncate">
                         {tx.merchant_name || tx.category_name}
                       </div>
-                      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                        <span>{tx.category_name}</span>
+                      <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                          {tx.category_name}
+                        </span>
                         <span className="opacity-30">•</span>
                         <span>
                           {new Date(tx.purchase_date).toLocaleDateString()}
@@ -315,81 +347,79 @@ export default function SpendingPage() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-end gap-3 shrink-0 ml-4">
-                    <div className="text-lg font-black text-foreground">
-                      {isExpense ? "-" : "+"}${Math.abs(tx.amount).toFixed(2)}
-                    </div>
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-8 shrink-0 ml-4">
+                    <div className="text-right">
+                      <div className="text-xl font-black text-foreground">
+                        {isExpense ? "-" : "+"}${Math.abs(tx.amount).toFixed(2)}
+                      </div>
                       {tx.trigger_name && (
                         <Badge
                           variant="outline"
-                          className="bg-red-500/10 text-red-400 border-red-500/20 px-2.5 py-0 text-[9px] font-black flex gap-1 uppercase tracking-widest"
+                          className="bg-red-500/10 text-red-400 border-red-500/20 px-2 py-0 text-[8px] font-black flex gap-1 uppercase tracking-widest mt-1"
                         >
-                          <Zap className="w-3 h-3 fill-red-400" />
+                          <Zap className="w-2.5 h-2.5 fill-red-400" />
                           {tx.trigger_name}
                         </Badge>
                       )}
-
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button className="p-1 hover:bg-muted rounded-lg transition-colors ml-2">
-                            <MoreVertical className="w-4 h-4 text-muted-foreground" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          className="bg-card border border-border text-foreground w-48"
-                        >
-                          <DropdownMenuLabel className="text-[10px] uppercase tracking-widest opacity-50">
-                            Node Actions
-                          </DropdownMenuLabel>
-                          <DropdownMenuSeparator className="bg-muted" />
-                          <DropdownMenuItem className="flex items-center gap-2 text-xs focus:bg-muted focus:text-primary cursor-pointer">
-                            <Flag className="w-3.5 h-3.5" /> Flag as Inaccurate
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="flex items-center gap-2 text-xs focus:bg-muted focus:text-primary cursor-pointer">
-                            <History className="w-3.5 h-3.5" /> View Behavioral
-                            History
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="flex items-center gap-2 text-xs focus:bg-muted focus:text-red-400 cursor-pointer">
-                            <EyeOff className="w-3.5 h-3.5" /> Ignore Trigger
-                            Signal
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
                     </div>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="w-10 h-10 flex items-center justify-center hover:bg-muted rounded-xl transition-colors">
+                          <MoreVertical className="w-5 h-5 text-muted-foreground" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="bg-card border border-border text-foreground w-56 p-2 rounded-xl"
+                      >
+                        <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest opacity-40 px-3 py-2">
+                          Telemetry Actions
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator className="bg-muted mx-2" />
+                        <DropdownMenuItem className="flex items-center gap-3 px-3 py-3 rounded-lg text-xs font-bold focus:bg-primary/10 focus:text-primary cursor-pointer transition-colors">
+                          <Flag className="w-4 h-4" /> Flag Inaccuracy
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="flex items-center gap-3 px-3 py-3 rounded-lg text-xs font-bold focus:bg-primary/10 focus:text-primary cursor-pointer transition-colors">
+                          <History className="w-4 h-4" /> Behavioral Audit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="flex items-center gap-3 px-3 py-3 rounded-lg text-xs font-bold focus:bg-red-500/10 focus:text-red-400 cursor-pointer transition-colors">
+                          <EyeOff className="w-4 h-4" /> Suppress Signal
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               );
             })}
 
             {transactions.length === 0 && !loading && (
-              <div className="text-center py-20 border border-dashed border-border rounded-3xl">
-                <Database className="w-10 h-10 text-muted-foreground/20 mx-auto mb-4" />
-                <p className="text-sm text-muted-foreground">
-                  No financial nodes detected in this period.
+              <div className="text-center py-24 border border-dashed border-border rounded-[3rem] bg-muted/10">
+                <Database className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
+                <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
+                  No telemetry detected
                 </p>
               </div>
             )}
           </div>
 
-          <div className="bg-primary/5 border border-primary/10 rounded-3xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 group cursor-pointer hover:bg-primary/10 transition-all">
-            <div className="flex items-center gap-5">
-              <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(45,237,156,0.2)]">
-                <Flame className="w-7 h-7 text-primary" />
+          <div className="bg-primary/5 border border-primary/10 rounded-[2.5rem] p-8 flex flex-col md:flex-row items-center justify-between gap-8 group cursor-pointer hover:bg-primary/10 transition-all relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center gap-6 relative z-10">
+              <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center shrink-0 shadow-[0_0_30px_rgba(45,237,156,0.3)] group-hover:scale-110 transition-transform">
+                <Flame className="w-8 h-8 text-primary" />
               </div>
-              <div>
-                <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1">
-                  Nova Insight
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">
+                  Nova Signal
                 </p>
-                <p className="text-base font-bold text-foreground group-hover:text-primary transition-colors italic leading-snug">
-                  "Your weekend shopping is 22% lower than usual. You're on
-                  track for a record saving month!"
+                <p className="text-lg font-bold text-foreground group-hover:text-primary transition-colors italic leading-tight">
+                  "Your behavioral drift is stabilizing. Optimal liquidity preservation detected."
                 </p>
               </div>
             </div>
-            <button className="bg-primary text-primary-foreground px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all">
-              Claim Bonus Streak
+            <button className="relative z-10 bg-primary text-primary-foreground px-10 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all">
+              Claim Efficiency Bonus
             </button>
           </div>
         </div>
