@@ -6,6 +6,8 @@ interface User {
   name: string;
   email: string;
   onboardingCompleted?: boolean;
+  subscriptionStatus?: 'active' | 'trialing' | 'inactive';
+  trialEndsAt?: string;
   [key: string]: any;
 }
 
@@ -17,6 +19,7 @@ interface AuthContextType {
   updateUser: (partial: Partial<User>) => void;
   isAuthenticated: boolean;
   loading: boolean;
+  hasActiveSubscription: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -38,6 +41,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   });
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
+
+  const hasActiveSubscription = !!user && (
+    user.subscriptionStatus === 'active' || 
+    (user.subscriptionStatus === 'trialing' && new Date(user.trialEndsAt || 0) > new Date())
+  );
 
   useEffect(() => {
     // 1. Sync with Supabase Auth State
@@ -120,7 +128,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       logout, 
       updateUser,
       isAuthenticated: !!token,
-      loading
+      loading,
+      hasActiveSubscription
     }}>
       {children}
     </AuthContext.Provider>

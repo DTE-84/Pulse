@@ -31,13 +31,22 @@ export const handleMe = async (req: Request, res: Response) => {
   // requireAuth middleware already validated token and set req.userId
   try {
     const result = await query(
-      "SELECT user_id, user_name, email, baseline_spend, nova_tone, is_demo FROM dim_users WHERE user_id = $1",
+      "SELECT user_id, user_name, email, baseline_spend, nova_tone, is_demo, subscription_status, trial_ends_at FROM dim_users WHERE user_id = $1",
       [req.userId]
     );
     const user = result.rows[0];
     if (!user) return res.status(404).json({ message: "User not found." });
-    res.json({ id: user.user_id, email: user.email, name: user.user_name,
-      baselineSpend: user.baseline_spend, novaTone: user.nova_tone, onboardingCompleted: true, isDemo: user.is_demo });
+    res.json({ 
+      id: user.user_id, 
+      email: user.email, 
+      name: user.user_name,
+      baselineSpend: user.baseline_spend, 
+      novaTone: user.nova_tone, 
+      onboardingCompleted: true, 
+      isDemo: user.is_demo,
+      subscriptionStatus: user.subscription_status,
+      trialEndsAt: user.trial_ends_at
+    });
   } catch { res.status(500).json({ message: "Internal error." }); }
 };
 
@@ -47,7 +56,7 @@ export const handleLogin = async (req: Request, res: Response) => {
   if (err) return res.status(400).json({ message: err });
   try {
     const result = await query(
-      "SELECT user_id, user_name, email, password, baseline_spend, nova_tone, is_demo FROM dim_users WHERE email = $1",
+      "SELECT user_id, user_name, email, password, baseline_spend, nova_tone, is_demo, subscription_status, trial_ends_at FROM dim_users WHERE email = $1",
       [email.toLowerCase().trim()]
     );
     const user = result.rows[0];
@@ -56,8 +65,20 @@ export const handleLogin = async (req: Request, res: Response) => {
     const match = await bcrypt.compare(password, hash);
     if (!user || !match) return res.status(401).json({ message: "Invalid credentials." });
     const token = jwt.sign({ id: user.user_id, email: user.email }, JWT_SECRET, { expiresIn: "7d" });
-    res.json({ token, user: { id: user.user_id, email: user.email, name: user.user_name,
-      baselineSpend: user.baseline_spend, novaTone: user.nova_tone, onboardingCompleted: true, isDemo: user.is_demo } });
+    res.json({ 
+      token, 
+      user: { 
+        id: user.user_id, 
+        email: user.email, 
+        name: user.user_name,
+        baselineSpend: user.baseline_spend, 
+        novaTone: user.nova_tone, 
+        onboardingCompleted: true, 
+        isDemo: user.is_demo,
+        subscriptionStatus: user.subscription_status,
+        trialEndsAt: user.trial_ends_at
+      } 
+    });
   } catch (e: any) {
     if (e.code === "ECONNREFUSED") return res.status(503).json({ message: "Database unavailable." });
     res.status(500).json({ message: "Authentication error." });
@@ -75,12 +96,23 @@ export const handleSignup = async (req: Request, res: Response) => {
     if (existing.rows.length > 0) return res.status(400).json({ message: "An account with that email already exists." });
     const hashed = await bcrypt.hash(password, 12); // 12 rounds for production
     const result = await query(
-      "INSERT INTO dim_users (user_name, email, password, is_demo) VALUES ($1, $2, $3, $4) RETURNING user_id, user_name, email, is_demo",
-      [name.trim().slice(0, 100), email.toLowerCase().trim(), hashed, false]
+      "INSERT INTO dim_users (user_name, email, password, is_demo, subscription_status, trial_ends_at) VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '7 days') RETURNING user_id, user_name, email, is_demo, subscription_status, trial_ends_at",
+      [name.trim().slice(0, 100), email.toLowerCase().trim(), hashed, false, 'trialing']
     );
     const u = result.rows[0];
     const token = jwt.sign({ id: u.user_id, email: u.email }, JWT_SECRET, { expiresIn: "7d" });
-    res.status(201).json({ token, user: { id: u.user_id, email: u.email, name: u.user_name, onboardingCompleted: false, isDemo: u.is_demo } });
+    res.status(201).json({ 
+      token, 
+      user: { 
+        id: u.user_id, 
+        email: u.email, 
+        name: u.user_name, 
+        onboardingCompleted: false, 
+        isDemo: u.is_demo,
+        subscriptionStatus: u.subscription_status,
+        trialEndsAt: u.trial_ends_at
+      } 
+    });
   } catch (e: any) {
     if (e.code === "ECONNREFUSED") return res.status(503).json({ message: "Database unavailable." });
     res.status(500).json({ message: "Signup error." });

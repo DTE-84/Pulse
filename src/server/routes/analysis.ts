@@ -16,13 +16,28 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
     let user;
     try {
       const userRes = await query(
-        `SELECT user_name, baseline_spend, monthly_income FROM dim_users WHERE user_id = $1`,
+        `SELECT user_name, baseline_spend, monthly_income, subscription_status, trial_ends_at FROM dim_users WHERE user_id = $1`,
         [userId]
       );
       user = userRes.rows[0];
     } catch (dbErr: any) {
       console.error("[Nova Analysis] DB Error (dim_users):", dbErr.message);
       return res.status(500).json({ error: "Telemetry Linkage Failed", detail: dbErr.message });
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Subscription Guard
+    const hasActiveSub = user.subscription_status === 'active' || 
+                         (user.subscription_status === 'trialing' && new Date(user.trial_ends_at) > new Date());
+    
+    if (!hasActiveSub) {
+      return res.status(403).json({ 
+        message: "Elite Access Required", 
+        detail: "Your trial has ended or subscription is inactive. Please activate Elite membership to continue." 
+      });
     }
 
     // 2. Fetch Spending Data

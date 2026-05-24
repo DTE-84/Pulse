@@ -53,7 +53,7 @@ const plans = [
       "Advanced growth forecasting",
       "Priority expert support"
     ],
-    cta: "Start 14-Day Free Trial",
+    cta: "Start 7-Day Free Trial",
     popular: true,
     highlight: "text-primary shadow-[0_0_20px_rgba(45,237,156,0.3)]"
   },
@@ -82,7 +82,12 @@ const plans = [
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [slotsLeft, setSlotsLeft] = useState(14); // Sense of urgency
+  const { user, hasActiveSubscription } = useAuth();
   const { toast } = useToast();
+
+  const trialDaysLeft = user?.trialEndsAt 
+    ? Math.max(0, Math.ceil((new Date(user.trialEndsAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
+    : 0;
 
   useEffect(() => {
     // Subtle simulation of slots decreasing
@@ -147,15 +152,23 @@ const plans = [
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="space-y-4">
           <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest">
-            Pulse Pro Membership
+            Pulse Membership Status
           </Badge>
           <h1 className="text-5xl font-black tracking-tighter text-white leading-tight">
-            Choose your <br />
-            <span className="text-primary underline underline-offset-8 decoration-primary/20">level of mastery.</span> 
+            {hasActiveSubscription ? (
+              user?.subscriptionStatus === 'active' ? (
+                <>Your Elite <br /> <span className="text-primary underline underline-offset-8 decoration-primary/20">Uplink is Active.</span></>
+              ) : (
+                <>Your Free Trial <br /> <span className="text-primary underline underline-offset-8 decoration-primary/20">{trialDaysLeft} Days Remaining.</span></>
+              )
+            ) : (
+              <>Choose your <br /> <span className="text-primary underline underline-offset-8 decoration-primary/20">level of mastery.</span></>
+            )}
           </h1>
           <p className="text-muted-foreground font-semibold text-lg max-w-xl leading-snug">
-            Unlock Nova AI's full potential and transform your relationship with money.
-            Join thousands of users who have saved an average of $640/month.
+            {hasActiveSubscription 
+              ? "You have full access to Nova AI's behavioral coaching and deep analysis protocols."
+              : "Unlock Nova AI's full potential and transform your relationship with money. Join thousands of users who have saved an average of $640/month."}
           </p>
         </div>
 
@@ -269,7 +282,7 @@ const plans = [
              <h3 className="text-2xl font-black text-white">The Pulse Guarantee</h3>
           </div>
           <p className="text-muted-foreground font-semibold leading-relaxed">
-            Not satisfied? Cancel anytime during your 14-day trial with zero commitments.
+            Not satisfied? Cancel anytime during your 7-day trial with zero commitments.
             All your data remains encrypted and exportable whenever you need it.
           </p>
         </div>

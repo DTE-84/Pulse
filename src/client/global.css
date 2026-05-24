@@ -14,32 +14,32 @@
 
 @layer base {
   :root {
-    --background: 30 15% 3%;
-    --foreground: 0 0% 100%;
+    --background: 240 10% 3.9%; /* Pure Charcoal/Obsidian */
+    --foreground: 0 0% 98%;
     
-    --card: 30 15% 5%;
-    --card-foreground: 0 0% 100%;
+    --card: 240 10% 4.9%;
+    --card-foreground: 0 0% 98%;
  
-    --popover: 30 15% 3%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
  
     --primary: 153 85% 55%;
     --primary-foreground: 153 85% 5%;
  
-    --secondary: 30 15% 10%;
+    --secondary: 240 10% 10%;
     --secondary-foreground: 0 0% 100%;
  
-    --muted: 30 15% 10%;
+    --muted: 240 10% 10%;
     --muted-foreground: 0 0% 65%;
  
-    --accent: 30 15% 10%;
+    --accent: 240 10% 10%;
     --accent-foreground: 0 0% 100%;
  
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 30 15% 10%;
-    --input: 30 15% 10%;
+    --border: 240 10% 12%;
+    --input: 240 10% 12%;
     --ring: 153 85% 55%;
  
     --radius: 1.5rem;

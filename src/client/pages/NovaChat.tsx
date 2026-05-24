@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, Sparkles, Moon, Zap, Info, Loader2 } from "lucide-react";
+import { Send, Sparkles, Moon, Zap, Info, Loader2, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, ResponsiveContainer, Cell } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
 import { statsAPI, novaServiceAPI } from "@/lib/api";
 import { useTheme } from "@/components/theme-provider";
+import { Link } from "react-router-dom";
 
 const StressIndex = ({ value }: { value: number }) => {
   const circumference = 2 * Math.PI * 40;
@@ -89,7 +90,7 @@ export default function NovaChat() {
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [stats, setStats] = useState<any>(null);
-  useAuth();
+  const { hasActiveSubscription } = useAuth();
   const { theme, setTheme } = useTheme();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -107,6 +108,7 @@ export default function NovaChat() {
   }, [chatMessages, isTyping]);
 
   const handleSend = async () => {
+    if (!hasActiveSubscription) return;
     if (!input.trim()) return;
     const userMsg = {
       role: "user",
@@ -143,6 +145,7 @@ export default function NovaChat() {
   };
 
   const runDeepScan = async () => {
+    if (!hasActiveSubscription) return;
     setIsTyping(true);
     try {
       const res = await novaServiceAPI.getAnalysis();
@@ -172,7 +175,30 @@ export default function NovaChat() {
   };
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full relative">
+      {!hasActiveSubscription && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-background/40 backdrop-blur-md">
+          <div className="max-w-md w-full bg-card border border-border rounded-[2.5rem] p-10 text-center space-y-6 shadow-2xl">
+            <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto border border-primary/20">
+              <Zap className="w-10 h-10 text-primary" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Elite Access Required</h2>
+              <p className="text-sm font-semibold text-muted-foreground leading-relaxed">
+                Nova Chat and Deep Scan protocols are reserved for Pulse Elite members. 
+                Activate your membership to unlock behavioral AI coaching.
+              </p>
+            </div>
+            <Link 
+              to="/subscription"
+              className="w-full py-4 bg-primary text-background font-black rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_40px_rgba(45,237,156,0.25)] uppercase tracking-[0.2em] text-xs"
+            >
+              <Crown className="w-4 h-4" />
+              Upgrade to Elite
+            </Link>
+          </div>
+        </div>
+      )}
       <div className="flex flex-col flex-1 min-w-0">
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-border shrink-0">
           <div className="flex items-center gap-3">

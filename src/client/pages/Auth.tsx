@@ -58,8 +58,8 @@ export default function AuthPage() {
         const res = await authAPI.login({ email, password });
         login(res.data.token || "", res.data.user);
         toast({
-          title: "Uplink Established",
-          description: "Welcome back to the Command Center.",
+          title: "Access Granted",
+          description: "Welcome back to the Intelligence Hub.",
         });
         navigate(res.data.user.onboardingCompleted ? "/" : "/onboarding");
       } else {
@@ -86,7 +86,7 @@ export default function AuthPage() {
         description:
           err.response?.data?.message ||
           err.message ||
-          "Invalid credentials. Please verify your uplink.",
+          "Invalid credentials. Please verify your connection.",
       });
     } finally {
       setLoading(false);
@@ -198,7 +198,7 @@ export default function AuthPage() {
               </h3>
               <p className="text-muted-foreground font-medium text-sm">
                 {isLogin
-                  ? "Establish uplink to your command center."
+                  ? "Access your intelligence hub."
                   : "Begin your journey into behavioral intelligence."}
               </p>
             </div>
@@ -236,7 +236,7 @@ export default function AuthPage() {
                 <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Secret Key"
+                  placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete={isLogin ? "current-password" : "new-password"}
@@ -273,7 +273,7 @@ export default function AuthPage() {
                     type="button"
                     className="text-[10px] font-black text-primary/60 hover:text-primary transition-colors uppercase tracking-widest"
                   >
-                    Forgot Secret Key?
+                    Forgot Password?
                   </button>
                 </div>
               )}
@@ -287,10 +287,50 @@ export default function AuthPage() {
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   <>
-                    {isLogin ? "Authenticate" : "Deploy Solution"}
+                    {isLogin ? "Sign In" : "Create Account"}
                     <ArrowRight className="w-5 h-5" />
                   </>
                 )}
+              </button>
+
+              <div className="relative py-4 flex items-center gap-4">
+                <div className="h-px flex-1 bg-border/50" />
+                <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">
+                  Or
+                </span>
+                <div className="h-px flex-1 bg-border/50" />
+              </div>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    const res = await authAPI.login({
+                      email: "guest@dte-solutions.icu",
+                      password: "GuestPass123!",
+                    });
+                    login(res.data.token || "", res.data.user);
+                    toast({
+                      title: "Sandbox Protocol Initialized",
+                      description: "Entering high-fidelity demo environment.",
+                    });
+                    navigate("/");
+                  } catch (err) {
+                    toast({
+                      variant: "destructive",
+                      title: "Sandbox Offline",
+                      description: "Please create a Guest Account to enable this protocol.",
+                    });
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                className="w-full bg-muted border border-border text-foreground/60 font-black py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-muted/80 hover:text-foreground transition-all uppercase tracking-[0.2em] text-[10px] disabled:opacity-50"
+              >
+                <Sparkles className="w-4 h-4 text-primary" />
+                Launch Sandbox Protocol
               </button>
             </form>
 
