@@ -300,6 +300,8 @@ export default function NovaChat() {
           </div>
           <div className="max-w-4xl mx-auto relative group">
             <input
+              id="nova-message"
+              name="nova-message"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}

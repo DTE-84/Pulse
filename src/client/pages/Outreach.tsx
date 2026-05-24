@@ -117,8 +117,10 @@ export default function Outreach() {
 
             <div className="space-y-6 relative z-10">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-primary uppercase tracking-[0.2em] ml-2">Broadcast Subject</label>
+                <label htmlFor="broadcast-subject" className="text-[10px] font-black text-primary uppercase tracking-[0.2em] ml-2">Broadcast Subject</label>
                 <input 
+                  id="broadcast-subject"
+                  name="broadcast-subject"
                   type="text" 
                   placeholder="e.g., Exclusive Opportunity: High-Fidelity Solutions"
                   value={subject}
@@ -128,8 +130,10 @@ export default function Outreach() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-primary uppercase tracking-[0.2em] ml-2">Broadcast Message</label>
+                <label htmlFor="broadcast-message" className="text-[10px] font-black text-primary uppercase tracking-[0.2em] ml-2">Broadcast Message</label>
                 <textarea 
+                  id="broadcast-message"
+                  name="broadcast-message"
                   rows={8}
                   placeholder="Draft your high-sophistication message here..."
                   value={message}

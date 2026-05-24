@@ -316,10 +316,12 @@ export default function GrowthPage() {
                 </DialogHeader>
                 <div className="space-y-6 py-6">
                   <div className="space-y-2 group">
-                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] group-focus-within:text-primary transition-colors">
+                    <label htmlFor="goal-name" className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] group-focus-within:text-primary transition-colors">
                       Goal Identification
                     </label>
                     <Input
+                      id="goal-name"
+                      name="goal-name"
                       placeholder="e.g., Emergency Vault"
                       value={newGoal.name}
                       onChange={(e) =>
@@ -329,10 +331,12 @@ export default function GrowthPage() {
                     />
                   </div>
                   <div className="space-y-2 group">
-                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] group-focus-within:text-primary transition-colors">
+                    <label htmlFor="goal-target" className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] group-focus-within:text-primary transition-colors">
                       Target Quantum ($)
                     </label>
                     <Input
+                      id="goal-target"
+                      name="goal-target"
                       type="number"
                       placeholder="25000"
                       value={newGoal.target}
@@ -343,10 +347,12 @@ export default function GrowthPage() {
                     />
                   </div>
                   <div className="space-y-2 group">
-                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] group-focus-within:text-primary transition-colors">
+                    <label htmlFor="goal-deadline" className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] group-focus-within:text-primary transition-colors">
                       Optimization Deadline
                     </label>
                     <Input
+                      id="goal-deadline"
+                      name="goal-deadline"
                       type="date"
                       value={newGoal.deadline}
                       onChange={(e) =>

@@ -198,8 +198,8 @@ const MobileNav = () => {
         className={cn(
           "lg:hidden fixed left-4 right-4 z-50 bg-card/90 backdrop-blur-2xl border border-border rounded-[2rem] transition-all duration-500 ease-out shadow-[0_-20px_50px_rgba(0,0,0,0.1)] overflow-hidden",
           drawerOpen
-            ? "bottom-24 opacity-100 translate-y-0"
-            : "bottom-20 opacity-0 pointer-events-none translate-y-12",
+            ? "bottom-28 opacity-100 translate-y-0"
+            : "bottom-24 opacity-0 pointer-events-none translate-y-12",
         )}
       >
         <div className="p-3 space-y-1">
@@ -249,7 +249,7 @@ const MobileNav = () => {
       </div>
 
       {/* Primary tab bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-2xl border-t border-border z-50 flex items-center justify-around px-2 sm:px-4 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-3 min-h-[4rem] neo-shadow">
+      <div className="lg:hidden fixed bottom-4 left-4 right-4 bg-background/95 backdrop-blur-2xl border border-border z-50 flex items-center justify-around px-2 sm:px-4 pb-[env(safe-area-inset-bottom)] pt-3 min-h-[4.5rem] rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-white/5">
         {primaryNav.map((item) => {
           const isActive =
             location.pathname === item.href ||

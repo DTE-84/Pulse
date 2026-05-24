@@ -122,10 +122,12 @@ export default function Profile() {
       <div className="bg-[#12110F] border border-white/5 rounded-[2.5rem] p-8 md:p-10 space-y-8 shadow-2xl">
         <div className="space-y-6">
           <div className="space-y-3">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Full Name</Label>
+            <Label htmlFor="profile-name" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Full Name</Label>
             <div className="relative group">
               <User className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <Input 
+                id="profile-name"
+                name="profile-name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="bg-white/[0.02] border-white/5 rounded-2xl py-6 pl-12 focus:border-primary/40 transition-all font-semibold"
@@ -134,10 +136,12 @@ export default function Profile() {
           </div>
 
           <div className="space-y-3 opacity-50 cursor-not-allowed">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Email Address (Locked)</Label>
+            <Label htmlFor="profile-email" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Email Address (Locked)</Label>
             <div className="relative">
               <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
+                id="profile-email"
+                name="profile-email"
                 value={formData.email}
                 disabled
                 className="bg-white/[0.01] border-white/5 rounded-2xl py-6 pl-12 font-semibold"
@@ -146,10 +150,12 @@ export default function Profile() {
           </div>
 
           <div className="space-y-3">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Monthly Spending Baseline ($)</Label>
+            <Label htmlFor="profile-baseline" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Monthly Spending Baseline ($)</Label>
             <div className="relative group">
               <Hash className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <Input 
+                id="profile-baseline"
+                name="profile-baseline"
                 type="number"
                 value={formData.baselineSpend}
                 onChange={(e) => setFormData({ ...formData, baselineSpend: parseFloat(e.target.value) })}

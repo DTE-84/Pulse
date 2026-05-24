@@ -70,32 +70,26 @@ export const authAPI = {
           baselineSpend: user.baseline_spend,
           novaTone: user.nova_tone,
           onboardingCompleted: user.onboarding_completed,
+          subscriptionStatus: user.subscription_status,
+          trialEndsAt: user.trial_ends_at
         },
       },
     };
   },
 
   signup: async ({ email, password, name }: any) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    // Pass name in options.data so the trigger can pick it up
+    const { data, error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        data: { name }
+      }
+    });
     if (error) throw error;
 
-    // Only insert profile if we have an active session (email confirmation disabled).
-    // If email confirmation is enabled, the profile will be created on first login.
-    if (data.user && data.session) {
-      const { error: insertError } = await supabase.from("dim_users").insert([
-        {
-          user_id: data.user.id,
-          user_name: name,
-          email: email,
-          baseline_spend: 2500,
-          monthly_income: 5200,
-          initial_balance: 15000,
-          nova_tone: "Balanced",
-          onboarding_completed: false,
-        },
-      ]);
-      if (insertError) throw insertError;
-    }
+    // Redundant manual insert removed. Profile creation is handled by the 
+    // public.handle_new_user() trigger for 100% data integrity.
 
     return {
       data: {
@@ -105,6 +99,8 @@ export const authAPI = {
           email: email,
           name: name,
           onboardingCompleted: false,
+          subscriptionStatus: 'trialing',
+          trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
         },
       },
     };
@@ -152,6 +148,8 @@ export const authAPI = {
         baselineSpend: profile.baseline_spend,
         novaTone: profile.nova_tone,
         onboardingCompleted: profile.onboarding_completed,
+        subscriptionStatus: profile.subscription_status,
+        trialEndsAt: profile.trial_ends_at
       },
     };
   },

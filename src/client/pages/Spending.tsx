@@ -120,6 +120,8 @@ export default function SpendingPage() {
           <div className="relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <input
+              id="search-transactions"
+              name="search-transactions"
               placeholder="Search transactions..."
               className="bg-muted border border-border pl-12 pr-6 py-3 rounded-full text-xs font-bold text-foreground focus:outline-none focus:border-primary/30 transition-all w-full sm:w-64"
             />

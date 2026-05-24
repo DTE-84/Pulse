@@ -208,6 +208,8 @@ export default function AuthPage() {
                 <div className="relative group">
                   <User className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   <input
+                    id="name"
+                    name="name"
                     type="text"
                     placeholder="Full Name"
                     value={name}
@@ -222,6 +224,8 @@ export default function AuthPage() {
               <div className="relative group">
                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <input
+                  id="email"
+                  name="email"
                   type="email"
                   placeholder="Email Address"
                   value={email}
@@ -235,6 +239,8 @@ export default function AuthPage() {
               <div className="relative group">
                 <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <input
+                  id="password"
+                  name="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   value={password}
