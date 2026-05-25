@@ -83,10 +83,11 @@ export default function AuthPage() {
       toast({
         variant: "destructive",
         title: "Auth Failed",
-        description:
+        description: String(
           err.response?.data?.message ||
           err.message ||
-          "Invalid credentials. Please verify your connection.",
+          "Invalid credentials. Please verify your connection."
+        ),
       });
     } finally {
       setLoading(false);
@@ -323,7 +324,7 @@ export default function AuthPage() {
                     toast({
                       variant: "destructive",
                       title: "Sandbox Offline",
-                      description: err.response?.data?.message || "Could not established analytical link to guest environment.",
+                      description: String(err.response?.data?.message || "Could not established analytical link to guest environment."),
                     });
                   } finally {
                     setLoading(false);

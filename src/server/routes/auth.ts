@@ -120,11 +120,14 @@ export const handleSignup = async (req: Request, res: Response) => {
 };
 
 export const handleGuestSignup = async (req: Request, res: Response) => {
+  console.log("[Guest Signup] Initializing unique protocol...");
   try {
     const guestId = Math.random().toString(36).substring(7);
     const email = `guest_${guestId}@pulse.demo`;
     const password = await bcrypt.hash(Math.random().toString(36), 12);
     const name = `Guest User ${guestId.toUpperCase()}`;
+    
+    console.log(`[Guest Signup] Provisioning identity: ${email}`);
     
     const result = await query(
       "INSERT INTO dim_users (user_name, email, password, is_demo, subscription_status, trial_ends_at) VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '7 days') RETURNING user_id, user_name, email, is_demo, subscription_status, trial_ends_at",
@@ -132,7 +135,16 @@ export const handleGuestSignup = async (req: Request, res: Response) => {
     );
     
     const u = result.rows[0];
-    const token = jwt.sign({ id: u.user_id, email: u.email }, JWT_SECRET, { expiresIn: "7d" });
+    console.log(`[Guest Signup] Database entry confirmed: ${u.user_id}`);
+    
+    let token;
+    try {
+      token = jwt.sign({ id: u.user_id, email: u.email }, JWT_SECRET, { expiresIn: "7d" });
+      console.log("[Guest Signup] Uplink token generated.");
+    } catch (jwtErr: any) {
+      console.error("[Guest Signup] JWT Error:", jwtErr.message);
+      return res.status(500).json({ message: "Uplink Token Error", detail: jwtErr.message });
+    }
     
     res.status(201).json({ 
       token, 
@@ -140,14 +152,25 @@ export const handleGuestSignup = async (req: Request, res: Response) => {
         id: u.user_id, 
         email: u.email, 
         name: u.user_name, 
-        onboardingCompleted: true, // Auto-complete onboarding for guests
+        onboardingCompleted: true, 
         isDemo: true,
         subscriptionStatus: u.subscription_status,
         trialEndsAt: u.trial_ends_at
       } 
     });
   } catch (err: any) {
-    res.status(500).json({ message: "Guest Initialization Failed", detail: err.message });
+    console.error("[Guest Signup] ERROR:", err.message);
+    if (err.code === "ECONNREFUSED" || err.message.includes("connection")) {
+      return res.status(503).json({ 
+        message: "Sandbox Database Offline", 
+        detail: "The high-fidelity telemetry environment is currently unreachable." 
+      });
+    }
+    res.status(500).json({ 
+      message: "Guest Initialization Failed", 
+      detail: err.message,
+      stack: process.env.NODE_ENV === "production" ? undefined : err.stack
+    });
   }
 };
 

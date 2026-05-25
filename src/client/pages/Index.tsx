@@ -452,7 +452,7 @@ export default function Index() {
       setStats(statsRes.data);
     } catch (err: any) {
       setAnalyzing(false);
-      const errorMsg = err.response?.data?.message || "Nova encountered a signal deviation during the scan.";
+      const errorMsg = String(err.response?.data?.message || "Nova encountered a signal deviation during the scan.");
       toast({
         variant: "destructive",
         title: "Analysis failed",

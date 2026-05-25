@@ -23,6 +23,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { paymentsAPI } from "@/lib/api";
 
 const plans = [
@@ -135,7 +136,7 @@ const plans = [
       toast({
         variant: "destructive",
         title: "Checkout Error",
-        description: "Could not established analytical link to payment gateway.",
+        description: String(err.response?.data?.message || "Could not established analytical link to payment gateway."),
       });
       setIsCheckingOut(false);
     }

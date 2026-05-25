@@ -76,7 +76,7 @@ export default function Profile() {
       toast({
         variant: "destructive",
         title: "Update Failed",
-        description: err.message || "Could not established analytical link to server.",
+        description: String(err.message || "Could not established analytical link to server."),
       });
     } finally {
       setIsSaving(false);
@@ -97,7 +97,7 @@ export default function Profile() {
       toast({
         variant: "destructive",
         title: "Termination Failed",
-        description: err.message || "Could not established analytical link to server.",
+        description: String(err.message || "Could not established analytical link to server."),
       });
     } finally {
       setIsDeleting(false);
