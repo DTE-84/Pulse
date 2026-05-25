@@ -322,7 +322,6 @@ export default function Index() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [triggerId, setTriggerId] = useState<string>("0"); // Default to no trigger
   const { isAuthenticated, user, loading: authLoading } = useAuth();
-  const [slotsLeft, setSlotsLeft] = useState(14);
 
   const trialDaysLeft = user?.trialEndsAt 
     ? Math.max(0, Math.ceil((new Date(user.trialEndsAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
@@ -822,9 +821,6 @@ export default function Index() {
           <div className="space-y-4 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-3">
               <Crown className="w-6 h-6 text-yellow-400 animate-bounce" />
-              <Badge className="bg-primary text-primary-foreground font-black uppercase tracking-[0.2em] px-4">
-                Only {slotsLeft} Founding Slots Remaining
-              </Badge>
             </div>
             <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tighter">
               Pre-Order to get Elite for $14.99 for Life

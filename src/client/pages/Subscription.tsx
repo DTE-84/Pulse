@@ -82,21 +82,12 @@ export default function SubscriptionPage() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [slotsLeft, setSlotsLeft] = useState(14); // Sense of urgency
   const { user, hasActiveSubscription } = useAuth();
   const { toast } = useToast();
 
   const trialDaysLeft = user?.trialEndsAt 
     ? Math.max(0, Math.ceil((new Date(user.trialEndsAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
     : 0;
-
-  useEffect(() => {
-    // Subtle simulation of slots decreasing
-    const timer = setTimeout(() => {
-      if (slotsLeft > 3) setSlotsLeft(prev => prev - 1);
-    }, 15000);
-    return () => clearTimeout(timer);
-  }, [slotsLeft]);
 
   const handleStripeRedirect = async () => {
     if (!selectedPlan) return;
@@ -187,12 +178,6 @@ export default function SubscriptionPage() {
             {plan.popular && (
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(45,237,156,0.5)]">
                 Most Popular
-              </div>
-            )}
-
-            {plan.elite && (
-               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(234,179,8,0.3)]">
-                Only {slotsLeft} Founding Slots Remaining
               </div>
             )}
 
