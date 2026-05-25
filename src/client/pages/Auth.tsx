@@ -312,21 +312,18 @@ export default function AuthPage() {
                 onClick={async () => {
                   setLoading(true);
                   try {
-                    const res = await authAPI.login({
-                      email: "guest@dte-solutions.icu",
-                      password: "GuestPass123!",
-                    });
+                    const res = await authAPI.guestSignup();
                     login(res.data.token || "", res.data.user);
                     toast({
                       title: "Sandbox Protocol Initialized",
                       description: "Entering high-fidelity demo environment.",
                     });
                     navigate("/");
-                  } catch (err) {
+                  } catch (err: any) {
                     toast({
                       variant: "destructive",
                       title: "Sandbox Offline",
-                      description: "Please create a Guest Account to enable this protocol.",
+                      description: err.response?.data?.message || "Could not established analytical link to guest environment.",
                     });
                   } finally {
                     setLoading(false);

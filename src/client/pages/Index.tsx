@@ -321,16 +321,47 @@ export default function Index() {
   const [ingestData, setIngestData] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [triggerId, setTriggerId] = useState<string>("0"); // Default to no trigger
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, user, loading: authLoading } = useAuth();
   const [slotsLeft, setSlotsLeft] = useState(14);
 
-  useEffect(() => {
-    // Subtle simulation of slots decreasing
-    const timer = setTimeout(() => {
-      if (slotsLeft > 3) setSlotsLeft(prev => prev - 1);
-    }, 15000);
-    return () => clearTimeout(timer);
-  }, [slotsLeft]);
+  const trialDaysLeft = user?.trialEndsAt 
+    ? Math.max(0, Math.ceil((new Date(user.trialEndsAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
+    : 0;
+
+  const handleSeedSandbox = async () => {
+    setSyncing(true);
+    toast({
+      title: "Initializing Sandbox",
+      description: "Generating high-fidelity behavioral telemetry for your trial...",
+    });
+
+    try {
+      const mockTransactions = [
+        { date: new Date().toISOString().split('T')[0], amount: 45.20, category: "Dining", risk_category: "Lifestyle", merchant_name: "Stellar Coffee" },
+        { date: new Date(Date.now() - 86400000).toISOString().split('T')[0], amount: 120.00, category: "Shopping", risk_category: "Impulse", merchant_name: "Amazon Hub", trigger_id: 2 },
+        { date: new Date(Date.now() - 172800000).toISOString().split('T')[0], amount: 8.50, category: "Transport", risk_category: "Essential", merchant_name: "Uber Protocol" },
+        { date: new Date(Date.now() - 259200000).toISOString().split('T')[0], amount: 250.00, category: "Groceries", risk_category: "Essential", merchant_name: "Whole Foods" },
+        { date: new Date(Date.now() - 345600000).toISOString().split('T')[0], amount: 55.00, category: "Entertainment", risk_category: "Lifestyle", merchant_name: "Netflix & Pulse", trigger_id: 1 }
+      ];
+
+      await transactionsAPI.ingest({ transactions: mockTransactions });
+      const res = await statsAPI.get();
+      setStats(res.data);
+
+      toast({
+        title: "Sandbox Primed",
+        description: "Nova now has behavioral nodes to analyze. Explore the dashboard to see Pulse in action.",
+      });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Sandbox Error",
+        description: "Could not establish the mock telemetry link.",
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const handleIngest = async () => {
     if (!ingestData.trim()) {
@@ -437,6 +468,15 @@ export default function Index() {
       return;
     }
 
+    // Redirect to subscription if trial expired and no active sub
+    const isTrialExpired = user?.subscriptionStatus === 'trialing' && trialDaysLeft <= 0;
+    const isInactive = user?.subscriptionStatus === 'inactive' || !user?.subscriptionStatus;
+    
+    if ((isTrialExpired || isInactive) && user?.subscriptionStatus !== 'active') {
+      navigate("/subscription");
+      return;
+    }
+
     const fetchStats = async () => {
       try {
         const res = await statsAPI.get();
@@ -480,6 +520,11 @@ export default function Index() {
             <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground">
               Your financial heartbeat
             </h1>
+            {user?.subscriptionStatus === 'trialing' && (
+              <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest">
+                Elite Preview: {trialDaysLeft} Days Remaining
+              </Badge>
+            )}
             {stats?.projection?.isHighVelocity && (
               <Badge className="bg-red-500/10 text-red-400 border-red-500/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest animate-pulse">
                 High-Velocity Surge
@@ -624,18 +669,33 @@ export default function Index() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <button
-            onClick={runAnalysis}
-            disabled={analyzing}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-5 py-3 rounded-full text-[10px] font-black transition-all uppercase tracking-widest disabled:opacity-50"
-          >
-            {analyzing ? (
-              <Loader2 className="w-3 h-3 animate-spin" />
-            ) : (
-              <Play className="w-3 h-3 fill-red-400" />
-            )}
-            {analyzing ? "Reviewing..." : "Run Nova review"}
-          </button>
+          {user?.subscriptionStatus === 'trialing' ? (
+            <button
+              onClick={handleSeedSandbox}
+              disabled={syncing}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 border border-yellow-500/20 px-5 py-3 rounded-full text-[10px] font-black transition-all uppercase tracking-widest disabled:opacity-50"
+            >
+              {syncing ? (
+                <RefreshCcw className="w-3 h-3 animate-spin" />
+              ) : (
+                <Zap className="w-3 h-3" />
+              )}
+              {syncing ? "Initializing..." : "Initialize Sandbox Telemetry"}
+            </button>
+          ) : (
+            <button
+              onClick={runAnalysis}
+              disabled={analyzing}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-5 py-3 rounded-full text-[10px] font-black transition-all uppercase tracking-widest disabled:opacity-50"
+            >
+              {analyzing ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Play className="w-3 h-3 fill-red-400" />
+              )}
+              {analyzing ? "Reviewing..." : "Run Nova review"}
+            </button>
+          )}
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -648,7 +708,7 @@ export default function Index() {
                 ) : (
                   <Database className="w-3 h-3" />
                 )}
-                {syncing ? "Syncing..." : "Sync transactions"}
+                {syncing ? "Syncing..." : user?.subscriptionStatus === 'active' ? "Sync Bank Telemetry" : "Manual Transaction Sync"}
               </button>
             </DialogTrigger>
             <DialogContent className="bg-card border border-border text-foreground max-w-2xl">

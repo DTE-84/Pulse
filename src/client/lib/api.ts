@@ -105,6 +105,10 @@ export const authAPI = {
       },
     };
   },
+  guestSignup: async () => {
+    const response = await API.post("/api/auth/guest");
+    return response;
+  },
   me: async () => {
     const {
       data: { user },

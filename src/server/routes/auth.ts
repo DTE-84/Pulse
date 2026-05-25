@@ -119,6 +119,39 @@ export const handleSignup = async (req: Request, res: Response) => {
   }
 };
 
+export const handleGuestSignup = async (req: Request, res: Response) => {
+  try {
+    const guestId = Math.random().toString(36).substring(7);
+    const email = `guest_${guestId}@pulse.demo`;
+    const password = await bcrypt.hash(Math.random().toString(36), 12);
+    const name = `Guest User ${guestId.toUpperCase()}`;
+    
+    const result = await query(
+      "INSERT INTO dim_users (user_name, email, password, is_demo, subscription_status, trial_ends_at) VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '7 days') RETURNING user_id, user_name, email, is_demo, subscription_status, trial_ends_at",
+      [name, email, password, true, 'trialing']
+    );
+    
+    const u = result.rows[0];
+    const token = jwt.sign({ id: u.user_id, email: u.email }, JWT_SECRET, { expiresIn: "7d" });
+    
+    res.status(201).json({ 
+      token, 
+      user: { 
+        id: u.user_id, 
+        email: u.email, 
+        name: u.user_name, 
+        onboardingCompleted: true, // Auto-complete onboarding for guests
+        isDemo: true,
+        subscriptionStatus: u.subscription_status,
+        trialEndsAt: u.trial_ends_at
+      } 
+    });
+  } catch (err: any) {
+    res.status(500).json({ message: "Guest Initialization Failed", detail: err.message });
+  }
+};
+
+
 export const handleUpdateProfile = async (req: Request, res: Response) => {
   const { name, baselineSpend, novaTone } = req.body;
   const VALID_TONES = ["Gentle", "Balanced", "Driven"];
