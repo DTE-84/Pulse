@@ -87,8 +87,8 @@ const Sidebar = () => {
                   <div className="absolute right-4 w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(45,237,156,1)]" />
                 )}
               </Link>
-              );
-              })}}
+            );
+          })}
               </nav>
         {/* Pre-Order CTA Card */}
         <div
@@ -243,7 +243,7 @@ const MobileNav = () => {
                 )}
               </Link>
             );
-          })}}
+          })}
         </div>
       </div>
 
@@ -274,7 +274,7 @@ const MobileNav = () => {
               )}
             </Link>
           );
-        })}}
+        })}
 
         {/* More button */}
         <button
