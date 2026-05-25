@@ -305,8 +305,9 @@ const MobileNav = () => {
           )}
         </button>
       </div>
-    </>
-  );
+    </div>
+  </>
+);
 };
 
 export const Layout = ({ children }: LayoutProps) => {
