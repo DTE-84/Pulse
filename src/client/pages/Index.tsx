@@ -452,7 +452,7 @@ export default function Index() {
       setStats(statsRes.data);
     } catch (err: any) {
       setAnalyzing(false);
-      const errorMsg = String(err.response?.data?.message || "Nova encountered a signal deviation during the scan.");
+      const errorMsg = err.response?.data?.message || "Nova encountered a signal deviation during the scan.";
       toast({
         variant: "destructive",
         title: "Analysis failed",
@@ -848,7 +848,7 @@ export default function Index() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {stats?.triggers?.map((trigger: any) => (
           <TriggerCard
-            key={trigger.id}
+            key={trigger.name}
             title={trigger.name}
             subtitle={trigger.status || "Spending pattern detected"}
             colorClass={

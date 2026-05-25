@@ -309,6 +309,7 @@ const MobileNav = () => {
 };
 
 export const Layout = ({ children }: LayoutProps) => {
+  console.log("[PulseAi] Rendering Layout");
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -323,7 +324,7 @@ export const Layout = ({ children }: LayoutProps) => {
             <div className="relative w-10 h-10 flex items-center justify-center">
               <div className="relative z-10 w-10 h-10 flex items-center justify-center overflow-hidden">
                 <img
-                  src={`${import.meta.env.BASE_URL}PulseNovaLogoTrans.png`}
+                  src={`${import.meta.env.BASE_URL || "/"}PulseNovaLogoTrans.png`}
                   alt="Pulse"
                   className="w-10 h-10 object-contain"
                 />
