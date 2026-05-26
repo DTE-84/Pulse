@@ -1,11 +1,18 @@
 import { Request, Response } from "express";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+const STRIPE_KEY = process.env.STRIPE_SECRET_KEY;
+const stripe = STRIPE_KEY ? new Stripe(STRIPE_KEY, {
   apiVersion: "2023-10-16" as any,
-});
+}) : null;
 
 export const createCheckoutSession = async (req: Request, res: Response) => {
+  if (!stripe) {
+    return res.status(503).json({ 
+      message: "Payment Uplink Offline", 
+      detail: "Stripe API Key is missing from the environment. Secure payments are currently disabled." 
+    });
+  }
   const { planName, isAnnual } = req.body;
   const userId = req.userId;
 
