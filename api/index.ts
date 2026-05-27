@@ -1,5 +1,4 @@
-import { createServer } from "../src/server/index";
+// @ts-ignore - Importing from built production bundle
+import app from "../dist/server/production.mjs";
 
-// Export the Express server as a Vercel serverless function
-const app = createServer();
 export default app;
