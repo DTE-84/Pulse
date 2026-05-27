@@ -31,6 +31,14 @@
     "esModuleInterop": true,
     "types": ["node"]
   },
-  "include": ["src/client", "src/server", "src/shared", "src/vite.config.ts", "src/vite.config.server.mts"],
+  "include": [
+    "src/client", 
+    "src/server", 
+    "src/shared", 
+    "api", 
+    "src/vite.config.ts", 
+    "src/vite.config.server.mts"
+  ],
   "exclude": ["node_modules"]
 }
+
