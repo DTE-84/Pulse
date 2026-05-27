@@ -7,6 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
+    publicDir: false,
     build: {
         lib: {
             entry: path.resolve(__dirname, "src/server/node-build.ts"),
@@ -14,12 +15,11 @@ export default defineConfig({
             fileName: "production",
             formats: ["es"],
         },
-        outDir: "dist/server",
+        outDir: "server-dist",
         target: "node22",
         ssr: true,
         rollupOptions: {
             external: [
-                
                 "fs",
                 "path",
                 "url",
@@ -36,10 +36,19 @@ export default defineConfig({
                 // External dependencies that should not be bundled
                 "express",
                 "cors",
+                "pg",
+                "dotenv",
+                "bcryptjs",
+                "jsonwebtoken",
+                "stripe",
+                "plaid",
+                "axios",
+                "@google/generative-ai",
+                "@supabase/supabase-js",
             ],
             output: {
                 format: "es",
-                entryFileNames: "[name].mjs",
+                entryFileNames: "production.mjs",
             },
         },
         minify: false, // Keep readable for debugging

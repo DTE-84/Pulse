@@ -11,7 +11,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // In production, serve the built SPA files
-const distPath = path.resolve(__dirname, "..");
+// If we are in server-dist/, the SPA files are in ../dist/
+const distPath = path.resolve(__dirname, "..", "dist");
 
 // Serve static files at the base path (/Pulse)
 app.use("/Pulse/assets", express.static(path.join(distPath, "assets"), {

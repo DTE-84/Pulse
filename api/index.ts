@@ -1,4 +1,4 @@
 // @ts-ignore - Importing from built production bundle
-import app from "../dist/server/production.mjs";
+import app from "../server-dist/production.mjs";
 
 export default app;
