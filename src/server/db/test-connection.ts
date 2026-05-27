@@ -5,9 +5,10 @@ const { Pool } = pg;
 
 async function testConnection() {
   console.log("Attempting to connect to Pulse DB at Supabase...");
+  const isProd = process.env.NODE_ENV === "production";
   const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }, // Common for Supabase
+    ssl: { rejectUnauthorized: isProd }, // Match main db.ts logic
   });
 
   try {
