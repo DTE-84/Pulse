@@ -1,6 +1,4 @@
-import server from '../../server/index.js';
-
-export default server;
+export { createServer } from '../../server/index.js';
 export interface DemoResponse {
   message: string;
 }
