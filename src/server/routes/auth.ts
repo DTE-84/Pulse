@@ -124,28 +124,34 @@ export const handleGuestSignup = async (req: Request, res: Response) => {
   try {
     const guestId = Math.random().toString(36).substring(7);
     const email = `guest_${guestId}@pulse.demo`;
+    
+    console.log("[Guest Signup] Hashing password...");
     const password = await bcrypt.hash(Math.random().toString(36), 12);
     const name = `Guest User ${guestId.toUpperCase()}`;
     
     console.log(`[Guest Signup] Provisioning identity: ${email}`);
     
+    console.log("[Guest Signup] Executing DB query...");
     const result = await query(
       "INSERT INTO dim_users (user_name, email, password, is_demo, subscription_status, trial_ends_at) VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '7 days') RETURNING user_id, user_name, email, is_demo, subscription_status, trial_ends_at",
       [name, email, password, true, 'trialing']
     );
     
     const u = result.rows[0];
+    if (!u) throw new Error("Database insertion returned no data.");
     console.log(`[Guest Signup] Database entry confirmed: ${u.user_id}`);
     
     let token;
     try {
+      console.log("[Guest Signup] Signing JWT...");
       token = jwt.sign({ id: u.user_id, email: u.email }, JWT_SECRET, { expiresIn: "7d" });
       console.log("[Guest Signup] Uplink token generated.");
     } catch (jwtErr: any) {
-      console.error("[Guest Signup] JWT Error:", jwtErr.message);
+      console.error("[Guest Signup] JWT Error:", jwtErr);
       return res.status(500).json({ message: "Uplink Token Error", detail: jwtErr.message });
     }
     
+    console.log("[Guest Signup] Sending success response...");
     res.status(201).json({ 
       token, 
       user: { 
@@ -159,7 +165,7 @@ export const handleGuestSignup = async (req: Request, res: Response) => {
       } 
     });
   } catch (err: any) {
-    console.error("[Guest Signup] ERROR:", err.message);
+    console.error("[Guest Signup] FATAL ERROR:", err);
     if (err.code === "ECONNREFUSED" || err.message.includes("connection")) {
       return res.status(503).json({ 
         message: "Sandbox Database Offline", 
