@@ -137,8 +137,11 @@ export const handleGuestSignup = async (req: Request, res: Response) => {
       [name, email, password, true, 'trialing']
     );
     
+    if (!result || !result.rows || result.rows.length === 0) {
+      throw new Error("Database insertion returned no rows.");
+    }
+
     const u = result.rows[0];
-    if (!u) throw new Error("Database insertion returned no data.");
     console.log(`[Guest Signup] Database entry confirmed: ${u.user_id}`);
     
     let token;
