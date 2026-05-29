@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { query } from "../db/db";
+import { seedGuestData } from "../db/seed-guest";
 import { JWT_SECRET } from "../middleware/security";
 
 // Basic email + password presence check (no library needed)
@@ -144,6 +145,13 @@ export const handleGuestSignup = async (req: Request, res: Response) => {
     const u = result.rows[0];
     console.log(`[Guest Signup] Database entry confirmed: ${u.user_id}`);
     
+    // Auto-Seed Guest Data for High-Fidelity First Impression
+    try {
+      await seedGuestData(u.user_id);
+    } catch (seedErr) {
+      console.warn("[Guest Signup] Data seeding failed, but user was created:", seedErr);
+    }
+
     let token;
     try {
       console.log("[Guest Signup] Signing JWT...");
