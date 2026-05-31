@@ -230,6 +230,9 @@ export const handleDebug = async (req: Request, res: Response) => {
     env: {
       has_db_url: !!process.env.DATABASE_URL,
       has_jwt_secret: !!process.env.JWT_SECRET,
+      has_plaid_client_id: !!process.env.PLAID_CLIENT_ID,
+      has_plaid_secret: !!process.env.PLAID_SECRET,
+      plaid_env: process.env.PLAID_ENV || "not_set (defaulting to sandbox)",
       node_env: process.env.NODE_ENV,
       vercel_env: process.env.VERCEL_ENV || "local"
     }

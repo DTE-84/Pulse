@@ -1,17 +1,9 @@
-import pg from 'pg';
-import "dotenv/config";
-
-const { Pool } = pg;
+import getPool, { query } from './db';
 
 async function checkConstraints() {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
-  });
-
   try {
     console.log("\n--- Primary Key Constraints ---");
-    const pkRes = await pool.query(`
+    const pkRes = await query(`
       SELECT conname, contype, a.attname
       FROM pg_constraint c
       JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = ANY(c.conkey)
@@ -20,7 +12,7 @@ async function checkConstraints() {
     console.table(pkRes.rows);
 
     console.log("\n--- Foreign Key Constraints ---");
-    const fkRes = await pool.query(`
+    const fkRes = await query(`
       SELECT conname, confrelid::regclass as ref_table, a.attname as col
       FROM pg_constraint c
       JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = ANY(c.conkey)
@@ -29,14 +21,14 @@ async function checkConstraints() {
     console.table(fkRes.rows);
 
     console.log("\n--- RLS Status ---");
-    const rlsRes = await pool.query(`
+    const rlsRes = await query(`
       SELECT tablename, rowsecurity FROM pg_tables WHERE schemaname = 'public' AND tablename IN ('dim_users', 'fact_transactions', 'dim_goals');
     `);
     console.table(rlsRes.rows);
   } catch (err) {
     console.error("❌ Error checking constraints:", err);
   } finally {
-    await pool.end();
+    await getPool().end();
   }
 }
 

@@ -1,4 +1,4 @@
-import { query } from "../db/db";
+import { query } from "./db";
 
 // Date Helpers
 const subDays = (d: Date, days: number) => {

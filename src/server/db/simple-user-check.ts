@@ -1,4 +1,4 @@
-import { query } from "./db";
+import { query, getPool } from "./db";
 
 async function listUsers() {
   try {
@@ -8,7 +8,7 @@ async function listUsers() {
   } catch (err) {
     console.error("Failed to list users:", err);
   } finally {
-    process.exit();
+    await getPool().end();
   }
 }
 

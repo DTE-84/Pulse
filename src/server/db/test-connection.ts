@@ -1,22 +1,14 @@
-import pg from 'pg';
-import "dotenv/config";
-
-const { Pool } = pg;
+import { query, getPool } from "./db";
 
 async function testConnection() {
   console.log("Attempting to connect to Pulse DB at Supabase...");
-  const isProd = process.env.NODE_ENV === "production";
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: isProd }, // Match main db.ts logic
-  });
 
   try {
-    const res = await pool.query('SELECT NOW()');
+    const res = await query('SELECT NOW()');
     console.log("✅ SUCCESS: Pulse DB Uplink established at " + res.rows[0].now);
     
     // Check if the Star Schema is present
-    const tableCheck = await pool.query(`
+    const tableCheck = await query(`
       SELECT table_name 
       FROM information_schema.tables 
       WHERE table_schema = 'public' 
@@ -32,7 +24,7 @@ async function testConnection() {
   } catch (err: any) {
     console.error("❌ ERROR: Connection failed.", err.message);
   } finally {
-    await pool.end();
+    await getPool().end();
   }
 }
 

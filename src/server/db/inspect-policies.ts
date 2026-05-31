@@ -1,17 +1,9 @@
-import pg from 'pg';
-import "dotenv/config";
-
-const { Pool } = pg;
+import getPool, { query } from './db';
 
 async function checkPolicies() {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
-  });
-
   try {
     console.log("\n--- RLS Policies for dim_users ---");
-    const res = await pool.query(`
+    const res = await query(`
       SELECT schemaname, tablename, policyname, permissive, roles, cmd, qual, with_check 
       FROM pg_policies 
       WHERE tablename = 'dim_users';
@@ -20,7 +12,7 @@ async function checkPolicies() {
   } catch (err) {
     console.error("❌ Error checking policies:", err);
   } finally {
-    await pool.end();
+    await getPool().end();
   }
 }
 

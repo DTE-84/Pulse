@@ -1,18 +1,10 @@
-import pg from 'pg';
-import "dotenv/config";
-
-const { Pool } = pg;
+import getPool, { query } from './db';
 
 async function runFullFix() {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
-  });
-
   try {
     console.log("Applying full UUID migration fix to Pulse DB...");
     
-    await pool.query(`
+    await query(`
       BEGIN;
 
       -- 1. Ensure columns exist first
@@ -44,13 +36,13 @@ async function runFullFix() {
     `);
 
     // Let's just verify what we have now.
-    await pool.query("SELECT * FROM dim_users LIMIT 1");
+    await query("SELECT * FROM dim_users LIMIT 1");
     console.log("✅ Table state checked.");
     
   } catch (err) {
     console.error("❌ Error applying fix:", err);
   } finally {
-    await pool.end();
+    await getPool().end();
   }
 }
 

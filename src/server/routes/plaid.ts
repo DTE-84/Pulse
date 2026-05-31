@@ -38,10 +38,11 @@ export const createLinkToken = async (req: Request, res: Response) => {
 
     const response = await client.linkTokenCreate({
       user: { client_user_id: userId },
-      client_name: "Pulse Ai",
-      products: [Products.Transactions],
-      country_codes: [CountryCode.Us],
+      client_name: process.env.PLAID_CLIENT_NAME || "Pulse Ai",
+      products: (process.env.PLAID_PRODUCTS || "transactions").split(",") as Products[],
+      country_codes: (process.env.PLAID_COUNTRY_CODES || "US").split(",") as CountryCode[],
       language: "en",
+      redirect_uri: process.env.PLAID_REDIRECT_URI || undefined,
     });
     res.json(response.data);
   } catch (err: any) {

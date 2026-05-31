@@ -1,18 +1,10 @@
-import pg from 'pg';
-import "dotenv/config";
-
-const { Pool } = pg;
+import getPool, { query } from './db';
 
 async function runGlobalFix() {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
-  });
-
   try {
     console.log("Applying global UUID mapping fix to Pulse DB...");
     
-    await pool.query(`
+    await query(`
       BEGIN;
 
       -- 1. dim_users additions
@@ -38,7 +30,7 @@ async function runGlobalFix() {
   } catch (err) {
     console.error("❌ Error applying fix:", err);
   } finally {
-    await pool.end();
+    await getPool().end();
   }
 }
 

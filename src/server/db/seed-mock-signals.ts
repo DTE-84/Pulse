@@ -1,4 +1,4 @@
-import { query } from "./db";
+import { query, getPool } from "./db";
 
 const DREW_USER_ID = "fe67369a-fd48-4634-bc04-42da3a8ced63";
 
@@ -73,7 +73,7 @@ async function activateNovaSignals() {
   } catch (err) {
     console.error("❌ Signal Ingestion Failed:", err);
   } finally {
-    process.exit();
+    await getPool().end();
   }
 }
 

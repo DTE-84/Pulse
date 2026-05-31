@@ -1,18 +1,10 @@
-import pg from 'pg';
-import "dotenv/config";
-
-const { Pool } = pg;
+import { query, getPool } from './db';
 
 async function runFix() {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
-  });
-
   try {
     console.log("Applying additive schema fix to Pulse DB...");
     
-    await pool.query(`
+    await query(`
       -- 1. Fix dim_users: ensure UUID primary key and missing columns
       -- First, we need to handle the case where user_id is integer.
       -- We'll rename the old user_id and create a new uuid one if needed, 
@@ -36,7 +28,7 @@ async function runFix() {
   } catch (err) {
     console.error("❌ Error applying fix:", err);
   } finally {
-    await pool.end();
+    await getPool().end();
   }
 }
 

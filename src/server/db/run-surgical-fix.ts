@@ -1,18 +1,10 @@
-import pg from 'pg';
-import "dotenv/config";
-
-const { Pool } = pg;
+import { query, getPool } from './db';
 
 async function runSurgicalFix() {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
-  });
-
   try {
     console.log("Applying surgical UUID fix to Pulse DB...");
     
-    await pool.query(`
+    await query(`
       BEGIN;
 
       -- 1. Ensure new columns exist
@@ -35,7 +27,7 @@ async function runSurgicalFix() {
   } catch (err) {
     console.error("❌ Error applying fix:", err);
   } finally {
-    await pool.end();
+    await getPool().end();
   }
 }
 
