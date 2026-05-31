@@ -5,7 +5,7 @@ import cors from "cors";
 // 1. Direct Imports for Core Routes (Eliminate lazy-load bundling issues)
 import { handleDemo } from "./routes/demo";
 import { handleStats } from "./routes/stats";
-import { handleLogin, handleSignup, handleGuestSignup, handleMe, handleUpdateProfile, handleDeleteAccount } from "./routes/auth";
+import { handleLogin, handleSignup, handleGuestSignup, handleMe, handleUpdateProfile, handleDeleteAccount, handleDebug } from "./routes/auth";
 import { handleIngest } from "./routes/ingest";
 import { handleNovaChat } from "./routes/chat";
 import { handleAnalysis } from "./routes/analysis";
@@ -72,17 +72,7 @@ export function createServer() {
   app.delete("/api/auth/delete", requireAuth, handleDeleteAccount as any);
 
   // Diagnostic Endpoint (Internal Security Node)
-  app.get("/api/debug/system", requireAuth, async (req, res) => {
-    res.json({
-      userId: req.userId,
-      env: {
-        has_gemini_key: !!process.env.GOOGLE_GENAI_API_KEY,
-        has_supabase_url: !!process.env.VITE_SUPABASE_URL,
-        node_env: process.env.NODE_ENV
-      },
-      timestamp: new Date().toISOString()
-    });
-  });
+  app.get("/api/debug/system", handleDebug as any);
 
   app.use((err: any, _req: any, res: any, _next: any) => {
     const isProd = process.env.NODE_ENV === "production";

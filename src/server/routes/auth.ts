@@ -210,6 +210,33 @@ export const handleGuestSignup = async (req: Request, res: Response) => {
   }
 };
 
+export const handleDebug = async (req: Request, res: Response) => {
+  try {
+    const dbStatus = await query("SELECT COUNT(*) FROM dim_users");
+    res.json({
+      status: "Online",
+      env: {
+        has_db_url: !!process.env.DATABASE_URL,
+        has_jwt_secret: !!process.env.JWT_SECRET,
+        node_env: process.env.NODE_ENV,
+        vercel_env: process.env.VERCEL_ENV || "local"
+      },
+      db: {
+        users_count: dbStatus.rows[0].count,
+        connected: true
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      status: "Error",
+      message: err.message,
+      code: err.code,
+      hint: err.hint
+    });
+  }
+};
+
 
 export const handleUpdateProfile = async (req: Request, res: Response) => {
   const { name, baselineSpend, novaTone } = req.body;
