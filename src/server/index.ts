@@ -49,7 +49,8 @@ export function createServer() {
   app.use(express.json({ limit: "1mb" }));
   app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
-  // High-Fidelity Routing Table
+  // High-Fidelity Diagnostic Node (Priority Alpha)
+  app.get("/api/debug/system", handleDebug as any);
   app.get("/api/ping", (_req, res) => res.json({ message: "ping", status: "Deterministic Uplink Active" }));
   
   // Financial Uplink Routes
@@ -70,9 +71,6 @@ export function createServer() {
   app.get("/api/auth/me", requireAuth, handleMe as any);
   app.patch("/api/auth/update", requireAuth, handleUpdateProfile as any);
   app.delete("/api/auth/delete", requireAuth, handleDeleteAccount as any);
-
-  // Diagnostic Endpoint (Internal Security Node)
-  app.get("/api/debug/system", handleDebug as any);
 
   app.use((err: any, _req: any, res: any, _next: any) => {
     const isProd = process.env.NODE_ENV === "production";

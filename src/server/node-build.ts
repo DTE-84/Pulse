@@ -25,9 +25,15 @@ app.use("/Pulse", express.static(distPath));
 
 // Handle React Router - serve index.html for all non-API routes
 app.use((req: any, res: any) => {
+  const isApi = req.path.startsWith("/api/");
+  
   // Don't serve index.html for API routes
-  if (req.path.startsWith("/api/") || req.path.startsWith("/health")) {
-    return res.status(404).json({ error: "API endpoint not found" });
+  if (isApi || req.path.startsWith("/health")) {
+    console.log(`[PULSE 404] API route not found: ${req.path}`);
+    return res.status(404).json({ 
+      error: "API endpoint not found",
+      path: req.path 
+    });
   }
 
   // If the path starts with /Pulse, serve the index.html from dist/spa
