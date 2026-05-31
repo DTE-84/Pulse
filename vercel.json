@@ -1,8 +1,12 @@
 {
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index.ts" },
+    { "source": "/Pulse/assets/(.*)", "destination": "/assets/$1" },
+    { "source": "/Pulse/(.*)", "destination": "/$1" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
+  "cleanUrls": true,
+  "trailingSlash": true,
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "outputDirectory": "dist",
