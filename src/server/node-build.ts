@@ -11,32 +11,38 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // In production, serve the built SPA files
-// If we are in server-dist/, the SPA files are in ../dist/
 const distPath = path.resolve(__dirname, "..", "dist");
 
-// Serve static files at the base path (/Pulse)
+// Serve assets from the /Pulse/assets subpath
 app.use("/Pulse/assets", express.static(path.join(distPath, "assets"), {
   immutable: true,
   maxAge: "1y",
   fallthrough: false
 }));
 
+// Serve other static files (icons, manifest, etc.) from the /Pulse/ subpath
 app.use("/Pulse", express.static(distPath));
 
 // Handle React Router - serve index.html for all non-API routes
 app.use((req: any, res: any) => {
   const isApi = req.path.startsWith("/api/");
-  
+
   // Don't serve index.html for API routes
   if (isApi || req.path.startsWith("/health")) {
     console.log(`[PULSE 404] API route not found: ${req.path}`);
-    return res.status(404).json({ 
+    return res.status(404).json({
       error: "API endpoint not found",
-      path: req.path 
+      path: req.path
     });
   }
 
-  // If the path starts with /Pulse, serve the index.html from dist/spa
+  // Support for root assets that might be requested without the /Pulse prefix
+  // though Vite base should handle most cases
+  if (req.path.startsWith("/assets/")) {
+     return res.sendFile(path.join(distPath, req.path));
+  }
+
+  // If the path starts with /Pulse, serve the index.html from dist
   if (req.path.startsWith("/Pulse")) {
     return res.sendFile(path.join(distPath, "index.html"));
   }
