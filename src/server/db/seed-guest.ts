@@ -68,7 +68,7 @@ export async function seedGuestData(userId: string) {
       // Baseline (Last Month)
       { amount: 1200.00, cat: "Housing", date: subMonths(now, 1), tid: null },
       { amount: 165.20, cat: "Groceries", date: subMonths(now, 1), tid: null },
-      { amount: 245.00, cat: "Shopping", date: subMonths(now, 1), tid: triggerMap["Stress"] },
+      { amount: 245.00, cat: "Shopping", date: subMonths(now, 1), tid: triggerMap["Stress"] || null },
       
       // Current Month Strategy
       { amount: 1200.00, cat: "Housing", date: now, tid: null },
@@ -79,10 +79,10 @@ export async function seedGuestData(userId: string) {
       { amount: 7.25, cat: "Dining", date: subHours(now, 28), tid: null },
       
       // Risk Signal (Late Night)
-      { amount: 52.00, cat: "Dining", date: setTime(subDays(now, 2), 23, 30), tid: triggerMap["Late Night"] },
+      { amount: 52.00, cat: "Dining", date: setTime(subDays(now, 2), 23, 30), tid: triggerMap["Late Night"] || null },
       
       // High-Impact Impulse
-      { amount: 189.99, cat: "Shopping", date: subDays(now, 1), tid: triggerMap["Stress"] }
+      { amount: 189.99, cat: "Shopping", date: subDays(now, 1), tid: triggerMap["Stress"] || null }
     ];
 
     for (const node of nodes) {

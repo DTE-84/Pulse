@@ -32,6 +32,25 @@ function getSupabase() {
   return _supabase;
 }
 
+// Initialize Supabase Admin (RLS Bypass)
+let _supabaseAdmin: any;
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+
+export function getSupabaseAdmin() {
+  if (!_supabaseAdmin) {
+    if (!supabaseUrl || !serviceRoleKey) {
+      console.warn("[PULSE SECURITY] Supabase URL or Service Role Key is missing. Admin operations will fail.");
+    }
+    _supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+  }
+  return _supabaseAdmin;
+}
+
 // 2. AUTH MIDDLEWARE — multi-protocol JWT verifier (Local + Supabase)
 declare global { namespace Express { interface Request { userId?: string; userEmail?: string; } } }
 

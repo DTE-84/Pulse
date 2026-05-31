@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { query } from "../db/db";
 import { seedGuestData } from "../db/seed-guest";
-import { JWT_SECRET } from "../middleware/security";
+import { JWT_SECRET, getSupabaseAdmin } from "../middleware/security";
 
 // Basic email + password presence check (no library needed)
 function validateAuthInput(email: unknown, password: unknown): string | null {
@@ -137,32 +137,45 @@ export const handleGuestSignup = async (req: Request, res: Response) => {
     const password = await bcrypt.hash(Math.random().toString(36), 12);
     const name = `Guest User ${guestId.toUpperCase()}`;
     
-    // 2. Surgical Database Insertion
-    let result;
+    // 2. Surgical Database Insertion (using Admin Client for RLS Bypass)
+    let u;
     try {
-      result = await query(
-        "INSERT INTO dim_users (user_name, email, password, is_demo, subscription_status, trial_ends_at) VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '7 days') RETURNING user_id, user_name, email, is_demo, subscription_status, trial_ends_at",
-        [name, email, password, true, 'trialing']
-      );
-    } catch (dbErr: any) {
-      console.error("[PULSE AUTH] Database Insertion Failed:");
-      console.error("Code:", dbErr.code);
-      console.error("Detail:", dbErr.detail);
-      console.error("Message:", dbErr.message);
+      console.log("[PULSE AUTH] Initializing Supabase Admin client...");
+      const supabaseAdmin = getSupabaseAdmin();
       
-      return res.status(500).json({ 
-        message: "Sandbox Identity Failure", 
-        detail: dbErr.message,
-        code: dbErr.code,
-        hint: dbErr.hint
-      });
+      console.log("[PULSE AUTH] Executing admin insertion...");
+      const { data, error: dbErr } = await supabaseAdmin
+        .from("dim_users")
+        .insert([{
+          user_name: name,
+          email: email,
+          password: password,
+          is_demo: true,
+          subscription_status: 'trialing',
+          trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        }])
+        .select("user_id, user_name, email")
+        .single();
+
+      if (dbErr) {
+        console.error("[PULSE AUTH] Admin Insertion Failed:");
+        console.error("Code:", dbErr.code);
+        console.error("Details:", dbErr.details);
+        console.error("Message:", dbErr.message);
+        
+        return res.status(500).json({ 
+          message: "Sandbox Identity Failure", 
+          detail: dbErr.message,
+          code: dbErr.code,
+          hint: dbErr.hint
+        });
+      }
+      u = data;
+    } catch (err: any) {
+      console.error("[PULSE AUTH] Unexpected Admin Client Failure:", err.message);
+      return res.status(500).json({ message: "Identity Service Unreachable", detail: err.message });
     }
 
-    if (!result || !result.rows || result.rows.length === 0) {
-      throw new Error("Identity record creation returned no data.");
-    }
-
-    const u = result.rows[0];
     console.log(`[PULSE AUTH] Identity confirmed: ${u.user_id}`);
     
     // 3. High-Fidelity Signal Seeding
