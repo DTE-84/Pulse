@@ -13,14 +13,21 @@ const __dirname = path.dirname(__filename);
 // In production, serve the built SPA files
 const distPath = path.resolve(__dirname, "..", "dist");
 
-// Serve assets from the /Pulse/assets subpath
+// Serve assets from both root and /Pulse for compatibility
+app.use("/assets", express.static(path.join(distPath, "assets"), {
+  immutable: true,
+  maxAge: "1y",
+  fallthrough: true
+}));
+
 app.use("/Pulse/assets", express.static(path.join(distPath, "assets"), {
   immutable: true,
   maxAge: "1y",
-  fallthrough: false
+  fallthrough: true
 }));
 
-// Serve other static files (icons, manifest, etc.) from the /Pulse/ subpath
+// Serve static files (icons, manifest, etc.)
+app.use(express.static(distPath));
 app.use("/Pulse", express.static(distPath));
 
 // Handle React Router - serve index.html for all non-API routes
@@ -36,23 +43,13 @@ app.use((req: any, res: any) => {
     });
   }
 
-  // Support for root assets that might be requested without the /Pulse prefix
-  // though Vite base should handle most cases
+  // Support for specific asset requests
   if (req.path.startsWith("/assets/")) {
      return res.sendFile(path.join(distPath, req.path));
   }
 
-  // If the path starts with /Pulse, serve the index.html from dist
-  if (req.path.startsWith("/Pulse")) {
-    return res.sendFile(path.join(distPath, "index.html"));
-  }
-
-  // Redirect root to /Pulse for UX consistency
-  if (req.path === "/") {
-    return res.redirect("/Pulse/");
-  }
-
-  res.status(404).json({ error: "Not found" });
+  // Catch-all: serve index.html
+  res.sendFile(path.join(distPath, "index.html"));
 });
 
 // Only listen if not in a Vercel environment

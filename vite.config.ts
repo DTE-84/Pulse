@@ -15,8 +15,8 @@ export default defineConfig({
         name: "Pulse Financial AI",
         short_name: "Pulse",
         description: "Sophisticated behavioral financial intelligence and habit tracking.",
-        start_url: "/Pulse/",
-        scope: "/Pulse/",
+        start_url: "/",
+        scope: "/",
         display: "standalone",
         orientation: "portrait",
         background_color: "#050505",
@@ -57,7 +57,7 @@ export default defineConfig({
       }
     })
   ],
-  base: "/Pulse/",
+  base: "/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src/client"),
