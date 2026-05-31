@@ -33,18 +33,12 @@ export default defineConfig({
                 "buffer",
                 "querystring",
                 "child_process",
-                // External dependencies that should not be bundled
-                "express",
-                "cors",
-                "pg",
-                "dotenv",
-                "bcryptjs",
-                "jsonwebtoken",
-                "stripe",
-                "plaid",
-                "axios",
-                "@google/generative-ai",
-                "@supabase/supabase-js",
+                "events",
+                "worker_threads",
+                "perf_hooks",
+                "diagnostics_channel",
+                "readline",
+                "zlib",
             ],
             output: {
                 format: "es",
@@ -53,6 +47,9 @@ export default defineConfig({
         },
         minify: false, // Keep readable for debugging
         sourcemap: true,
+    },
+    ssr: {
+        noExternal: true,
     },
     resolve: {
         alias: {

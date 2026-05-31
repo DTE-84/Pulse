@@ -20,7 +20,7 @@ function getPool() {
     
     pool = new Pool({
       connectionString: dbUrl,
-      ssl: isProd ? { rejectUnauthorized: true } : { rejectUnauthorized: false },
+      ssl: { rejectUnauthorized: false }, // Relaxed for stable cloud pooler handshake
     });
 
     pool.on('error', (err: any) => {

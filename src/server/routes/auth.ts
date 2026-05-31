@@ -121,48 +121,73 @@ export const handleSignup = async (req: Request, res: Response) => {
 };
 
 export const handleGuestSignup = async (req: Request, res: Response) => {
-  console.log("[Guest Signup] Initializing unique protocol...");
+  console.log("[PULSE AUTH] Initializing Guest Sandbox Protocol...");
+  
+  // 1. Environment Sanity Check
+  if (!process.env.DATABASE_URL) {
+    console.error("[PULSE AUTH] FATAL: DATABASE_URL missing from environment.");
+    return res.status(500).json({ message: "Cloud Nexus Offline", detail: "Database connection string missing." });
+  }
+
   try {
     const guestId = Math.random().toString(36).substring(7);
     const email = `guest_${guestId}@pulse.demo`;
     
-    console.log("[Guest Signup] Hashing password...");
+    console.log(`[PULSE AUTH] Provisioning identity: ${email}`);
     const password = await bcrypt.hash(Math.random().toString(36), 12);
     const name = `Guest User ${guestId.toUpperCase()}`;
     
-    console.log(`[Guest Signup] Provisioning identity: ${email}`);
-    
-    console.log("[Guest Signup] Executing DB query...");
-    const result = await query(
-      "INSERT INTO dim_users (user_name, email, password, is_demo, subscription_status, trial_ends_at) VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '7 days') RETURNING user_id, user_name, email, is_demo, subscription_status, trial_ends_at",
-      [name, email, password, true, 'trialing']
-    );
-    
+    // 2. Surgical Database Insertion
+    let result;
+    try {
+      result = await query(
+        "INSERT INTO dim_users (user_name, email, password, is_demo, subscription_status, trial_ends_at) VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '7 days') RETURNING user_id, user_name, email, is_demo, subscription_status, trial_ends_at",
+        [name, email, password, true, 'trialing']
+      );
+    } catch (dbErr: any) {
+      console.error("[PULSE AUTH] Database Insertion Failed:");
+      console.error("Code:", dbErr.code);
+      console.error("Detail:", dbErr.detail);
+      console.error("Message:", dbErr.message);
+      
+      return res.status(500).json({ 
+        message: "Sandbox Identity Failure", 
+        detail: dbErr.message,
+        code: dbErr.code,
+        hint: dbErr.hint
+      });
+    }
+
     if (!result || !result.rows || result.rows.length === 0) {
-      throw new Error("Database insertion returned no rows.");
+      throw new Error("Identity record creation returned no data.");
     }
 
     const u = result.rows[0];
-    console.log(`[Guest Signup] Database entry confirmed: ${u.user_id}`);
+    console.log(`[PULSE AUTH] Identity confirmed: ${u.user_id}`);
     
-    // Auto-Seed Guest Data for High-Fidelity First Impression
+    // 3. High-Fidelity Signal Seeding
     try {
+      console.log("[PULSE AUTH] Injecting behavioral signals...");
       await seedGuestData(u.user_id);
-    } catch (seedErr) {
-      console.warn("[Guest Signup] Data seeding failed, but user was created:", seedErr);
+    } catch (seedErr: any) {
+      console.warn("[PULSE AUTH] Signal seeding interrupted:", seedErr.message);
+      // We continue because the user was successfully created
     }
 
+    // 4. Token Provisioning
     let token;
     try {
-      console.log("[Guest Signup] Signing JWT...");
-      token = jwt.sign({ id: u.user_id, email: u.email }, JWT_SECRET, { expiresIn: "7d" });
-      console.log("[Guest Signup] Uplink token generated.");
+      const secret = process.env.JWT_SECRET;
+      if (!secret) throw new Error("JWT_SECRET missing from environment.");
+
+      token = jwt.sign({ id: u.user_id, email: u.email }, secret, { expiresIn: "7d" });
+      console.log("[PULSE AUTH] Uplink token generated.");
     } catch (jwtErr: any) {
-      console.error("[Guest Signup] JWT Error:", jwtErr);
+      console.error("[PULSE AUTH] Token Provisioning Failed:", jwtErr.message);
       return res.status(500).json({ message: "Uplink Token Error", detail: jwtErr.message });
     }
     
-    console.log("[Guest Signup] Sending success response...");
+    console.log("[PULSE AUTH] Guest Sandbox Protocol Complete.");
     res.status(201).json({ 
       token, 
       user: { 
@@ -176,17 +201,11 @@ export const handleGuestSignup = async (req: Request, res: Response) => {
       } 
     });
   } catch (err: any) {
-    console.error("[Guest Signup] FATAL ERROR:", err);
-    if (err.code === "ECONNREFUSED" || err.message.includes("connection")) {
-      return res.status(503).json({ 
-        message: "Sandbox Database Offline", 
-        detail: "The high-fidelity telemetry environment is currently unreachable." 
-      });
-    }
+    console.error("[PULSE AUTH] General Failure:", err.message);
     res.status(500).json({ 
-      message: "Guest Initialization Failed", 
+      message: "Guest Protocol Failure", 
       detail: err.message,
-      stack: process.env.NODE_ENV === "production" ? undefined : err.stack
+      code: err.code
     });
   }
 };
