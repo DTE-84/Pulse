@@ -211,29 +211,40 @@ export const handleGuestSignup = async (req: Request, res: Response) => {
 };
 
 export const handleDebug = async (req: Request, res: Response) => {
+  const telemetry: any = {
+    status: "Initializing",
+    timestamp: new Date().toISOString(),
+    env: {
+      has_db_url: !!process.env.DATABASE_URL,
+      has_jwt_secret: !!process.env.JWT_SECRET,
+      node_env: process.env.NODE_ENV,
+      vercel_env: process.env.VERCEL_ENV || "local"
+    }
+  };
+
   try {
+    if (!process.env.DATABASE_URL) {
+      telemetry.status = "Environment Warning";
+      telemetry.error = "DATABASE_URL is missing.";
+      return res.json(telemetry);
+    }
+
     const dbStatus = await query("SELECT COUNT(*) FROM dim_users");
-    res.json({
-      status: "Online",
-      env: {
-        has_db_url: !!process.env.DATABASE_URL,
-        has_jwt_secret: !!process.env.JWT_SECRET,
-        node_env: process.env.NODE_ENV,
-        vercel_env: process.env.VERCEL_ENV || "local"
-      },
-      db: {
-        users_count: dbStatus.rows[0].count,
-        connected: true
-      },
-      timestamp: new Date().toISOString()
-    });
+    telemetry.status = "Online";
+    telemetry.db = {
+      users_count: dbStatus.rows[0].count,
+      connected: true
+    };
+    res.json(telemetry);
   } catch (err: any) {
-    res.status(500).json({
-      status: "Error",
+    telemetry.status = "Database Error";
+    telemetry.error = {
       message: err.message,
       code: err.code,
-      hint: err.hint
-    });
+      hint: err.hint,
+      detail: err.detail
+    };
+    res.status(500).json(telemetry);
   }
 };
 
