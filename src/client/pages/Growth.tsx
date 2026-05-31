@@ -277,12 +277,15 @@ export default function GrowthPage() {
                         </span>
                       </div>
                       <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                        <div
-                          className={cn(
-                            "h-full rounded-full transition-all duration-[1500ms] bg-primary shadow-[0_0_10px_rgba(45,237,156,0.5)]",
-                          )}
-                          style={{ width: `${progress}%` }}
-                        />
+                         <div
+                            className={cn(
+                              "h-full rounded-full transition-all bg-primary shadow-[0_0_10px_rgba(45,237,156,0.5)]",
+                            )}
+                            style={{ 
+                              width: `${progress}%`,
+                              transitionDuration: '1500ms'
+                            }}
+                          />
                       </div>
                     </div>
                   </div>
