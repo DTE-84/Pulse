@@ -10,9 +10,6 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
     return res.status(400).send("Webhook Error: Missing signature or secret.");
   }
 
-  // Note: Stripe requires the raw body for signature verification
-  const _payload = req.body; 
-
   console.log("[Stripe Webhook] Event Received.");
   
   // Placeholder for verification logic

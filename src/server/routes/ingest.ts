@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
+import { spawn } from "child_process";
 import { query } from "../db/db";
 import { sanitizeCsvField, validateTransaction } from "../middleware/security";
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -75,7 +76,7 @@ export const handleIngest = async (req: Request, res: Response) => {
       const proc = spawn("python", [scriptPath, tempCsvPath], { stdio: ["ignore", "pipe", "pipe"] });
       let stderr = "";
       proc.stderr.on("data", (d: Buffer) => { stderr += d.toString(); });
-      proc.on("close", (code) => {
+      proc.on("close", (code: number | null) => {
         if (code !== 0) reject(new Error(stderr || "Wrangler exited with code " + code));
         else resolve();
       });
