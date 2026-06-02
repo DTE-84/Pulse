@@ -10,7 +10,7 @@
   "outputDirectory": "dist",
   "functions": {
     "api/index.ts": {
-      "includeFiles": "server-dist/**"
+      "includeFiles": "dist/server/**"
     }
   },
   "headers": [
