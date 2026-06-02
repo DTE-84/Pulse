@@ -4,7 +4,7 @@
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "cleanUrls": true,
-  "trailingSlash": true,
+  "trailingSlash": false, 
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "outputDirectory": "dist",
@@ -12,5 +12,25 @@
     "api/index.ts": {
       "includeFiles": "server-dist/**"
     }
-  }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, no-cache, no-store, must-revalidate"
+        }
+      ]
+    }
+  ]
 }

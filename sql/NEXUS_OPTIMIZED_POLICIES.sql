@@ -94,4 +94,20 @@ CREATE POLICY "Plaid_Nexus" ON public.plaid_items
     USING ((select auth.uid()) = user_id)
     WITH CHECK ((select auth.uid()) = user_id);
 
+
+-- ── 7. thread_summaries (Intelligence Nexus) ──────────────────────────────────
+ALTER TABLE public.thread_summaries ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "thread_summaries_thread_owner_insert" ON public.thread_summaries;
+
+CREATE POLICY "thread_summaries_thread_owner_insert" ON public.thread_summaries
+    FOR INSERT 
+    WITH CHECK (
+      EXISTS (
+        SELECT 1 FROM threads t 
+        WHERE t.id = thread_summaries.thread_id 
+        AND t.created_by = (select auth.uid())
+      )
+    );
+
 COMMIT;
