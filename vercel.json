@@ -5,13 +5,10 @@
   ],
   "cleanUrls": true,
   "trailingSlash": false,
+  "regions": ["sfo1"],
   "buildCommand": "npm run build:client",
   "outputDirectory": "dist",
-  "functions": {
-    "api/index.ts": {
-      "runtime": "@vercel/node"
-    }
-  },
+
   "headers": [
     {
       "source": "/(.*)",
