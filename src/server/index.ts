@@ -33,14 +33,28 @@ export function createServer() {
 
   app.use(cors({
     origin: (origin: string | undefined, cb: Function) => {
+      // Allow requests with no origin (like mobile apps, curl, or same-origin)
       if (!origin) return cb(null, true);
-      if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
-      if (origin.endsWith(".vercel.app")) return cb(null, true);
-      cb(new Error(`CORS: Origin ${origin} not permitted.`));
+
+      const isAllowed = 
+        ALLOWED_ORIGINS.includes(origin) || 
+        ALLOWED_ORIGINS.includes(origin + "/") ||
+        origin.endsWith(".vercel.app") || 
+        origin.includes("dte-solutions.icu") ||
+        origin.includes("localhost");
+
+      if (isAllowed) {
+        cb(null, true);
+      } else {
+        console.warn(`[PULSE CORS] Unauthorized Origin: ${origin}`);
+        // In development, we might want to be more lax, but in prod we restrict.
+        // For debugging, we return the error which will show up in the console.
+        cb(new Error(`CORS: Origin ${origin} not permitted.`));
+      }
     },
     credentials: true,
-    methods: ["GET", "POST", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
   }));
 
   // Stripe Webhook needs raw body before express.json()
@@ -69,10 +83,17 @@ export function createServer() {
   // Unified Auth Nexus
   app.use("/api/auth", authRouter);
 
-  app.use((err: any, _req: any, res: any, _next: any) => {
+  app.use((err: any, req: any, res: any, _next: any) => {
     const isProd = process.env.NODE_ENV === "production";
     console.error("[PULSE SERVER CRASH]:", err.message);
     
+    // Ensure CORS headers are present even on error responses
+    const origin = req.headers.origin;
+    if (origin && (ALLOWED_ORIGINS.includes(origin) || origin.endsWith(".vercel.app") || origin.includes("dte-solutions.icu"))) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+    }
+
     res.status(err.status || 500).json({ 
       message: "Nova Uplink Interrupted", 
       detail: isProd ? "Internal Signal Error. Our engineers have been alerted." : err.message,
