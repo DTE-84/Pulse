@@ -1,5 +1,8 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createServer } from '../src/server/index.js';
 
 const app = createServer();
 
-export default app;
+export default function handler(req: VercelRequest, res: VercelResponse) {
+  return app(req as any, res as any);
+}
