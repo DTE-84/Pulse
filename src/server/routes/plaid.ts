@@ -25,14 +25,14 @@ export const createLinkToken = async (req: Request, res: Response) => {
   if (!userId) return res.status(401).json({ message: "Authentication required." });
 
   try {
-    // 1. Subscription Guard: Protect Drew's margins by restricting real sync to paid members
+    // Subscription Guard: Only block if subscription has explicitly expired
     const userRes = await query("SELECT subscription_status FROM dim_users WHERE user_id = $1", [userId]);
     const user = userRes.rows[0];
 
-    if (!user || user.subscription_status !== 'active') {
+    if (!user || user.subscription_status === 'expired') {
       return res.status(403).json({ 
         message: "Elite Uplink Required", 
-        detail: "Real-world bank synchronization is reserved for active Elite members. Trial users can utilize the 'Sandbox Sync' for behavioral modeling." 
+        detail: "Real-world bank synchronization requires an active subscription. Please upgrade to continue." 
       });
     }
 
