@@ -1,14 +1,11 @@
 import { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
-import { spawn } from "child_process";
 import { query } from "../db/db";
 import { sanitizeCsvField, validateTransaction } from "../middleware/security";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.resolve();
 
 const MAX_TRANSACTIONS = 500;
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY || "");
