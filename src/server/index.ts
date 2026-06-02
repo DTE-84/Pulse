@@ -5,7 +5,7 @@ import cors from "cors";
 // 1. Direct Imports for Core Routes (Eliminate lazy-load bundling issues)
 import { handleDemo } from "./routes/demo";
 import { handleStats } from "./routes/stats";
-import { handleLogin, handleSignup, handleGuestSignup, handleMe, handleUpdateProfile, handleDeleteAccount, handleDebug } from "./routes/auth";
+import authRouter, { handleDebug } from "./routes/auth";
 import { handleIngest } from "./routes/ingest";
 import { handleNovaChat } from "./routes/chat";
 import { handleAnalysis } from "./routes/analysis";
@@ -65,12 +65,9 @@ export function createServer() {
   app.get("/api/finance/goals", apiLimiter, requireAuth, handleGetGoals as any);
   app.post("/api/finance/goals", apiLimiter, requireAuth, handleCreateGoal as any);
   app.post("/api/finance/ingest", ingestLimiter, requireAuth, handleIngest as any);
-  app.post("/api/auth/login", authLimiter, handleLogin as any);
-  app.post("/api/auth/signup", authLimiter, handleSignup as any);
-  app.post("/api/auth/guest", authLimiter, handleGuestSignup as any);
-  app.get("/api/auth/me", requireAuth, handleMe as any);
-  app.patch("/api/auth/update", requireAuth, handleUpdateProfile as any);
-  app.delete("/api/auth/delete", requireAuth, handleDeleteAccount as any);
+
+  // Unified Auth Nexus
+  app.use("/api/auth", authRouter);
 
   app.use((err: any, _req: any, res: any, _next: any) => {
     const isProd = process.env.NODE_ENV === "production";

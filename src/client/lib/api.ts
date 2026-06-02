@@ -107,6 +107,16 @@ export const authAPI = {
   },
   guestSignup: async () => {
     const response = await API.post("/api/auth/guest");
+    const { token, refreshToken } = response.data;
+    
+    if (token) {
+      // Synchronize with Supabase Client to enable RLS and session persistence
+      await supabase.auth.setSession({
+        access_token: token,
+        refresh_token: refreshToken || "",
+      });
+    }
+    
     return response;
   },
   me: async () => {

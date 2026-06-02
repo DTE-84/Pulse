@@ -1,9 +1,11 @@
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { query } from "../db/db";
 import { seedGuestData } from "../db/seed-guest";
-import { JWT_SECRET, getSupabaseAdmin } from "../middleware/security";
+import { JWT_SECRET, getSupabaseAdmin, authLimiter, requireAuth } from "../middleware/security";
+
+const router = Router();
 
 // Basic email + password presence check (no library needed)
 function validateAuthInput(email: unknown, password: unknown): string | null {
@@ -123,102 +125,117 @@ export const handleSignup = async (req: Request, res: Response) => {
 export const handleGuestSignup = async (_req: Request, res: Response) => {
   console.log("[PULSE AUTH] Initializing Guest Sandbox Protocol...");
   
-  // 1. Environment Sanity Check
-  if (!process.env.DATABASE_URL) {
-    console.error("[PULSE AUTH] FATAL: DATABASE_URL missing from environment.");
-    return res.status(500).json({ message: "Cloud Nexus Offline", detail: "Database connection string missing." });
-  }
-
   try {
+    const supabaseAdmin = getSupabaseAdmin();
     const guestId = Math.random().toString(36).substring(7);
     const email = `guest_${guestId}@pulse.demo`;
-    
-    console.log(`[PULSE AUTH] Provisioning identity: ${email}`);
-    const password = await bcrypt.hash(Math.random().toString(36), 12);
+    const password = Math.random().toString(36) + "A1!"; // Ensure it meets complexity
     const name = `Guest User ${guestId.toUpperCase()}`;
-    
-    // 2. Surgical Database Insertion (using Admin Client for RLS Bypass)
-    let u;
-    try {
-      console.log("[PULSE AUTH] Initializing Supabase Admin client...");
-      const supabaseAdmin = getSupabaseAdmin();
-      
-      console.log("[PULSE AUTH] Executing admin insertion...");
-      const { data, error: dbErr } = await supabaseAdmin
-        .from("dim_users")
-        .insert([{
-          user_name: name,
-          email: email,
-          password: password,
-          is_demo: true,
-          subscription_status: 'trialing',
-          trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-        }])
-        .select("user_id, user_name, email")
-        .single();
 
-      if (dbErr) {
-        console.error("[PULSE AUTH] Admin Insertion Failed:");
-        console.error("Code:", dbErr.code);
-        console.error("Details:", dbErr.details);
-        console.error("Message:", dbErr.message);
-        
-        return res.status(500).json({ 
-          message: "Sandbox Identity Failure", 
-          detail: dbErr.message,
-          code: dbErr.code,
-          hint: dbErr.hint
-        });
-      }
-      u = data;
-    } catch (err: any) {
-      console.error("[PULSE AUTH] Unexpected Admin Client Failure:", err.message);
-      return res.status(500).json({ message: "Identity Service Unreachable", detail: err.message });
+    console.log(`[PULSE AUTH] Provisioning Supabase Auth identity: ${email}`);
+
+    // 1. Create User in Supabase Auth
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { name }
+    });
+
+    if (authError) {
+      console.error("[PULSE AUTH] Supabase Auth Creation Failed:", authError.message);
+      return res.status(500).json({ 
+        message: "Sandbox Identity Failure", 
+        detail: authError.message 
+      });
     }
 
-    console.log(`[PULSE AUTH] Identity confirmed: ${u.user_id}`);
-    
+    const user = authData.user;
+    console.log(`[PULSE AUTH] Identity confirmed: ${user.id}`);
+
+    // 2. Update the profile created by the trigger
+    // The trigger public.handle_new_user() should have already created the dim_users record.
+    console.log("[PULSE AUTH] Refining demo profile...");
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from("dim_users")
+      .update({
+        is_demo: true,
+        subscription_status: 'trialing',
+        trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        onboarding_completed: true // Guests skip onboarding
+      })
+      .eq("user_id", user.id)
+      .select()
+      .single();
+
+    if (profileError) {
+      console.warn("[PULSE AUTH] Profile refinement failed (might need retry):", profileError.message);
+      // We'll try to insert if it's missing (though trigger should handle it)
+      await supabaseAdmin.from("dim_users").upsert([{
+        user_id: user.id,
+        user_name: name,
+        email: email,
+        is_demo: true,
+        subscription_status: 'trialing',
+        trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        onboarding_completed: true
+      }]);
+    }
+
     // 3. High-Fidelity Signal Seeding
     try {
       console.log("[PULSE AUTH] Injecting behavioral signals...");
-      await seedGuestData(u.user_id);
+      await seedGuestData(user.id);
     } catch (seedErr: any) {
       console.warn("[PULSE AUTH] Signal seeding interrupted:", seedErr.message);
-      // We continue because the user was successfully created
     }
 
-    // 4. Token Provisioning
-    let token;
-    try {
-      const secret = process.env.JWT_SECRET;
-      if (!secret) throw new Error("JWT_SECRET missing from environment.");
-
-      token = jwt.sign({ id: u.user_id, email: u.email }, secret, { expiresIn: "7d" });
-      console.log("[PULSE AUTH] Uplink token generated.");
-    } catch (jwtErr: any) {
-      console.error("[PULSE AUTH] Token Provisioning Failed:", jwtErr.message);
-      return res.status(500).json({ message: "Uplink Token Error", detail: jwtErr.message });
-    }
-    
-    console.log("[PULSE AUTH] Guest Sandbox Protocol Complete.");
-    res.status(201).json({ 
-      token, 
-      user: { 
-        id: u.user_id, 
-        email: u.email, 
-        name: u.user_name, 
-        onboardingCompleted: true, 
-        isDemo: true,
-        subscriptionStatus: u.subscription_status,
-        trialEndsAt: u.trial_ends_at
-      } 
+    // 4. Generate REAL Supabase Session for the Guest
+    console.log("[PULSE AUTH] Generating Supabase session...");
+    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.signInWithPassword({
+      email,
+      password
     });
+
+    if (sessionError || !sessionData.session) {
+      console.error("[PULSE AUTH] Session Generation Failed:", sessionError?.message);
+      // Fallback to local JWT if Supabase session fails (unlikely but safe)
+      const secret = process.env.JWT_SECRET || "";
+      const token = jwt.sign({ id: user.id, email: user.email }, secret, { expiresIn: "7d" });
+      
+      res.status(201).json({ 
+        token, 
+        user: { 
+          id: user.id, 
+          email: user.email, 
+          name: name, 
+          onboardingCompleted: true, 
+          isDemo: true,
+          subscriptionStatus: 'trialing',
+          trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        } 
+      });
+    } else {
+      console.log("[PULSE AUTH] Guest Sandbox Protocol Complete.");
+      res.status(201).json({ 
+        token: sessionData.session.access_token,
+        refreshToken: sessionData.session.refresh_token,
+        user: { 
+          id: user.id, 
+          email: user.email, 
+          name: name, 
+          onboardingCompleted: true, 
+          isDemo: true,
+          subscriptionStatus: 'trialing',
+          trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        } 
+      });
+    }
   } catch (err: any) {
     console.error("[PULSE AUTH] General Failure:", err.message);
     res.status(500).json({ 
       message: "Guest Protocol Failure", 
-      detail: err.message,
-      code: err.code
+      detail: err.message
     });
   }
 };
@@ -287,3 +304,13 @@ export const handleDeleteAccount = async (req: Request, res: Response) => {
     res.json({ message: "Account successfully terminated." });
   } catch { res.status(500).json({ message: "Termination error." }); }
 };
+
+// Route Definitions
+router.post("/login", authLimiter, handleLogin as any);
+router.post("/signup", authLimiter, handleSignup as any);
+router.post("/guest", authLimiter, handleGuestSignup as any);
+router.get("/me", requireAuth, handleMe as any);
+router.patch("/update", requireAuth, handleUpdateProfile as any);
+router.delete("/delete", requireAuth, handleDeleteAccount as any);
+
+export default router;
