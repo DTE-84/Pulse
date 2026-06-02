@@ -65,7 +65,26 @@ export function createServer() {
   // High-Fidelity Diagnostic Node (Priority Alpha)
   app.get("/api/debug/system", handleDebug as any);
   app.get("/api/ping", (_req, res) => res.json({ message: "ping", status: "Deterministic Uplink Active" }));
+  app.get("/api/health", (_req, res) => res.json({ status: "ok", message: "Pulse API is healthy", timestamp: new Date().toISOString() }));
   
+  app.get("/api/diagnostic", (req, res) => {
+    res.json({
+      url: req.url,
+      path: req.path,
+      headers: {
+        host: req.headers.host,
+        origin: req.headers.origin,
+        referer: req.headers.referer
+      },
+      env: {
+        NODE_ENV: process.env.NODE_ENV,
+        VERCEL: process.env.VERCEL,
+        HAS_DB: !!process.env.DATABASE_URL,
+        HAS_JWT: !!process.env.JWT_SECRET
+      }
+    });
+  });
+
   // Financial Uplink Routes
   app.post("/api/payments/create-session", requireAuth, createCheckoutSession as any);
   app.post("/api/plaid/create-link-token", requireAuth, createLinkToken as any);
@@ -81,6 +100,16 @@ export function createServer() {
 
   // Unified Auth Nexus
   app.use("/api/auth", authRouter);
+
+  // Catch-all for undefined API routes (Distinguish from Vercel 404)
+  app.all("/api/*", (req, res) => {
+    console.warn(`[PULSE API 404] No match for: ${req.method} ${req.path}`);
+    res.status(404).json({
+      error: "API endpoint not found (Express)",
+      path: req.path,
+      method: req.method
+    });
+  });
 
   app.use((err: any, req: any, res: any, _next: any) => {
     const isProd = process.env.NODE_ENV === "production";
