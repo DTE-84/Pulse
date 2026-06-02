@@ -1,5 +1,5 @@
-// @ts-ignore - Importing from built production bundle
-import app from "../dist/server/production.mjs";
+import { createServer } from '../src/server/index.js';
 
-// Vercel expects the function to be the default export
+const app = createServer();
+
 export default app;

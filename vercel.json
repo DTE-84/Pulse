@@ -4,32 +4,20 @@
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "cleanUrls": true,
-  "trailingSlash": false, 
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
+  "trailingSlash": false,
+  "buildCommand": "npm run build:client",
   "outputDirectory": "dist",
-  "functions": {
-    "api/index.ts": {
-      "includeFiles": "dist/server/**"
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        }
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
       ]
     },
     {
       "source": "/sw.js",
       "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, no-cache, no-store, must-revalidate"
-        }
+        { "key": "Cache-Control", "value": "public, max-age=0, no-cache, no-store, must-revalidate" }
       ]
     }
   ]
