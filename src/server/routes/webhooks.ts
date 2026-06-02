@@ -11,7 +11,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
   }
 
   // Note: Stripe requires the raw body for signature verification
-  const payload = req.body; 
+  const _payload = req.body; 
 
   console.log("[Stripe Webhook] Event Received.");
   

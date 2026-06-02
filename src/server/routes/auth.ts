@@ -120,7 +120,7 @@ export const handleSignup = async (req: Request, res: Response) => {
   }
 };
 
-export const handleGuestSignup = async (req: Request, res: Response) => {
+export const handleGuestSignup = async (_req: Request, res: Response) => {
   console.log("[PULSE AUTH] Initializing Guest Sandbox Protocol...");
   
   // 1. Environment Sanity Check
@@ -223,7 +223,7 @@ export const handleGuestSignup = async (req: Request, res: Response) => {
   }
 };
 
-export const handleDebug = async (req: Request, res: Response) => {
+export const handleDebug = async (_req: Request, res: Response) => {
   const telemetry: any = {
     status: "Initializing",
     timestamp: new Date().toISOString(),
