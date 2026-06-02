@@ -18,7 +18,6 @@ import { createLinkToken, exchangePublicToken } from "./routes/plaid";
 import {
   securityHeaders,
   requireAuth,
-  authLimiter,
   ingestLimiter,
   apiLimiter,
 } from "./middleware/security";

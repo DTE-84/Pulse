@@ -156,7 +156,7 @@ export const handleGuestSignup = async (_req: Request, res: Response) => {
     // 2. Update the profile created by the trigger
     // The trigger public.handle_new_user() should have already created the dim_users record.
     console.log("[PULSE AUTH] Refining demo profile...");
-    const { data: profile, error: profileError } = await supabaseAdmin
+    const { data: _profile, error: profileError } = await supabaseAdmin
       .from("dim_users")
       .update({
         is_demo: true,
