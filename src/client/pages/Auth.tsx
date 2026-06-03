@@ -68,7 +68,11 @@ export default function AuthPage() {
           title: "Access Granted",
           description: "Welcome back to the Intelligence Hub.",
         });
-        navigate(res.data.user.onboardingCompleted ? "/" : "/onboarding");
+        
+        // Small delay for context state to settle
+        setTimeout(() => {
+          navigate(res.data.user.onboardingCompleted ? "/" : "/onboarding");
+        }, 100);
       } else {
         const res = await authAPI.signup({ name, email, password });
         if (!res.data.token) {
@@ -83,7 +87,10 @@ export default function AuthPage() {
             title: "Profile Initialized",
             description: "Preparing your Advanced Financial AI protocols.",
           });
-          navigate("/onboarding");
+          
+          setTimeout(() => {
+            navigate("/onboarding");
+          }, 100);
         }
       }
     } catch (err: any) {
