@@ -157,24 +157,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
-  const login = (newToken: string, userData: User) => {
+  const login = async (newToken: string, userData: User) => {
     // If no token provided (e.g. Supabase-native login), try to get it from current session
     let tokenToUse = newToken;
     
     if (!tokenToUse) {
       console.log("[PulseAi] No explicit token provided to login(), checking session...");
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          console.log("[PulseAi] Session found, synchronizing...");
-          setToken(session.access_token);
-          setUser(userData);
-          localStorage.setItem('token', session.access_token);
-          localStorage.setItem('user', JSON.stringify(userData));
-        } else {
-          console.error("[PulseAi] Login attempt failed: No token provided and no active session found.");
-        }
-      });
-      return;
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        console.log("[PulseAi] Session found, synchronizing...");
+        tokenToUse = session.access_token;
+      } else {
+        console.error("[PulseAi] Login attempt failed: No token provided and no active session found.");
+        return;
+      }
     }
 
     setToken(tokenToUse);

@@ -1,9 +1,2 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-export default function handler(_req: VercelRequest, res: VercelResponse) {
-  res.status(200).json({ 
-    message: "Pulse API Landing", 
-    status: "Active",
-    timestamp: new Date().toISOString()
-  });
-}
+import app from '../src/server/index';
+export default app;
