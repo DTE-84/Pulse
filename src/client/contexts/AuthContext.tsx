@@ -14,7 +14,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (newToken: string, userData: User) => void;
+  login: (newToken: string, userData: User) => Promise<void>;
   logout: () => void;
   updateUser: (partial: Partial<User>) => void;
   isAuthenticated: boolean;

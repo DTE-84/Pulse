@@ -63,7 +63,7 @@ export default function AuthPage() {
     try {
       if (isLogin) {
         const res = await authAPI.login({ email, password });
-        login(res.data.token || "", res.data.user);
+        await login(res.data.token || "", res.data.user);
         toast({
           title: "Access Granted",
           description: "Welcome back to the Intelligence Hub.",
@@ -82,7 +82,7 @@ export default function AuthPage() {
           });
           setIsLogin(true);
         } else {
-          login(res.data.token, res.data.user);
+          await login(res.data.token, res.data.user);
           toast({
             title: "Profile Initialized",
             description: "Preparing your Advanced Financial AI protocols.",
@@ -329,7 +329,7 @@ export default function AuthPage() {
                   try {
                     const res = await authAPI.guestSignup();
                     // First set the local context
-                    login(res.data.token || "", res.data.user);
+                    await login(res.data.token || "", res.data.user);
                     
                     toast({
                       title: "Sandbox Protocol Initialized",
