@@ -1,7 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const rawUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+// Sanitize URL: Remove trailing slashes or /rest/v1 suffix which causes Auth 404s
+const supabaseUrl = rawUrl?.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
+
+console.log("[PulseAi] Supabase initialized with:", {
+  url: supabaseUrl,
+  isSanitized: rawUrl !== supabaseUrl,
+  hasKey: !!supabaseAnonKey
+});
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(

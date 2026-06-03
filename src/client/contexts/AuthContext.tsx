@@ -50,30 +50,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // 1. Sync with Supabase Auth State
     const initAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setToken(session.access_token);
-        localStorage.setItem('token', session.access_token);
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        // Fetch profile if not in localStorage or to keep it fresh
-        const { data: profile } = await supabase
-          .from('dim_users')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
+        if (sessionError) throw sessionError;
+
+        if (session) {
+          setToken(session.access_token);
+          localStorage.setItem('token', session.access_token);
           
-        if (profile) {
-          const userData = { 
-            ...profile, 
-            id: profile.user_id, 
-            name: profile.user_name,
-            onboardingCompleted: profile.onboarding_completed 
-          };
-          setUser(userData);
-          localStorage.setItem('user', JSON.stringify(userData));
+          // Fetch profile if not in localStorage or to keep it fresh
+          const { data: profile, error: profileError } = await supabase
+            .from('dim_users')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .maybeSingle();
+            
+          if (profileError) throw profileError;
+
+          if (profile) {
+            const userData = { 
+              ...profile, 
+              id: profile.user_id, 
+              name: profile.user_name,
+              onboardingCompleted: profile.onboarding_completed 
+            };
+            setUser(userData);
+            localStorage.setItem('user', JSON.stringify(userData));
+          }
         }
+      } catch (err) {
+        console.error("[PulseAi] Auth Initialization Failed:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     initAuth();

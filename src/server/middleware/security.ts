@@ -19,7 +19,8 @@ const getJwtSecret = () => {
 export const JWT_SECRET: string = process.env.JWT_SECRET || "temp-secret-for-build-only-1234567890";
 
 // Initialize Supabase Admin for token verification
-const supabaseUrl = process.env.VITE_SUPABASE_URL || "";
+const rawUrl = process.env.VITE_SUPABASE_URL || "";
+const supabaseUrl = rawUrl.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || "";
 let _supabase: any;
 
