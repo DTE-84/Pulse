@@ -12,6 +12,7 @@
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build --config vite.config.ts",
     "build:server": "vite build --config vite.config.server.mjs",
+    "test": "vitest run",
     "start": "node server-dist/production.mjs",
     "typecheck": "tsc"
   },
