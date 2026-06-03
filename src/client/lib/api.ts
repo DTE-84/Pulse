@@ -51,6 +51,8 @@ export const authAPI = {
             email: data.user.email,
             baseline_spend: 2500,
             onboarding_completed: false,
+            subscription_status: 'trialing',
+            trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
           },
         ])
         .select()
@@ -143,6 +145,8 @@ export const authAPI = {
             email: user.email,
             baseline_spend: 2500,
             onboarding_completed: false,
+            subscription_status: 'trialing',
+            trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
           },
         ])
         .select()

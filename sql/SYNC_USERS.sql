@@ -29,13 +29,15 @@ ON CONFLICT (user_id) DO NOTHING;
 CREATE OR REPLACE FUNCTION public.handle_new_user() 
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.dim_users (user_id, email, user_name, onboarding_completed, baseline_spend)
+  INSERT INTO public.dim_users (user_id, email, user_name, onboarding_completed, baseline_spend, subscription_status, trial_ends_at)
   VALUES (
     new.id, 
     new.email, 
     COALESCE(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)), 
     false, 
-    2500.00
+    2500.00,
+    'trialing',
+    NOW() + INTERVAL '7 days'
   );
   RETURN new;
 END;

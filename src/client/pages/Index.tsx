@@ -469,10 +469,11 @@ export default function Index() {
 
     // Redirect to subscription if trial expired and no active sub
     const isTrialExpired = user?.subscriptionStatus === 'trialing' && trialDaysLeft <= 0;
-    const isInactive = user?.subscriptionStatus === 'inactive' || !user?.subscriptionStatus;
+    const isExplicitlyInactive = user?.subscriptionStatus === 'inactive' || user?.subscriptionStatus === 'expired';
     
-    // allow is_demo users to access the dashboard without forcing a subscription redirect
-    if (!user?.isDemo && (isTrialExpired || isInactive) && user?.subscriptionStatus !== 'active') {
+    // Only redirect if explicitly inactive or expired. 
+    // New users with null/undefined status are treated as being in an initial trial phase.
+    if (!user?.isDemo && (isTrialExpired || isExplicitlyInactive) && user?.subscriptionStatus !== 'active') {
       navigate("/subscription");
       return;
     }

@@ -73,7 +73,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               ...profile, 
               id: profile.user_id, 
               name: profile.user_name,
-              onboardingCompleted: profile.onboarding_completed 
+              onboardingCompleted: profile.onboarding_completed,
+              subscriptionStatus: profile.subscription_status,
+              trialEndsAt: profile.trial_ends_at,
+              isDemo: profile.is_demo
             };
             setUser(userData);
             localStorage.setItem('user', JSON.stringify(userData));

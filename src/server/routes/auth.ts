@@ -45,7 +45,7 @@ export const handleMe = async (req: Request, res: Response) => {
       name: user.user_name,
       baselineSpend: user.baseline_spend, 
       novaTone: user.nova_tone, 
-      onboardingCompleted: true, 
+      onboardingCompleted: user.onboarding_completed, 
       isDemo: user.is_demo,
       subscriptionStatus: user.subscription_status,
       trialEndsAt: user.trial_ends_at
@@ -83,7 +83,7 @@ export const handleLogin = async (req: Request, res: Response) => {
         name: user.user_name,
         baselineSpend: user.baseline_spend, 
         novaTone: user.nova_tone, 
-        onboardingCompleted: true, 
+        onboardingCompleted: user.onboarding_completed, 
         isDemo: user.is_demo,
         subscriptionStatus: user.subscription_status,
         trialEndsAt: user.trial_ends_at
