@@ -6,10 +6,10 @@ import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const rootPath = path.resolve(__dirname, "..");
 
 export default defineConfig({
-  // Use project root as the root for Vite
-  root: __dirname,
+  root: rootPath,
   plugins: [
     react(),
     VitePWA({
@@ -39,12 +39,12 @@ export default defineConfig({
   base: "/",
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src/client"),
-      "@shared": path.resolve(__dirname, "src/shared"),
+      "@": path.resolve(rootPath, "src/client"),
+      "@shared": path.resolve(rootPath, "src/shared"),
     },
   },
   build: {
-    outDir: path.resolve(__dirname, "dist"),
+    outDir: path.resolve(rootPath, "dist"),
     emptyOutDir: true,
     chunkSizeWarningLimit: 2000,
   },
