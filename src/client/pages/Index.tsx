@@ -471,7 +471,8 @@ export default function Index() {
     const isTrialExpired = user?.subscriptionStatus === 'trialing' && trialDaysLeft <= 0;
     const isInactive = user?.subscriptionStatus === 'inactive' || !user?.subscriptionStatus;
     
-    if ((isTrialExpired || isInactive) && user?.subscriptionStatus !== 'active') {
+    // allow is_demo users to access the dashboard without forcing a subscription redirect
+    if (!user?.isDemo && (isTrialExpired || isInactive) && user?.subscriptionStatus !== 'active') {
       navigate("/subscription");
       return;
     }
