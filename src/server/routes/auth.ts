@@ -50,7 +50,10 @@ export const handleMe = async (req: Request, res: Response) => {
       subscriptionStatus: user.subscription_status,
       trialEndsAt: user.trial_ends_at
     });
-  } catch { res.status(500).json({ message: "Internal error." }); }
+  } catch (err: any) { 
+    console.error("[AUTH ME] Error:", err.message);
+    res.status(500).json({ message: "Internal error.", detail: err.message }); 
+  }
 };
 
 export const handleLogin = async (req: Request, res: Response) => {
@@ -58,6 +61,7 @@ export const handleLogin = async (req: Request, res: Response) => {
   const err = validateAuthInput(email, password);
   if (err) return res.status(400).json({ message: err });
   try {
+    console.log(`[AUTH LOGIN] Attempting login for: ${email}`);
     const result = await query(
       "SELECT user_id, user_name, email, password, baseline_spend, nova_tone, is_demo, subscription_status, trial_ends_at FROM dim_users WHERE email = $1",
       [email.toLowerCase().trim()]
@@ -66,7 +70,10 @@ export const handleLogin = async (req: Request, res: Response) => {
     // Constant-time response — do not reveal whether email exists
     const hash = user?.password || "b0";
     const match = await bcrypt.compare(password, hash);
-    if (!user || !match) return res.status(401).json({ message: "Invalid credentials." });
+    if (!user || !match) {
+      console.warn(`[AUTH LOGIN] Failed login for: ${email}`);
+      return res.status(401).json({ message: "Invalid credentials." });
+    }
     const token = jwt.sign({ id: user.user_id, email: user.email }, JWT_SECRET, { expiresIn: "7d" });
     res.json({ 
       token, 
@@ -83,8 +90,9 @@ export const handleLogin = async (req: Request, res: Response) => {
       } 
     });
   } catch (e: any) {
+    console.error("[AUTH LOGIN] Error:", e.message);
     if (e.code === "ECONNREFUSED") return res.status(503).json({ message: "Database unavailable." });
-    res.status(500).json({ message: "Authentication error." });
+    res.status(500).json({ message: "Authentication error.", detail: e.message });
   }
 };
 
@@ -95,6 +103,7 @@ export const handleSignup = async (req: Request, res: Response) => {
   if (typeof name !== "string" || name.trim().length < 1)
     return res.status(400).json({ message: "Name is required." });
   try {
+    console.log(`[AUTH SIGNUP] Attempting signup for: ${email}`);
     const existing = await query("SELECT 1 FROM dim_users WHERE email = $1", [email.toLowerCase().trim()]);
     if (existing.rows.length > 0) return res.status(400).json({ message: "An account with that email already exists." });
     const hashed = await bcrypt.hash(password, 12); // 12 rounds for production
@@ -117,13 +126,17 @@ export const handleSignup = async (req: Request, res: Response) => {
       } 
     });
   } catch (e: any) {
+    console.error("[AUTH SIGNUP] Error:", e.message);
     if (e.code === "ECONNREFUSED") return res.status(503).json({ message: "Database unavailable." });
-    res.status(500).json({ message: "Signup error." });
+    res.status(500).json({ message: "Signup error.", detail: e.message });
   }
 };
 
 export const handleGuestSignup = async (_req: Request, res: Response) => {
   console.log("[PULSE AUTH] Initializing Guest Sandbox Protocol...");
+  const sUrl = process.env.VITE_SUPABASE_URL;
+  const sKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  console.log(`[PULSE AUTH] Diagnostics - URL: ${sUrl ? "OK" : "MISSING"}, Key: ${sKey ? "OK" : "MISSING"}`);
   
   try {
     const supabaseAdmin = getSupabaseAdmin();
@@ -210,21 +223,10 @@ export const handleGuestSignup = async (_req: Request, res: Response) => {
     });
 
     if (sessionError || !sessionData.session) {
-      console.error("[PULSE AUTH] Session Generation Failed:", sessionError?.message);
-      const secret = process.env.JWT_SECRET || "";
-      const token = jwt.sign({ id: user.id, email: user.email }, secret, { expiresIn: "7d" });
-      
-      return res.status(201).json({ 
-        token, 
-        user: { 
-          id: user.id, 
-          email: user.email, 
-          name: name, 
-          onboardingCompleted: true, 
-          isDemo: true,
-          subscriptionStatus: 'trialing',
-          trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-        } 
+      console.error("[PULSE AUTH] Session Generation Failed:", sessionError?.message || "No session data");
+      return res.status(500).json({ 
+        message: "Session Uplink Failed", 
+        detail: sessionError?.message || "Supabase did not return a session for the guest."
       });
     }
 

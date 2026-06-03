@@ -2,6 +2,9 @@
   "name": "pulse-ai-prod",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev:client": "vite --config vite.config.ts --base=/",
     "dev:server": "tsx watch src/server/dev.ts",
