@@ -127,9 +127,14 @@ export const handleGuestSignup = async (_req: Request, res: Response) => {
   
   try {
     const supabaseAdmin = getSupabaseAdmin();
+    if (!supabaseAdmin) {
+       console.error("[PULSE AUTH] FATAL: supabaseAdmin is null or undefined");
+       throw new Error("Supabase Admin client initialization failed.");
+    }
+
     const guestId = Math.random().toString(36).substring(7);
     const email = `guest_${guestId}@pulse.demo`;
-    const password = Math.random().toString(36) + "A1!"; // Ensure it meets complexity
+    const password = Math.random().toString(36) + "A1!"; 
     const name = `Guest User ${guestId.toUpperCase()}`;
 
     console.log(`[PULSE AUTH] Provisioning Supabase Auth identity: ${email}`);
@@ -143,35 +148,38 @@ export const handleGuestSignup = async (_req: Request, res: Response) => {
     });
 
     if (authError) {
-      console.error("[PULSE AUTH] Supabase Auth Creation Failed:", authError.message);
+      console.error("[PULSE AUTH] Supabase Auth Creation Failed:", JSON.stringify(authError));
       return res.status(500).json({ 
         message: "Sandbox Identity Failure", 
-        detail: authError.message 
+        detail: authError.message,
+        code: authError.status
       });
     }
 
     const user = authData.user;
+    if (!user) {
+        console.error("[PULSE AUTH] Auth successful but user object is missing");
+        throw new Error("User creation succeeded but no user object returned.");
+    }
     console.log(`[PULSE AUTH] Identity confirmed: ${user.id}`);
 
     // 2. Update the profile created by the trigger
-    // The trigger public.handle_new_user() should have already created the dim_users record.
     console.log("[PULSE AUTH] Refining demo profile...");
-    const { data: _profile, error: profileError } = await supabaseAdmin
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from("dim_users")
       .update({
         is_demo: true,
         subscription_status: 'trialing',
         trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        onboarding_completed: true // Guests skip onboarding
+        onboarding_completed: true 
       })
       .eq("user_id", user.id)
       .select()
       .single();
 
     if (profileError) {
-      console.warn("[PULSE AUTH] Profile refinement failed (might need retry):", profileError.message);
-      // We'll try to insert if it's missing (though trigger should handle it)
-      await supabaseAdmin.from("dim_users").upsert([{
+      console.warn("[PULSE AUTH] Profile refinement failed, attempting upsert:", profileError.message);
+      const { error: upsertError } = await supabaseAdmin.from("dim_users").upsert([{
         user_id: user.id,
         user_name: name,
         email: email,
@@ -180,6 +188,10 @@ export const handleGuestSignup = async (_req: Request, res: Response) => {
         trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         onboarding_completed: true
       }]);
+      
+      if (upsertError) {
+          console.error("[PULSE AUTH] Upsert also failed:", upsertError.message);
+      }
     }
 
     // 3. High-Fidelity Signal Seeding
@@ -199,11 +211,10 @@ export const handleGuestSignup = async (_req: Request, res: Response) => {
 
     if (sessionError || !sessionData.session) {
       console.error("[PULSE AUTH] Session Generation Failed:", sessionError?.message);
-      // Fallback to local JWT if Supabase session fails (unlikely but safe)
       const secret = process.env.JWT_SECRET || "";
       const token = jwt.sign({ id: user.id, email: user.email }, secret, { expiresIn: "7d" });
       
-      res.status(201).json({ 
+      return res.status(201).json({ 
         token, 
         user: { 
           id: user.id, 
@@ -215,27 +226,29 @@ export const handleGuestSignup = async (_req: Request, res: Response) => {
           trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
         } 
       });
-    } else {
-      console.log("[PULSE AUTH] Guest Sandbox Protocol Complete.");
-      res.status(201).json({ 
-        token: sessionData.session.access_token,
-        refreshToken: sessionData.session.refresh_token,
-        user: { 
-          id: user.id, 
-          email: user.email, 
-          name: name, 
-          onboardingCompleted: true, 
-          isDemo: true,
-          subscriptionStatus: 'trialing',
-          trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-        } 
-      });
     }
+
+    console.log("[PULSE AUTH] Guest Sandbox Protocol Complete.");
+    res.status(201).json({ 
+      token: sessionData.session.access_token,
+      refreshToken: sessionData.session.refresh_token,
+      user: { 
+        id: user.id, 
+        email: user.email, 
+        name: name, 
+        onboardingCompleted: true, 
+        isDemo: true,
+        subscriptionStatus: 'trialing',
+        trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      } 
+    });
   } catch (err: any) {
-    console.error("[PULSE AUTH] General Failure:", err.message);
+    console.error("[PULSE AUTH] FATAL General Failure:", err.message);
+    console.error(err.stack);
     res.status(500).json({ 
       message: "Guest Protocol Failure", 
-      detail: err.message
+      detail: err.message,
+      stack: process.env.NODE_ENV === "development" ? err.stack : undefined
     });
   }
 };
@@ -247,34 +260,32 @@ export const handleDebug = async (_req: Request, res: Response) => {
     env: {
       has_db_url: !!process.env.DATABASE_URL,
       has_jwt_secret: !!process.env.JWT_SECRET,
-      has_plaid_client_id: !!process.env.PLAID_CLIENT_ID,
-      has_plaid_secret: !!process.env.PLAID_SECRET,
-      plaid_env: process.env.PLAID_ENV || "not_set (defaulting to sandbox)",
+      has_supabase_url: !!process.env.VITE_SUPABASE_URL,
+      has_supabase_anon: !!process.env.VITE_SUPABASE_ANON_KEY,
+      has_service_role: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
       node_env: process.env.NODE_ENV,
-      vercel_env: process.env.VERCEL_ENV || "local"
+      vercel: !!process.env.VERCEL
     }
   };
 
   try {
-    if (!process.env.DATABASE_URL) {
-      telemetry.status = "Environment Warning";
-      telemetry.error = "DATABASE_URL is missing.";
-      return res.json(telemetry);
-    }
-
-    const dbStatus = await query("SELECT COUNT(*) FROM dim_users");
+    console.log("[DEBUG] Testing DB Connection...");
+    const dbStatus = await query("SELECT NOW() as now, COUNT(*) as count FROM dim_users");
     telemetry.status = "Online";
     telemetry.db = {
-      users_count: dbStatus.rows[0].count,
-      connected: true
+      connected: true,
+      time: dbStatus.rows[0].now,
+      users_count: dbStatus.rows[0].count
     };
+    
+    console.log("[DEBUG] DB Check Passed.");
     res.json(telemetry);
   } catch (err: any) {
+    console.error("[DEBUG] DB Check Failed:", err.message);
     telemetry.status = "Database Error";
     telemetry.error = {
       message: err.message,
       code: err.code,
-      hint: err.hint,
       detail: err.detail
     };
     res.status(500).json(telemetry);

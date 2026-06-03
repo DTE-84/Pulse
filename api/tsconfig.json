@@ -1,11 +1,18 @@
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "module": "CommonJS",
+    "target": "ES2022",
+    "module": "ESNext",
     "moduleResolution": "node",
-    "allowImportingTsExtensions": false,
-    "noEmit": false,
-    "outDir": "../dist/api"
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["ESNext", "DOM"],
+    "baseUrl": "..",
+    "paths": {
+      "@/*": ["src/client/*"],
+      "@shared/*": ["src/shared/*"]
+    }
   },
-  "include": ["index.ts", "../src/server/**/*"]
+  "include": ["index.ts", "ping.ts", "../src/server/**/*"]
 }

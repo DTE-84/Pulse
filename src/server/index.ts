@@ -63,7 +63,7 @@ export function createServer() {
   app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
   // High-Fidelity Diagnostic Node (Priority Alpha)
-  app.get("/api/debug/system", handleDebug as any);
+  app.get("/api/debug/system", cors() as any, handleDebug as any);
   app.get("/api/ping", (_req, res) => res.json({ message: "ping", status: "Deterministic Uplink Active" }));
   app.get("/api/health", (_req, res) => res.json({ status: "ok", message: "Pulse API is healthy", timestamp: new Date().toISOString() }));
   

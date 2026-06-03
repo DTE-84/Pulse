@@ -7,8 +7,12 @@ function getPool() {
   if (!pool) {
     const dbUrl = process.env.DATABASE_URL;
     if (!dbUrl) {
-      console.error("[PULSE DB] FATAL: DATABASE_URL is missing from environment variables.");
-      throw new Error("Database configuration error: Missing DATABASE_URL.");
+      console.warn("[PULSE DB] WARNING: DATABASE_URL is missing from environment variables.");
+      // We don't throw here to allow diagnostic routes to function
+      return {
+        query: () => { throw new Error("Database offline: DATABASE_URL missing."); },
+        on: () => {}
+      } as any;
     }
 
     const isProd = process.env.NODE_ENV === "production";
@@ -27,6 +31,10 @@ function getPool() {
   return pool;
 }
 
-export const query = (text: string, params?: any[]) => getPool().query(text, params);
+export const query = (text: string, params?: any[]) => {
+  const p = getPool();
+  if (!p) throw new Error("Database pool not initialized.");
+  return p.query(text, params);
+};
 
 export default getPool;

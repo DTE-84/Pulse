@@ -1,9 +1,9 @@
 {
-  "buildCommand": "npm run build:client",
-  "outputDirectory": "dist",
+  "version": 2,
   "rewrites": [
-    { "source": "/api/ping", "destination": "/api/ping" },
-    { "source": "/api/(.*)", "destination": "/api/index" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/api/ping", "destination": "/api/ping.ts" },
+    { "source": "/api/status-check", "destination": "/api/ping.ts" },
+    { "source": "/api/:path*", "destination": "/api/index.ts" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
