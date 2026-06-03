@@ -316,8 +316,18 @@ export const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
 
   useEffect(() => {
-    console.log("[PulseAi] Layout Guard Check:", { isAuthenticated, loading, path: location.pathname });
-    if (!loading && !isAuthenticated) {
+    const isAuthPage = location.pathname === "/auth" || location.pathname.endsWith("/auth");
+    const isOnboardingPage = location.pathname === "/onboarding" || location.pathname.endsWith("/onboarding");
+    
+    console.log("[PulseAi] Layout Guard Check:", { 
+      isAuthenticated, 
+      loading, 
+      path: location.pathname,
+      isAuthPage,
+      isOnboardingPage
+    });
+
+    if (!loading && !isAuthenticated && !isAuthPage && !isOnboardingPage) {
       console.log("[PulseAi] Not authenticated, redirecting to /auth");
       navigate("/auth");
     }
@@ -331,12 +341,7 @@ export const Layout = ({ children }: LayoutProps) => {
     );
   }
 
-  // If not authenticated and we've reached this point, we're likely in the middle of a redirect
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  console.log("[PulseAi] Rendering Layout");
+  console.log("[PulseAi] Rendering Layout Content", { path: location.pathname });
 
   return (
     <div className="flex min-h-screen bg-background text-foreground font-sans selection:bg-primary/30">

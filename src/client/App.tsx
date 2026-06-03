@@ -46,13 +46,15 @@ const App = () => {
               }}
             >
               <Routes>
+                {/* Public Routes */}
                 <Route path="/auth" element={<AuthPage />} />
-                <Route path="/onboarding" element={<OnboardingPage />} />
                 
-                <Route path="*" element={
+                {/* Protected Routes Wrapper */}
+                <Route path="/*" element={
                   <Layout>
                     <Routes>
                       <Route path="/" element={<Index />} />
+                      <Route path="/onboarding" element={<OnboardingPage />} />
                       <Route path="/nova" element={<NovaChat />} />
                       <Route path="/spending" element={<SpendingPage />} />
                       <Route path="/growth" element={<GrowthPage />} />
