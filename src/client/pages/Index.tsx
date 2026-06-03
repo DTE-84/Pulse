@@ -461,8 +461,11 @@ export default function Index() {
   };
 
   useEffect(() => {
+    // Wait for auth to finish loading before making any routing decisions
     if (authLoading) return;
+
     if (!isAuthenticated) {
+      console.log("[PulseAi] Not authenticated, redirecting to /auth");
       navigate("/auth");
       return;
     }
@@ -474,6 +477,7 @@ export default function Index() {
     // Only redirect if explicitly inactive or expired. 
     // New users with null/undefined status or missing trial dates are treated as being in an initial trial phase.
     if (!user?.isDemo && (isTrialExpired || isExplicitlyInactive) && user?.subscriptionStatus !== 'active') {
+      console.log("[PulseAi] Subscription required, redirecting to /subscription");
       navigate("/subscription");
       return;
     }
@@ -489,7 +493,7 @@ export default function Index() {
       }
     };
     fetchStats();
-  }, [isAuthenticated, authLoading, navigate, user]);
+  }, [isAuthenticated, authLoading, navigate, user?.id, user?.subscriptionStatus]);
 
   if (authLoading || loading) {
     return (

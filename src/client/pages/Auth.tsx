@@ -314,12 +314,18 @@ export default function AuthPage() {
                   setLoading(true);
                   try {
                     const res = await authAPI.guestSignup();
+                    // First set the local context
                     login(res.data.token || "", res.data.user);
+                    
                     toast({
                       title: "Sandbox Protocol Initialized",
                       description: "Entering high-fidelity demo environment.",
                     });
-                    navigate("/");
+                    
+                    // Give a small delay for state to settle before navigation
+                    setTimeout(() => {
+                      navigate("/");
+                    }, 100);
                   } catch (err: any) {
                     toast({
                       variant: "destructive",
