@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ChevronLeft,
@@ -11,6 +11,7 @@ import {
   Lock,
   Sparkles,
   Heart,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -26,9 +27,31 @@ export default function Onboarding() {
   const [novaTone, setTone] = useState("Balanced");
   const [loading, setLoading] = useState(false);
 
-  const { updateUser } = useAuth();
+  const { updateUser, isAuthenticated, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (!isAuthenticated) {
+        console.log("[PulseAi] Onboarding: Not authenticated, redirecting to /auth");
+        navigate("/auth");
+      } else if (user?.onboardingCompleted) {
+        console.log("[PulseAi] Onboarding: Already completed, redirecting to /");
+        navigate("/");
+      }
+    }
+  }, [isAuthenticated, authLoading, user, navigate]);
+
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) return null;
 
   const totalSteps = 8;
 

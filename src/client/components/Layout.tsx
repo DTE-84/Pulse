@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   MessageSquare,
@@ -10,6 +10,7 @@ import {
   LogOut,
   Crown,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -310,9 +311,32 @@ const MobileNav = () => {
 };
 
 export const Layout = ({ children }: LayoutProps) => {
-  console.log("[PulseAi] Rendering Layout");
-  const { logout } = useAuth();
+  const { logout, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    console.log("[PulseAi] Layout Guard Check:", { isAuthenticated, loading, path: location.pathname });
+    if (!loading && !isAuthenticated) {
+      console.log("[PulseAi] Not authenticated, redirecting to /auth");
+      navigate("/auth");
+    }
+  }, [isAuthenticated, loading, navigate, location.pathname]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // If not authenticated and we've reached this point, we're likely in the middle of a redirect
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  console.log("[PulseAi] Rendering Layout");
 
   return (
     <div className="flex min-h-screen bg-background text-foreground font-sans selection:bg-primary/30">
@@ -358,3 +382,4 @@ export const Layout = ({ children }: LayoutProps) => {
     </div>
   );
 };
+

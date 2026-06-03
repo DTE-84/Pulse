@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Lock,
@@ -24,9 +24,16 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
 
-  const { login } = useAuth();
+  const { login, isAuthenticated, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && user) {
+      console.log("[PulseAi] AuthPage: Already authenticated, redirecting to", user.onboardingCompleted ? "/" : "/onboarding");
+      navigate(user.onboardingCompleted ? "/" : "/onboarding");
+    }
+  }, [isAuthenticated, authLoading, user, navigate]);
 
   const validatePassword = (pass: string) => {
     if (pass.length < 8) return "Password must be at least 8 characters.";

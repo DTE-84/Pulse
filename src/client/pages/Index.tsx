@@ -461,22 +461,8 @@ export default function Index() {
   };
 
   useEffect(() => {
-    // Wait for auth to finish loading before making any routing decisions
-    if (authLoading) return;
-
-    console.log("[PulseAi] Dashboard Routing V2.1 Check", { isAuthenticated, hasUser: !!user });
-
-    if (!isAuthenticated) {
-      console.log("[PulseAi] Redirecting to /auth: User not authenticated.");
-      navigate("/auth");
-      return;
-    }
-
-    // If authenticated but user profile hasn't loaded yet, wait.
-    if (!user) {
-      console.log("[PulseAi] Auth active but user profile not yet synchronized.");
-      return;
-    }
+    // Wait for auth to finish loading before fetching stats
+    if (authLoading || !isAuthenticated || !user) return;
 
     console.log("[PulseAi] Dashboard Routing Check:", {
       isDemo: user.isDemo,

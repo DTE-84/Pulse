@@ -34,12 +34,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(() => {
     try {
       const savedUser = localStorage.getItem('user');
-      return savedUser ? JSON.parse(savedUser) : null;
+      const savedToken = localStorage.getItem('token');
+      // Only restore user if we also have a token
+      return (savedUser && savedToken) ? JSON.parse(savedUser) : null;
     } catch {
       return null;
     }
   });
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+  const [token, setToken] = useState<string | null>(() => {
+    const savedToken = localStorage.getItem('token');
+    return savedToken || null;
+  });
   const [loading, setLoading] = useState(true);
 
   const hasActiveSubscription = !!user && (
@@ -109,9 +114,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUser(userData);
             localStorage.setItem('user', JSON.stringify(userData));
           }
+        } else {
+          // If no session but we had local state, clear it (it was stale)
+          if (token || user) {
+            console.log("[PulseAi] Stale session detected, clearing local storage.");
+            setToken(null);
+            setUser(null);
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+          }
         }
       } catch (err) {
         console.error("[PulseAi] Auth Initialization Failed:", err);
+        // Clear on error to be safe
+        setToken(null);
+        setUser(null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
       } finally {
         setLoading(false);
       }
@@ -121,6 +140,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // 2. Listen for Auth Changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("[PulseAi] Auth Event:", _event);
       if (session) {
         setToken(session.access_token);
         localStorage.setItem('token', session.access_token);
@@ -138,6 +158,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = (newToken: string, userData: User) => {
+    if (!newToken) {
+      console.error("[PulseAi] Login attempt without token");
+      return;
+    }
     setToken(newToken);
     setUser(userData);
     localStorage.setItem('token', newToken);
@@ -167,17 +191,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     login, 
     logout, 
     updateUser,
-    isAuthenticated: !!token,
+    isAuthenticated: !!token && !!user,
     loading,
     hasActiveSubscription
   }), [user, token, loading, hasActiveSubscription]);
 
   useEffect(() => {
-    console.log("[PulseAi] Auth V2.1 State Updated:", { 
+    console.log("[PulseAi] Auth V2.2 State Updated:", { 
       hasUser: !!user, 
       hasToken: !!token, 
       loading, 
-      isAuthenticated: !!token,
+      isAuthenticated: !!token && !!user,
       subscription: user?.subscriptionStatus
     });
   }, [user, token, loading]);
