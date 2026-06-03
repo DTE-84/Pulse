@@ -161,17 +161,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  return (
-    <AuthContext.Provider value={{ 
-      user, 
-      token, 
-      login, 
-      logout, 
-      updateUser,
+  const contextValue = React.useMemo(() => ({ 
+    user, 
+    token, 
+    login, 
+    logout, 
+    updateUser,
+    isAuthenticated: !!token,
+    loading,
+    hasActiveSubscription
+  }), [user, token, loading, hasActiveSubscription]);
+
+  useEffect(() => {
+    console.log("[PulseAi] Auth V2.1 State Updated:", { 
+      hasUser: !!user, 
+      hasToken: !!token, 
+      loading, 
       isAuthenticated: !!token,
-      loading,
-      hasActiveSubscription
-    }}>
+      subscription: user?.subscriptionStatus
+    });
+  }, [user, token, loading]);
+
+  return (
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

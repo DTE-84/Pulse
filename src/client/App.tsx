@@ -28,9 +28,11 @@ import { Layout } from "./components/Layout";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="dark" storageKey="pulse-theme">
+const App = () => {
+  console.log("[PulseAi] App Rendering");
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="dark" storageKey="pulse-theme">
       <TooltipProvider>
         <Toaster />
         <Sonner />

@@ -464,20 +464,33 @@ export default function Index() {
     // Wait for auth to finish loading before making any routing decisions
     if (authLoading) return;
 
+    console.log("[PulseAi] Dashboard Routing V2.1 Check", { isAuthenticated, hasUser: !!user });
+
     if (!isAuthenticated) {
-      console.log("[PulseAi] Not authenticated, redirecting to /auth");
+      console.log("[PulseAi] Redirecting to /auth: User not authenticated.");
       navigate("/auth");
       return;
     }
 
+    // If authenticated but user profile hasn't loaded yet, wait.
+    if (!user) {
+      console.log("[PulseAi] Auth active but user profile not yet synchronized.");
+      return;
+    }
+
+    console.log("[PulseAi] Dashboard Routing Check:", {
+      isDemo: user.isDemo,
+      status: user.subscriptionStatus,
+      trialEndsAt: user.trialEndsAt
+    });
+
     // Redirect to subscription if trial expired and no active sub
-    const isTrialExpired = user?.subscriptionStatus === 'trialing' && user?.trialEndsAt && new Date(user.trialEndsAt) < new Date();
-    const isExplicitlyInactive = user?.subscriptionStatus === 'inactive' || user?.subscriptionStatus === 'expired';
+    const isTrialExpired = user.subscriptionStatus === 'trialing' && user.trialEndsAt && new Date(user.trialEndsAt) < new Date();
+    const isExplicitlyInactive = user.subscriptionStatus === 'inactive' || user.subscriptionStatus === 'expired';
     
     // Only redirect if explicitly inactive or expired. 
-    // New users with null/undefined status or missing trial dates are treated as being in an initial trial phase.
-    if (!user?.isDemo && (isTrialExpired || isExplicitlyInactive) && user?.subscriptionStatus !== 'active') {
-      console.log("[PulseAi] Subscription required, redirecting to /subscription");
+    if (!user.isDemo && (isTrialExpired || isExplicitlyInactive) && user.subscriptionStatus !== 'active') {
+      console.log("[PulseAi] Redirecting to /subscription: Trial expired or account inactive.");
       navigate("/subscription");
       return;
     }
@@ -487,13 +500,13 @@ export default function Index() {
         const res = await statsAPI.get();
         setStats(res.data);
       } catch (err) {
-        console.error("Failed to fetch Pulse stats:", err);
+        console.error("[PulseAi] Dashboard Stats Error:", err);
       } finally {
         setLoading(false);
       }
     };
     fetchStats();
-  }, [isAuthenticated, authLoading, navigate, user?.id, user?.subscriptionStatus]);
+  }, [isAuthenticated, authLoading, navigate, user?.id, user?.subscriptionStatus, user?.isDemo, user?.trialEndsAt]);
 
   if (authLoading || loading) {
     return (
