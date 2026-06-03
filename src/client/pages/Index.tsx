@@ -468,11 +468,11 @@ export default function Index() {
     }
 
     // Redirect to subscription if trial expired and no active sub
-    const isTrialExpired = user?.subscriptionStatus === 'trialing' && trialDaysLeft <= 0;
+    const isTrialExpired = user?.subscriptionStatus === 'trialing' && user?.trialEndsAt && new Date(user.trialEndsAt) < new Date();
     const isExplicitlyInactive = user?.subscriptionStatus === 'inactive' || user?.subscriptionStatus === 'expired';
     
     // Only redirect if explicitly inactive or expired. 
-    // New users with null/undefined status are treated as being in an initial trial phase.
+    // New users with null/undefined status or missing trial dates are treated as being in an initial trial phase.
     if (!user?.isDemo && (isTrialExpired || isExplicitlyInactive) && user?.subscriptionStatus !== 'active') {
       navigate("/subscription");
       return;
@@ -489,7 +489,7 @@ export default function Index() {
       }
     };
     fetchStats();
-  }, [isAuthenticated, authLoading, navigate]);
+  }, [isAuthenticated, authLoading, navigate, user]);
 
   if (authLoading || loading) {
     return (

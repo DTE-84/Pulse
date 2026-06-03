@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const hasActiveSubscription = !!user && (
     user.subscriptionStatus === 'active' || 
-    (user.subscriptionStatus === 'trialing' && new Date(user.trialEndsAt || 0) > new Date())
+    (user.subscriptionStatus === 'trialing' && (!user.trialEndsAt || new Date(user.trialEndsAt) > new Date()))
   );
 
   useEffect(() => {
@@ -68,15 +68,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             
           if (profileError) throw profileError;
 
-          if (profile) {
+          let finalProfile = profile;
+
+          // Self-healing: If profile missing, create it
+          if (!finalProfile) {
+            console.log("[PulseAi] Profile missing during init, creating...");
+            const { data: newProfile, error: insertError } = await supabase
+              .from('dim_users')
+              .insert([
+                {
+                  user_id: session.user.id,
+                  user_name: session.user.email?.split("@")[0] || "User",
+                  email: session.user.email,
+                  baseline_spend: 2500,
+                  onboarding_completed: false,
+                  subscription_status: 'trialing',
+                  trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+                },
+              ])
+              .select()
+              .single();
+            
+            if (!insertError) {
+              finalProfile = newProfile;
+            } else {
+              console.error("[PulseAi] Profile creation failed:", insertError);
+            }
+          }
+
+          if (finalProfile) {
             const userData = { 
-              ...profile, 
-              id: profile.user_id, 
-              name: profile.user_name,
-              onboardingCompleted: profile.onboarding_completed,
-              subscriptionStatus: profile.subscription_status,
-              trialEndsAt: profile.trial_ends_at,
-              isDemo: profile.is_demo
+              ...finalProfile, 
+              id: finalProfile.user_id, 
+              name: finalProfile.user_name,
+              onboardingCompleted: finalProfile.onboarding_completed,
+              subscriptionStatus: finalProfile.subscription_status,
+              trialEndsAt: finalProfile.trial_ends_at,
+              isDemo: finalProfile.is_demo
             };
             setUser(userData);
             localStorage.setItem('user', JSON.stringify(userData));
