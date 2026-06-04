@@ -63,7 +63,10 @@ export default function AuthPage() {
     try {
       if (isLogin) {
         const res = await authAPI.login({ email, password });
-        await login(res.data.token || "", res.data.user);
+        if (!res.data.token) {
+          throw new Error("Authentication succeeded but no session token was issued.");
+        }
+        await login(res.data.token, res.data.user);
         toast({
           title: "Access Granted",
           description: "Welcome back to the Intelligence Hub.",
@@ -328,8 +331,11 @@ export default function AuthPage() {
                   setLoading(true);
                   try {
                     const res = await authAPI.guestSignup();
+                    if (!res.data.token) {
+                      throw new Error("Sandbox initialized but no access token was provided.");
+                    }
                     // First set the local context
-                    await login(res.data.token || "", res.data.user);
+                    await login(res.data.token, res.data.user);
                     
                     toast({
                       title: "Sandbox Protocol Initialized",

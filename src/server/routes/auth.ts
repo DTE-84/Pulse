@@ -178,7 +178,7 @@ export const handleGuestSignup = async (_req: Request, res: Response) => {
 
     // 2. Update the profile created by the trigger
     console.log("[PULSE AUTH] Refining demo profile...");
-    const { data: profile, error: profileError } = await supabaseAdmin
+    const { error: profileError } = await supabaseAdmin
       .from("dim_users")
       .update({
         is_demo: true,
@@ -186,9 +186,7 @@ export const handleGuestSignup = async (_req: Request, res: Response) => {
         trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         onboarding_completed: true 
       })
-      .eq("user_id", user.id)
-      .select()
-      .single();
+      .eq("user_id", user.id);
 
     if (profileError) {
       console.warn("[PULSE AUTH] Profile refinement failed, attempting upsert:", profileError.message);

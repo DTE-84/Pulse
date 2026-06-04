@@ -168,10 +168,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (session) {
         console.log("[PulseAi] Session found, synchronizing...");
         tokenToUse = session.access_token;
-      } else {
-        console.error("[PulseAi] Login attempt failed: No token provided and no active session found.");
-        return;
       }
+    }
+
+    if (!tokenToUse) {
+      console.error("[PulseAi] Login attempt aborted: No session token found. Redirecting to manual login form.");
+      // Clear any stale state to be safe
+      setToken(null);
+      setUser(null);
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      return;
     }
 
     setToken(tokenToUse);

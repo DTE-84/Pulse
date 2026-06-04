@@ -11,7 +11,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // In production, serve the built SPA files
-const distPath = path.resolve(__dirname, "..", "..", "dist");
+const distPath = process.env.VERCEL 
+  ? path.resolve(process.cwd(), "dist")
+  : path.resolve(__dirname, "..", "..", "dist");
 
 // Serve assets from both root and /Pulse for compatibility
 app.use("/assets", express.static(path.join(distPath, "assets"), {
