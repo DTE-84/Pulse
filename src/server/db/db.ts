@@ -1,39 +1,38 @@
-import { Pool } from "pg";
+import pkg from 'pg';
+const { Pool } = pkg;
 
-let pool: Pool | undefined;
+let _pool: pkg.Pool | null = null;
 
-function getPool() {
-  if (!pool) {
+function getPool(): pkg.Pool {
+  if (!_pool) {
     const dbUrl = process.env.DATABASE_URL;
     if (!dbUrl) {
-      console.warn("[PULSE DB] WARNING: DATABASE_URL is missing from environment variables.");
-      // We don't throw here to allow diagnostic routes to function
-      return {
-        query: () => { throw new Error("Database offline: DATABASE_URL missing."); },
-        on: () => {}
-      } as any;
+      console.warn("[PULSE DB] WARNING: DATABASE_URL is missing.");
+      throw new Error("Database configuration missing: DATABASE_URL not found.");
     }
 
     const isProd = process.env.NODE_ENV === "production";
-    console.log(`[PULSE DB] Initializing pool (Production: ${isProd})`);
+    console.log(`[PULSE DB] Initializing uplink (Production: ${isProd})`);
 
-    pool = new Pool({
+    _pool = new Pool({
       connectionString: dbUrl,
       ssl: { rejectUnauthorized: false },
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
     });
 
-    pool.on("error", (err: any) => {
-      console.error("[PULSE DB] Unexpected error on idle client:", err.message);
+    _pool.on("error", (err: Error) => {
+      console.error("[PULSE DB] Unexpected connectivity disruption:", err.message);
     });
   }
 
-  return pool;
+  return _pool;
 }
 
-export const query = (text: string, params?: any[]) => {
-  const p = getPool();
-  if (!p) throw new Error("Database pool not initialized.");
-  return p.query(text, params);
+export const query = async (text: string, params?: any[]) => {
+  const pool = getPool();
+  return pool.query(text, params);
 };
 
-export default getPool;
+export default { getPool, query };

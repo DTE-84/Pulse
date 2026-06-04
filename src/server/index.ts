@@ -2,16 +2,16 @@ import express from "express";
 import cors from "cors";
 
 // 1. Direct Imports for Core Routes (Eliminate lazy-load bundling issues)
-import { handleDemo } from "./routes/demo";
-import { handleStats } from "./routes/stats";
-import authRouter, { handleDebug } from "./routes/auth";
-import { handleIngest } from "./routes/ingest";
-import { handleNovaChat } from "./routes/chat";
-import { handleAnalysis } from "./routes/analysis";
-import { handleGetGoals, handleCreateGoal } from "./routes/goals";
-import { handleStripeWebhook } from "./routes/webhooks";
-import { createCheckoutSession } from "./routes/payments";
-import { createLinkToken, exchangePublicToken } from "./routes/plaid";
+import { handleDemo } from "./routes/demo.js";
+import { handleStats } from "./routes/stats.js";
+import authRouter, { handleDebug } from "./routes/auth.js";
+import { handleIngest } from "./routes/ingest.js";
+import { handleNovaChat } from "./routes/chat.js";
+import { handleAnalysis } from "./routes/analysis.js";
+import { handleGetGoals, handleCreateGoal } from "./routes/goals.js";
+import { handleStripeWebhook } from "./routes/webhooks.js";
+import { createCheckoutSession } from "./routes/payments.js";
+import { createLinkToken, exchangePublicToken } from "./routes/plaid.js";
 
 // 2. Middleware
 import {
@@ -19,7 +19,7 @@ import {
   requireAuth,
   ingestLimiter,
   apiLimiter,
-} from "./middleware/security";
+} from "./middleware/security.js";
 
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:5173,http://localhost:3000,https://pulse-nova-solutions.vercel.app,https://dte-solutions.icu")
   .split(",").map((o: string) => o.trim());

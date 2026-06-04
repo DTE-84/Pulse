@@ -1,3 +1,2 @@
-// @ts-ignore
-import app from '../server-dist/production.mjs';
+import app from '../src/server/index.js';
 export default app;

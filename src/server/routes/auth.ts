@@ -1,9 +1,9 @@
 import { Request, Response, Router } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { query } from "../db/db";
-import { seedGuestData } from "../db/seed-guest";
-import { JWT_SECRET, getSupabaseAdmin, authLimiter, requireAuth } from "../middleware/security";
+import { query } from "../db/db.js";
+import { seedGuestData } from "../db/seed-guest.js";
+import { JWT_SECRET, getSupabaseAdmin, authLimiter, requireAuth } from "../middleware/security.js";
 
 const router = Router();
 
