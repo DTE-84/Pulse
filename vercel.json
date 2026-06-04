@@ -1,11 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/**/*.ts",
-      "use": "@vercel/node"
-    }
-  ],
   "rewrites": [
     { "source": "/api/ping", "destination": "/api/ping.ts" },
     { "source": "/api/status-check", "destination": "/api/ping.ts" },
