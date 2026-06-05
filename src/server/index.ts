@@ -101,7 +101,7 @@ export function createServer() {
   app.use("/api/auth", authRouter);
 
   // Catch-all for undefined API routes (Distinguish from Vercel 404)
-  app.all("/api/*", (req, res) => {
+  app.all("/api/{*path}", (req, res) => {
     console.warn(`[PULSE API 404] No match for: ${req.method} ${req.path}`);
     res.status(404).json({
       error: "API endpoint not found (Express)",
