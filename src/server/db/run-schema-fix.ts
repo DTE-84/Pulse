@@ -1,4 +1,4 @@
-import { query, getPool } from './db';
+import { query, getPool } from './db.js';
 
 async function runFix() {
   try {

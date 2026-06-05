@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { query } from './db';
+import { query } from './db.js';
 
 async function cleanPolicies() {
   try {

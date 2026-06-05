@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { query } from "../db/db";
+import { query } from "../db/db.js";
 
 export const handleNovaChat: RequestHandler = async (req, res) => {
   const userId = req.userId;

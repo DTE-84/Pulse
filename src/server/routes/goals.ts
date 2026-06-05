@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { query } from "../db/db";
+import { query } from "../db/db.js";
 
 export const handleGetGoals: RequestHandler = async (req, res) => {
   try {

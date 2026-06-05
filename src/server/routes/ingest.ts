@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
 import { spawn } from "child_process";
-import { query } from "../db/db";
-import { sanitizeCsvField, validateTransaction } from "../middleware/security";
+import { query } from "../db/db.js";
+import { sanitizeCsvField, validateTransaction } from "../middleware/security.js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const __dirname = path.resolve();

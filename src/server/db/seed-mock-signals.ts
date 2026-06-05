@@ -1,4 +1,4 @@
-import { query, getPool } from "./db";
+import { query, getPool } from "./db.js";
 
 const DREW_USER_ID = "fe67369a-fd48-4634-bc04-42da3a8ced63";
 

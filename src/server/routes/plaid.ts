@@ -6,7 +6,7 @@ import {
   Products, 
   CountryCode 
 } from "plaid";
-import { query } from "../db/db";
+import { query } from "../db/db.js";
 
 const configuration = new Configuration({
   basePath: PlaidEnvironments[process.env.PLAID_ENV || "sandbox"],

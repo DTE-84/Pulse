@@ -1,29 +1,33 @@
 import pkg from 'pg';
-const { Pool } = pkg;
 
-let _pool: pkg.Pool | null = null;
+let _pool: any = null;
 
-function getPool(): pkg.Pool {
+/**
+ * High-Fidelity Database Uplink
+ * Engineered as a resilient singleton to prevent initialization race conditions.
+ */
+function getPool() {
   if (!_pool) {
     const dbUrl = process.env.DATABASE_URL;
     if (!dbUrl) {
-      console.warn("[PULSE DB] WARNING: DATABASE_URL is missing.");
-      throw new Error("Database configuration missing: DATABASE_URL not found.");
+      console.warn("[PULSE DB] FATAL: DATABASE_URL is missing.");
+      throw new Error("Critical Failure: DATABASE_URL environment variable is not defined.");
     }
 
     const isProd = process.env.NODE_ENV === "production";
-    console.log(`[PULSE DB] Initializing uplink (Production: ${isProd})`);
+    console.log(`[PULSE DB] Initializing Deterministic Uplink (Production: ${isProd})`);
 
-    _pool = new Pool({
+    // Use default import pattern to bypass ESM/CJS bundling conflicts
+    _pool = new pkg.Pool({
       connectionString: dbUrl,
       ssl: { rejectUnauthorized: false },
-      max: 10,
+      max: 15,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      connectionTimeoutMillis: 5000,
     });
 
     _pool.on("error", (err: Error) => {
-      console.error("[PULSE DB] Unexpected connectivity disruption:", err.message);
+      console.error("[PULSE DB] Critical Connectivity Disruption:", err.message);
     });
   }
 

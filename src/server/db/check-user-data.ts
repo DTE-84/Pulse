@@ -1,4 +1,4 @@
-import getPool, { query } from './db';
+import getPool, { query } from './db.js';
 
 async function checkUserData() {
   try {
