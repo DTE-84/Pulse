@@ -19,31 +19,33 @@ const getJwtSecret = () => {
 export const JWT_SECRET: string = process.env.JWT_SECRET || "temp-secret-for-build-only-1234567890";
 
 // Initialize Supabase Admin for token verification
-const rawUrl = process.env.VITE_SUPABASE_URL || "";
-const supabaseUrl = rawUrl.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || "";
 let _supabase: any;
 
 function getSupabase() {
+  const url = process.env.VITE_SUPABASE_URL || "";
+  const key = process.env.VITE_SUPABASE_ANON_KEY || "";
+  
   if (!_supabase) {
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!url || !key) {
       console.warn("[PULSE SECURITY] Supabase URL or Anon Key is missing.");
     }
-    _supabase = createClient(supabaseUrl, supabaseAnonKey);
+    _supabase = createClient(url, key);
   }
   return _supabase;
 }
 
 // Initialize Supabase Admin (RLS Bypass)
 let _supabaseAdmin: any;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
 export function getSupabaseAdmin() {
+  const url = process.env.VITE_SUPABASE_URL || "";
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+
   if (!_supabaseAdmin) {
-    if (!supabaseUrl || !serviceRoleKey) {
+    if (!url || !serviceRoleKey) {
       console.warn("[PULSE SECURITY] Supabase URL or Service Role Key is missing. Admin operations will fail.");
     }
-    _supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+    _supabaseAdmin = createClient(url, serviceRoleKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false

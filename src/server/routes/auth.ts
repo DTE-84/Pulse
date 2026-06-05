@@ -1,6 +1,7 @@
 import { Request, Response, Router } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { query } from "../db/db.js";
 import { seedGuestData } from "../db/seed-guest.js";
 import { JWT_SECRET, getSupabaseAdmin, authLimiter, requireAuth } from "../middleware/security.js";
@@ -145,27 +146,40 @@ export const handleGuestSignup = async (_req: Request, res: Response) => {
        throw new Error("Supabase Admin client initialization failed.");
     }
 
-    const guestId = Math.random().toString(36).substring(7);
+    // Use crypto for higher entropy and collision avoidance
+    const guestId = crypto.randomBytes(4).toString('hex'); 
     const email = `guest_${guestId}@pulse.demo`;
-    const password = Math.random().toString(36) + "A1!"; 
+    const password = crypto.randomBytes(12).toString('base64') + "A1!"; 
     const name = `Guest User ${guestId.toUpperCase()}`;
 
     console.log(`[PULSE AUTH] Provisioning Supabase Auth identity: ${email}`);
 
     // 1. Create User in Supabase Auth
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+    let { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
       user_metadata: { name }
     });
 
+    // Handle potential "unexpected_failure" by checking if user was actually created
+    if (authError && authError.status === 500) {
+      console.warn("[PULSE AUTH] Received 500 from Supabase, checking if user exists anyway...");
+      const { data: searchData } = await supabaseAdmin.auth.admin.listUsers();
+      const existingUser = searchData?.users.find((u: any) => u.email === email);
+      if (existingUser) {
+        console.log("[PULSE AUTH] User was successfully created despite 500 error.");
+        authData = { user: existingUser as any };
+        authError = null;
+      }
+    }
+
     if (authError) {
-      console.error("[PULSE AUTH] Supabase Auth Creation Failed:", JSON.stringify(authError));
+      console.error("[PULSE AUTH] Supabase Auth Creation Failed:", JSON.stringify(authError, Object.getOwnPropertyNames(authError)));
       return res.status(500).json({ 
         message: "Sandbox Identity Failure", 
-        detail: authError.message,
-        code: authError.status
+        detail: authError.message || "Unexpected Supabase Error",
+        code: authError.status || 500
       });
     }
 
