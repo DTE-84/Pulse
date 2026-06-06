@@ -132,7 +132,13 @@ export function validateTransaction(t: unknown): string | null {
   return null;
 }
 
-// 6. SECURITY HEADERS
+// 6. TRIAL GATE LOGIC
+export function isTrialActive(user: { subscription_tier: string, trial_ends_at: string | Date }) {
+  if (user.subscription_tier === 'pro') return false; // Paid users skip trial logic
+  return new Date() < new Date(user.trial_ends_at);
+}
+
+// 7. SECURITY HEADERS
 export const securityHeaders: RequestHandler = (_req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");

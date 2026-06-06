@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { query } from "../db/db.js";
 import { seedGuestData } from "../db/seed-guest.js";
+import { setupTrialSandboxItem } from "../lib/plaid.js";
 import { JWT_SECRET, getSupabaseAdmin, authLimiter, requireAuth } from "../middleware/security.js";
 
 const router = Router();
@@ -197,7 +198,10 @@ export const handleGuestSignup = async (_req: Request, res: Response) => {
       .update({
         is_demo: true,
         subscription_status: 'trialing',
+        subscription_tier: 'trial',
+        trial_started_at: new Date().toISOString(),
         trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        plaid_env: process.env.PLAID_ENV || 'sandbox',
         onboarding_completed: true 
       })
       .eq("user_id", user.id);
@@ -210,7 +214,10 @@ export const handleGuestSignup = async (_req: Request, res: Response) => {
         email: email,
         is_demo: true,
         subscription_status: 'trialing',
+        subscription_tier: 'trial',
+        trial_started_at: new Date().toISOString(),
         trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        plaid_env: process.env.PLAID_ENV || 'sandbox',
         onboarding_completed: true
       }]);
       
@@ -223,8 +230,12 @@ export const handleGuestSignup = async (_req: Request, res: Response) => {
     try {
       console.log("[PULSE AUTH] Injecting behavioral signals...");
       await seedGuestData(user.id);
+      
+      // Auto-Provision Plaid Sandbox for Zero-Friction Demo
+      console.log("[PULSE AUTH] Provisioning sandbox bank uplink...");
+      await setupTrialSandboxItem(user.id);
     } catch (seedErr: any) {
-      console.warn("[PULSE AUTH] Signal seeding interrupted:", seedErr.message);
+      console.warn("[PULSE AUTH] Signal/Bank seeding interrupted:", seedErr.message);
     }
 
     // 4. Generate REAL Supabase Session for the Guest

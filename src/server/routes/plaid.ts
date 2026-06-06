@@ -1,24 +1,10 @@
 import { Request, Response } from "express";
 import { 
-  Configuration, 
-  PlaidApi, 
-  PlaidEnvironments, 
   Products, 
   CountryCode 
 } from "plaid";
 import { query } from "../db/db.js";
-
-const configuration = new Configuration({
-  basePath: PlaidEnvironments[process.env.PLAID_ENV || "sandbox"],
-  baseOptions: {
-    headers: {
-      "PLAID-CLIENT-ID": process.env.PLAID_CLIENT_ID,
-      "PLAID-SECRET": process.env.PLAID_SECRET,
-    },
-  },
-});
-
-const client = new PlaidApi(configuration);
+import { plaidClient as client } from "../lib/plaid.js";
 
 export const createLinkToken = async (req: Request, res: Response) => {
   const userId = req.userId;
@@ -65,11 +51,11 @@ export const exchangePublicToken = async (req: Request, res: Response) => {
 
     // 1. Persist Plaid Item (Metadata - RLS Safe)
     const itemResult = await query(
-      `INSERT INTO public.plaid_items (user_id, plaid_item_id, institution_name)
-       VALUES ($1, $2, $3)
+      `INSERT INTO public.plaid_items (user_id, plaid_item_id, institution_name, environment, is_trial_item)
+       VALUES ($1, $2, $3, $4, $5)
        ON CONFLICT (plaid_item_id) DO UPDATE SET status = 'active', updated_at = NOW()
        RETURNING item_id`,
-      [userId, item_id, institutionName]
+      [userId, item_id, institutionName, process.env.PLAID_ENV || "sandbox", false]
     );
 
     const internalItemId = itemResult.rows[0].item_id;
