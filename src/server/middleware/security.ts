@@ -21,7 +21,7 @@ export const JWT_SECRET: string = process.env.JWT_SECRET || "temp-secret-for-bui
 // Initialize Supabase Admin for token verification
 let _supabase: any;
 
-function getSupabase() {
+export function getSupabase() {
   const url = process.env.VITE_SUPABASE_URL || "";
   const key = process.env.VITE_SUPABASE_ANON_KEY || "";
   
