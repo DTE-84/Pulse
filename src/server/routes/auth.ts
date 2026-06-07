@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { query } from "../db/db.js";
 import { seedGuestData } from "../db/seed-guest.js";
 import { setupTrialSandboxItem } from "../lib/plaid.js";
-import { getSupabaseAdmin, authLimiter, requireAuth } from "../middleware/security.js";
+import { getSupabase, getSupabaseAdmin, authLimiter, requireAuth } from "../middleware/security.js";
 
 const router = Router();
 
@@ -120,18 +120,17 @@ export const handleSignup = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "Name is required." });
 
   try {
-    console.log(`[AUTH SIGNUP] Attempting Supabase Admin signup for: ${email}`);
+    console.log(`[AUTH SIGNUP] Initiating signup for: ${email}`);
     
-    const supabaseAdmin = getSupabaseAdmin();
+    // Use the standard client (anon key) to trigger the Supabase confirmation email
+    const supabase = getSupabase();
     
-    // Create user via Admin API
-    // Set email_confirm: false to require email verification (standard)
-    // Set email_confirm: true if you want to AUTO-CONFIRM for now (bypasses email)
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
-      email_confirm: false, // Set to true to bypass email requirement
-      user_metadata: { name }
+      options: {
+        data: { name }
+      }
     });
 
     if (authError) {
@@ -142,18 +141,12 @@ export const handleSignup = async (req: Request, res: Response) => {
     const user = authData.user;
     if (!user) throw new Error("User creation failed.");
 
-    // Sign in to get a session/token for the user
-    const { data: sessionData } = await supabaseAdmin.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    // If email_confirm was false and user is not confirmed, sessionData.session might be null
-    // The frontend handles this by checking for res.data.token
+    // Note: If email confirmation is required, authData.session will be null.
+    // The client-side handles this by showing the 'Verification Required' message.
     
     return res.status(201).json({ 
-      token: sessionData.session?.access_token,
-      refreshToken: sessionData.session?.refresh_token,
+      token: authData.session?.access_token || null,
+      refreshToken: authData.session?.refresh_token || null,
       user: { 
         id: user.id, 
         email: user.email, 
