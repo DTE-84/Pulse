@@ -1,11 +1,9 @@
 import { Request, Response, Router } from "express";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { query } from "../db/db.js";
 import { seedGuestData } from "../db/seed-guest.js";
 import { setupTrialSandboxItem } from "../lib/plaid.js";
-import { JWT_SECRET, getSupabaseAdmin, authLimiter, requireAuth } from "../middleware/security.js";
+import { getSupabaseAdmin, authLimiter, requireAuth } from "../middleware/security.js";
 
 const router = Router();
 
@@ -62,38 +60,54 @@ export const handleLogin = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const err = validateAuthInput(email, password);
   if (err) return res.status(400).json({ message: err });
+
   try {
-    console.log(`[AUTH LOGIN] Attempting login for: ${email}`);
-    const result = await query(
-      "SELECT user_id, user_name, email, password, baseline_spend, nova_tone, is_demo, subscription_status, trial_ends_at FROM dim_users WHERE email = $1",
-      [email.toLowerCase().trim()]
-    );
-    const user = result.rows[0];
-    // Constant-time response — do not reveal whether email exists
-    const hash = user?.password || "b0";
-    const match = await bcrypt.compare(password, hash);
-    if (!user || !match) {
-      console.warn(`[AUTH LOGIN] Failed login for: ${email}`);
-      return res.status(401).json({ message: "Invalid credentials." });
+    console.log(`[AUTH LOGIN] Attempting Supabase login for: ${email}`);
+    
+    const supabaseAdmin = getSupabaseAdmin();
+    
+    const { data: authData, error: authError } = await supabaseAdmin.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (authError) {
+      console.warn(`[AUTH LOGIN] Failed login for: ${email} - ${authError.message}`);
+      return res.status(401).json({ 
+        message: authError.message.includes("Email not confirmed") 
+          ? "Please verify your email before logging in." 
+          : "Invalid credentials." 
+      });
     }
-    const token = jwt.sign({ id: user.user_id, email: user.email }, JWT_SECRET, { expiresIn: "7d" });
+
+    const session = authData.session;
+    const user = authData.user;
+    if (!session || !user) throw new Error("Authentication failed.");
+
+    // Fetch profile from dim_users
+    const result = await query(
+      "SELECT user_id, user_name, email, baseline_spend, nova_tone, onboarding_completed, is_demo, subscription_status, trial_ends_at FROM dim_users WHERE user_id = $1",
+      [user.id]
+    );
+    const profile = result.rows[0];
+
     res.json({ 
-      token, 
+      token: session.access_token,
+      refreshToken: session.refresh_token,
       user: { 
-        id: user.user_id, 
-        email: user.email, 
-        name: user.user_name,
-        baselineSpend: user.baseline_spend, 
-        novaTone: user.nova_tone, 
-        onboardingCompleted: user.onboarding_completed, 
-        isDemo: user.is_demo,
-        subscriptionStatus: user.subscription_status,
-        trialEndsAt: user.trial_ends_at
+        id: profile?.user_id || user.id, 
+        email: profile?.email || user.email, 
+        name: profile?.user_name || user.user_metadata?.name || "User",
+        baselineSpend: profile?.baseline_spend, 
+        novaTone: profile?.nova_tone, 
+        onboardingCompleted: profile?.onboarding_completed || false, 
+        isDemo: profile?.is_demo || false,
+        subscriptionStatus: profile?.subscription_status || 'trialing',
+        trialEndsAt: profile?.trial_ends_at
       } 
     });
   } catch (e: any) {
-    console.error("[AUTH LOGIN] Error:", e.message);
-    if (e.code === "ECONNREFUSED") return res.status(503).json({ message: "Database unavailable." });
+    console.error("[AUTH LOGIN] General Error:", e.message);
     res.status(500).json({ message: "Authentication error.", detail: e.message });
   }
 };
@@ -104,32 +118,54 @@ export const handleSignup = async (req: Request, res: Response) => {
   if (err) return res.status(400).json({ message: err });
   if (typeof name !== "string" || name.trim().length < 1)
     return res.status(400).json({ message: "Name is required." });
+
   try {
-    console.log(`[AUTH SIGNUP] Attempting signup for: ${email}`);
-    const existing = await query("SELECT 1 FROM dim_users WHERE email = $1", [email.toLowerCase().trim()]);
-    if (existing.rows.length > 0) return res.status(400).json({ message: "An account with that email already exists." });
-    const hashed = await bcrypt.hash(password, 12); // 12 rounds for production
-    const result = await query(
-      "INSERT INTO dim_users (user_name, email, password, is_demo, subscription_status, trial_ends_at) VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '7 days') RETURNING user_id, user_name, email, is_demo, subscription_status, trial_ends_at",
-      [name.trim().slice(0, 100), email.toLowerCase().trim(), hashed, false, 'trialing']
-    );
-    const u = result.rows[0];
-    const token = jwt.sign({ id: u.user_id, email: u.email }, JWT_SECRET, { expiresIn: "7d" });
-    res.status(201).json({ 
-      token, 
+    console.log(`[AUTH SIGNUP] Attempting Supabase Admin signup for: ${email}`);
+    
+    const supabaseAdmin = getSupabaseAdmin();
+    
+    // Create user via Admin API
+    // Set email_confirm: false to require email verification (standard)
+    // Set email_confirm: true if you want to AUTO-CONFIRM for now (bypasses email)
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: false, // Set to true to bypass email requirement
+      user_metadata: { name }
+    });
+
+    if (authError) {
+      console.error("[AUTH SIGNUP] Supabase Error:", authError.message);
+      return res.status(400).json({ message: authError.message });
+    }
+
+    const user = authData.user;
+    if (!user) throw new Error("User creation failed.");
+
+    // Sign in to get a session/token for the user
+    const { data: sessionData } = await supabaseAdmin.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    // If email_confirm was false and user is not confirmed, sessionData.session might be null
+    // The frontend handles this by checking for res.data.token
+    
+    return res.status(201).json({ 
+      token: sessionData.session?.access_token,
+      refreshToken: sessionData.session?.refresh_token,
       user: { 
-        id: u.user_id, 
-        email: u.email, 
-        name: u.user_name, 
+        id: user.id, 
+        email: user.email, 
+        name,
         onboardingCompleted: false, 
-        isDemo: u.is_demo,
-        subscriptionStatus: u.subscription_status,
-        trialEndsAt: u.trial_ends_at
+        isDemo: false,
+        subscriptionStatus: 'trialing',
+        trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
       } 
     });
   } catch (e: any) {
-    console.error("[AUTH SIGNUP] Error:", e.message);
-    if (e.code === "ECONNREFUSED") return res.status(503).json({ message: "Database unavailable." });
+    console.error("[AUTH SIGNUP] General Error:", e.message);
     res.status(500).json({ message: "Signup error.", detail: e.message });
   }
 };

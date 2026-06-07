@@ -80,32 +80,18 @@ export const authAPI = {
   },
 
   signup: async ({ email, password, name }: any) => {
-    // Pass name in options.data so the trigger can pick it up
-    const { data, error } = await supabase.auth.signUp({ 
-      email, 
-      password,
-      options: {
-        data: { name }
-      }
-    });
-    if (error) throw error;
-
-    // Redundant manual insert removed. Profile creation is handled by the 
-    // public.handle_new_user() trigger for 100% data integrity.
-
-    return {
-      data: {
-        token: data.session?.access_token,
-        user: {
-          id: data.user?.id || "",
-          email: email,
-          name: name,
-          onboardingCompleted: false,
-          subscriptionStatus: 'trialing',
-          trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-        },
-      },
-    };
+    const response = await API.post("/api/auth/signup", { email, password, name });
+    const { token, refreshToken } = response.data;
+    
+    if (token) {
+      // Synchronize with Supabase Client to enable RLS and session persistence
+      await supabase.auth.setSession({
+        access_token: token,
+        refresh_token: refreshToken || "",
+      });
+    }
+    
+    return response;
   },
   guestSignup: async () => {
     const response = await API.post("/api/auth/guest");
