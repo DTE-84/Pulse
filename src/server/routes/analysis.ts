@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import { query } from "../db/db.js";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Anthropic from "@anthropic-ai/sdk";
 
 export const handleAnalysis: RequestHandler = async (req, res) => {
   const userId = req.userId;
@@ -137,25 +137,25 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
       3. Suggest one "Brain Defrag" protocol to optimize velocity.
     `;
 
-    console.log("[Nova Analysis] Engaging Gemini 1.5 Flash...");
-    const apiKey = process.env.GOOGLE_GENAI_API_KEY;
+    console.log("[Nova Analysis] Engaging Claude Sonnet...");
+    const apiKey = process.env.ANTHROPIC_API_KEY;
     let report = "";
 
     if (!apiKey) {
-      console.warn("[Nova Analysis] GOOGLE_GENAI_API_KEY missing. Activating Deterministic Fallback.");
+      console.warn("[Nova Analysis] ANTHROPIC_API_KEY missing. Activating Deterministic Fallback.");
       report = generateFallbackReport(user?.user_name, currentSpend, savingsImprovement, topTrigger?.trigger_name, goalInsight);
     } else {
       try {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        
-        const result = await model.generateContent(systemPrompt);
-        
-        if (!result || !result.response) {
-          throw new Error("Empty response from Gemini.");
-        }
-        
-        report = result.response.text();
+        const client = new Anthropic({ apiKey });
+        const response = await client.messages.create({
+          model: "claude-sonnet-4-6",
+          max_tokens: 1000,
+          system: systemPrompt,
+          messages: [{ role: "user", content: systemPrompt }]
+        });
+
+        report = response.content[0].type === "text" ? response.content[0].text : "";
+        if (!report) throw new Error("Empty response from Claude.");
         console.log("[Nova Analysis] Deep Scan Successful.");
       } catch (aiErr: any) {
         console.error("[Nova Analysis] AI Uplink Failed:", aiErr.message);

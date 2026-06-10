@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Anthropic from "@anthropic-ai/sdk";
+
 import { query } from "../db/db.js";
 
 export const handleNovaChat: RequestHandler = async (req, res) => {
@@ -114,33 +115,36 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
       - Conclude with a clinical yet supportive tone.
     `;
 
-    // 5. Engage Gemini 1.5 Flash
-    console.log("[Nova Chat] Engaging Gemini 1.5 Flash...");
-    const apiKey = process.env.GOOGLE_GENAI_API_KEY;
-    if (!apiKey) throw new Error("GOOGLE_GENAI_API_KEY is missing from environment.");
+    // 5. Engage Claude Sonnet
+    console.log("[Nova Chat] Engaging Claude Sonnet...");
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) throw new Error("ANTHROPIC_API_KEY is missing from environment.");
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash", 
-      systemInstruction: systemPrompt 
-    });
-    
-    const geminiHistory = (history || [])
+    const client = new Anthropic({ apiKey });
+
+    const claudeHistory = (history || [])
       .filter((msg: any) => msg.role === "user" || msg.role === "assistant")
       .map((msg: any) => ({
-        role: msg.role === "assistant" ? "model" : "user",
-        parts: [{ text: String(msg.content || "") }]
+        role: msg.role as "user" | "assistant",
+        content: String(msg.content || ""),
       }));
 
-    const chat = model.startChat({ history: geminiHistory });
-    const result = await chat.sendMessage(String(message));
-    
-    if (!result.response) throw new Error("Empty response from Gemini.");
+    claudeHistory.push({ role: "user", content: String(message) });
+
+    const result = await client.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: claudeHistory,
+    });
+
+    const responseText = result.content[0].type === "text" ? result.content[0].text : "";
+    if (!responseText) throw new Error("Empty response from Claude.");
 
     console.log("[Nova Chat] Response Dispatched.");
-    return res.json({ 
-      role: "assistant", 
-      content: result.response.text(),
+    return res.json({
+      role: "assistant",
+      content: responseText,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
 
@@ -150,7 +154,7 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
     return res.status(500).json({ 
       message: "Nova Uplink Interrupted", 
       detail: isProd ? "The analytical link could not be established." : err.message,
-      hint: isProd ? undefined : "Verify Gemini API Key and DB connectivity."
+      hint: isProd ? undefined : "Verify Anthropic API Key and DB connectivity."
     });
   }
 };
