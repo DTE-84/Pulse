@@ -104,66 +104,69 @@ export const handleIngest = async (req: Request, res: Response) => {
 
     fs.writeFileSync(tempCsvPath, headers + "\n" + rows, { mode: 0o600 });
 
-    await new Promise<void>((resolve, reject) => {
-      const proc = spawn("python", [scriptPath, tempCsvPath, processedCsvPath], { stdio: ["ignore", "pipe", "pipe"] });
-      let stderr = "";
-      proc.stderr.on("data", (d: Buffer) => { stderr += d.toString(); });
-      proc.on("close", (code: number | null) => {
-        if (code !== 0) reject(new Error(stderr || "Wrangler exited with code " + code));
-        else resolve();
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const proc = spawn("python", [scriptPath, tempCsvPath, processedCsvPath], { stdio: ["ignore", "pipe", "pipe"] });
+        let stderr = "";
+        proc.stderr.on("data", (d: Buffer) => { stderr += d.toString(); });
+        proc.on("close", (code: number | null) => {
+          if (code !== 0) reject(new Error(stderr || "Wrangler exited with code " + code));
+          else resolve();
+        });
+        proc.on("error", reject);
       });
-      proc.on("error", reject);
-    });
 
-    if (!fs.existsSync(processedCsvPath))
-      throw new Error("Wrangler did not produce output file.");
+      if (!fs.existsSync(processedCsvPath))
+        throw new Error("Wrangler did not produce output file.");
 
-    const lines = fs.readFileSync(processedCsvPath, "utf-8")
-      .split("\n").slice(1).filter((l: string) => l.trim());
+      const lines = fs.readFileSync(processedCsvPath, "utf-8")
+        .split("\n").slice(1).filter((l: string) => l.trim());
 
-    // 3. Optimized DB Ingestion (Resolve N+1 Query Problem)
-    const uniqueCategories = [...new Set(lines.map(l => l.split(",")[2]))];
-    
-    // Batch fetch existing categories
-    const catSearch = await query(
-      "SELECT category_id, category_name FROM dim_categories WHERE category_name = ANY($1)",
-      [uniqueCategories]
-    );
-    const catMap = new Map<string, number>();
-    catSearch.rows.forEach(r => catMap.set(r.category_name, r.category_id));
-
-    // Handle missing categories
-    for (const catName of uniqueCategories) {
-      if (!catMap.has(catName)) {
-        const newCat = await query(
-          "INSERT INTO dim_categories (category_name, risk_level) VALUES ($1, $2) RETURNING category_id",
-          [catName, "Medium"]
-        );
-        catMap.set(catName, newCat.rows[0].category_id);
-      }
-    }
-
-    let inserted = 0;
-    for (const line of lines) {
-      const parts = line.split(",");
-      if (parts.length < 5) continue;
-      const [date, amount, category, risk_level, trigger_id] = parts;
-
-      const categoryId = catMap.get(category);
-      const tid = trigger_id && trigger_id.trim() !== "" ? parseInt(trigger_id) : null;
-
-      await query(
-        "INSERT INTO fact_transactions (user_id, category_id, amount, purchase_date, status, trigger_id) VALUES ($1, $2, $3, $4, $5, $6)",
-        [userId, categoryId, parseFloat(amount), date, "Completed", tid]
+      // 3. Optimized DB Ingestion (Resolve N+1 Query Problem)
+      const uniqueCategories = [...new Set(lines.map(l => l.split(",")[2]))];
+      
+      // Batch fetch existing categories
+      const catSearch = await query(
+        "SELECT category_id, category_name FROM dim_categories WHERE category_name = ANY($1)",
+        [uniqueCategories]
       );
-      inserted++;
+      const catMap = new Map<string, number>();
+      catSearch.rows.forEach(r => catMap.set(r.category_name, r.category_id));
+
+      // Handle missing categories
+      for (const catName of uniqueCategories) {
+        if (!catMap.has(catName)) {
+          const newCat = await query(
+            "INSERT INTO dim_categories (category_name, risk_level) VALUES ($1, $2) RETURNING category_id",
+            [catName, "Medium"]
+          );
+          catMap.set(catName, newCat.rows[0].category_id);
+        }
+      }
+
+      let inserted = 0;
+      for (const line of lines) {
+        const parts = line.split(",");
+        if (parts.length < 5) continue;
+        const [date, amount, category, risk_level, trigger_id] = parts;
+
+        const categoryId = catMap.get(category);
+        const tid = trigger_id && trigger_id.trim() !== "" ? parseInt(trigger_id) : null;
+
+        await query(
+          "INSERT INTO fact_transactions (user_id, category_id, amount, purchase_date, status, trigger_id) VALUES ($1, $2, $3, $4, $5, $6)",
+          [userId, categoryId, parseFloat(amount), date, "Completed", tid]
+        );
+        inserted++;
+      }
+
+      res.json({ status: "Synchronized", inserted, message: `High-fidelity ingestion of ${inserted} nodes complete.` });
+
+    } finally {
+      // Cleanup ephemeral nodes regardless of outcome
+      try { if (fs.existsSync(tempCsvPath)) fs.unlinkSync(tempCsvPath); } catch {}
+      try { if (fs.existsSync(processedCsvPath)) fs.unlinkSync(processedCsvPath); } catch {}
     }
-
-    // Cleanup ephemeral nodes
-    try { fs.unlinkSync(tempCsvPath); } catch {}
-    try { fs.unlinkSync(processedCsvPath); } catch {}
-
-    res.json({ status: "Synchronized", inserted, message: `High-fidelity ingestion of ${inserted} nodes complete.` });
 
   } catch (err: any) {
     const isProd = process.env.NODE_ENV === "production";
