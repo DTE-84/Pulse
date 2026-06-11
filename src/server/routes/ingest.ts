@@ -4,12 +4,11 @@ import path from "path";
 import { spawn } from "child_process";
 import { query } from "../db/db.js";
 import { sanitizeCsvField, validateTransaction } from "../middleware/security.js";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Anthropic from "@anthropic-ai/sdk";
 
 const __dirname = path.resolve();
 
 const MAX_TRANSACTIONS = 500;
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENAI_API_KEY || "");
 
 export const handleIngest = async (req: Request, res: Response) => {
   const { transactions } = req.body;
@@ -23,31 +22,43 @@ export const handleIngest = async (req: Request, res: Response) => {
 
   // 1. AI-Driven Data Integrity: Auto-Categorization & Risk Scoring
   let enrichedTransactions = transactions;
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const prompt = `
-      You are Nova's Behavioral Data Wrangler. 
-      Analyze the following transactions and ensure they have a 'category' and 'risk_level'.
-      
-      Categories: Dining, Groceries, Transport, Entertainment, Utilities, Rent, Shopping, Healthcare, Misc.
-      Risk Levels (Categorical to Ordinal Mapping): Low, Medium, High, Critical.
-      
-      Return ONLY a valid JSON array of objects with the fields: date, amount, category, risk_level.
-      Maintain absolute Data Integrity. If a category is ambiguous, use 'Misc'.
-      
-      Transactions: ${JSON.stringify(transactions)}
-    `;
+  const apiKey = process.env.ANTHROPIC_API_KEY;
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    // Basic JSON extraction in case Gemini wraps in code blocks
-    const jsonMatch = text.match(/\[.*\]/s);
-    if (jsonMatch) {
-      enrichedTransactions = JSON.parse(jsonMatch[0]);
+  if (apiKey) {
+    try {
+      const client = new Anthropic({ apiKey });
+      const prompt = `
+        You are Nova's Behavioral Data Wrangler.
+        Analyze the following transactions and ensure they have a 'category' and 'risk_level'.
+
+        Categories: Dining, Groceries, Transport, Entertainment, Utilities, Rent, Shopping, Healthcare, Misc.
+        Risk Levels (Categorical to Ordinal Mapping): Low, Medium, High, Critical.
+
+        Return ONLY a valid JSON array of objects with the fields: date, amount, category, risk_level.
+        Maintain absolute Data Integrity. If a category is ambiguous, use 'Misc'.
+
+        Transactions: ${JSON.stringify(transactions)}
+      `;
+
+      const result = await client.messages.create({
+        model: "claude-sonnet-4-6",
+        max_tokens: 2048,
+        system: "You are Nova's Behavioral Data Wrangler. Always return valid JSON.",
+        messages: [{ role: "user", content: prompt }]
+      });
+
+      const responseText = result.content[0].type === "text" ? result.content[0].text : "";
+      // Basic JSON extraction in case Claude wraps in code blocks
+      const jsonMatch = responseText.match(/\[.*\]/s);
+      if (jsonMatch) {
+        enrichedTransactions = JSON.parse(jsonMatch[0]);
+      }
+    } catch (aiErr) {
+      console.warn("[!] Nova AI Categorization bypassed due to error:", aiErr);
+      // Continue with raw transactions if AI fails - prioritize Data Availability
     }
-  } catch (aiErr) {
-    console.warn("[!] Nova AI Categorization bypassed due to error:", aiErr);
-    // Continue with raw transactions if AI fails - prioritize Data Availability
+  } else {
+    console.warn("[!] ANTHROPIC_API_KEY missing. Bypassing AI enrichment.");
   }
 
   // Validate enriched transactions
