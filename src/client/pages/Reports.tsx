@@ -148,7 +148,7 @@ export default function ReportsPage() {
            <div className="bg-[#12110F] border border-white/5 rounded-[2.5rem] p-10 space-y-10">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-black text-white uppercase tracking-tighter">AI Behavioral Synthesis</h3>
-                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-[10px] px-3">Gemini 1.5 Pro Enabled</Badge>
+                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-[10px] px-3">Claude 3.5 Sonnet Enabled</Badge>
               </div>
 
               <div className="space-y-6">

@@ -46,7 +46,7 @@ export default function Legal() {
           behavioral insights.
         </p>
         <p>
-          <strong>AI Processing:</strong> Your data is processed by Google Gemini models for "Nova" insights in secure, transient 
+          <strong>AI Processing:</strong> Your data is processed by Anthropic Claude models for "Nova" insights in secure, transient 
           sessions. We do not use your personal financial data to train global third-party AI models without explicit consent.
         </p>
         <p>

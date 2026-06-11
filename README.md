@@ -7,7 +7,7 @@ Pulse AI is the store-ready flagship build of the DTE Ecosystem. It maps Plaid f
 ## Core Architecture
 - **Backend:** FastAPI, PostgreSQL, Prisma
 - **Frontend:** React 18, PWA (Vite PWA)
-- **AI Engine:** Google Gemini (Nova)
+- **AI Engine:** Anthropic Claude 3.5 Sonnet (Nova)
 - **Telemetry:** Plaid Link Integration
 
 ## Key Features
