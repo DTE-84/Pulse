@@ -94,25 +94,44 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
     const dailyBaseline = monthlyBaseline / 30;
     const currentVelocity = currentMonthSpend / (dayOfMonth || 1);
     const drift = currentMonthSpend - (dailyBaseline * dayOfMonth);
+    const projectedMonthly = currentVelocity * 30;
+
+    const toneInstructions = {
+      gentle: "Use calm, encouraging language. Soften clinical terms with warmth. Lead with positive signals before addressing drift.",
+      balanced: "Maintain clarity and consistency. Clinical but approachable. Balance data with human context.",
+      driven: "Push with stronger accountability. Be direct and challenge complacency. Name patterns that need correction."
+    };
+
+    const toneGuidance = toneInstructions[(user.nova_tone as string || "balanced").toLowerCase() as keyof typeof toneInstructions]
+      || toneInstructions.balanced;
+
+    const incomeContext = user.monthly_income 
+      ? `- Monthly Income: $${parseFloat(user.monthly_income).toFixed(2)}\n  - Spend-to-Income Ratio: ${((currentMonthSpend / parseFloat(user.monthly_income)) * 100).toFixed(1)}%`
+      : '';
 
     const systemPrompt = `
       You are Nova, the Advanced Financial AI Consultant.
-      Persona: Senior Systems Engineer and Behavioral Analyst. 
+      Persona: Senior Systems Engineer and Behavioral Analyst.
       Values: Data Integrity, Signal Clarity, Deterministic Architecture.
 
       User Telemetry:
       - Subject: ${user?.user_name || 'Anonymous Subject'}
       - Monthly Baseline: $${monthlyBaseline.toFixed(2)}
       - Current Month Spend: $${currentMonthSpend.toFixed(2)} (${txCount} nodes)
-      - Spending Drift: $${drift.toFixed(2)}
+      - Projected Monthly Total: $${projectedMonthly.toFixed(2)}
+      - Spending Drift: $${drift.toFixed(2)} (${drift >= 0 ? 'Over' : 'Under'} baseline pace)
       - Daily Velocity: $${currentVelocity.toFixed(2)}/day
       - Active Categories: ${topCategories || 'Establishing baseline'}
+      ${incomeContext}
+
+      Coaching Tone: ${toneGuidance}
 
       Guidelines:
-      - Use Senior Analyst terminology.
+      - Use Senior Analyst terminology (e.g., "Signal Deviation", "Mass Trajectory", "Behavioral Velocity").
       - Never give direct financial advice.
-      - Provide high-signal behavioral insights.
-      - Conclude with a clinical yet supportive tone.
+      - Provide high-signal behavioral insights tied to the user's actual telemetry.
+      - Honor the coaching tone in every response — it was chosen by the user.
+      - Conclude with a clinical yet supportive observation.
     `;
 
     // 5. Engage Claude Sonnet
@@ -122,7 +141,10 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
 
     const client = new Anthropic({ apiKey });
 
-    const claudeHistory = (history || [])
+    // Manage context and cost: Keep last 20 messages (10 exchanges)
+    const trimmedHistory = (history || []).slice(-20);
+
+    const claudeHistory = trimmedHistory
       .filter((msg: any) => msg.role === "user" || msg.role === "assistant")
       .map((msg: any) => ({
         role: msg.role as "user" | "assistant",

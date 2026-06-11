@@ -16,7 +16,7 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
     let user;
     try {
       const userRes = await query(
-        `SELECT user_name, baseline_spend, monthly_income, subscription_status, trial_ends_at FROM dim_users WHERE user_id = $1`,
+        `SELECT user_name, baseline_spend, monthly_income, nova_tone, subscription_status, trial_ends_at FROM dim_users WHERE user_id = $1`,
         [userId]
       );
       user = userRes.rows[0];
@@ -71,10 +71,15 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
       });
     }
 
-    const income = parseFloat(user?.monthly_income || "5200");
-    const currentSavings = income - currentSpend;
-    const lastMonthSavings = income - lastMonthSpend;
-    const savingsImprovement = currentSavings - lastMonthSavings;
+    const income = parseFloat(user?.monthly_income || "0");
+    const hasIncome = income > 0;
+    let savingsImprovement = 0;
+
+    if (hasIncome) {
+      const currentSavings = income - currentSpend;
+      const lastMonthSavings = income - lastMonthSpend;
+      savingsImprovement = currentSavings - lastMonthSavings;
+    }
 
     // 3. Fetch Active Goals
     console.log("[Nova Analysis] Querying dim_goals...");
@@ -108,9 +113,11 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
 
     // 5. Build AI Insight
     let goalInsight = "";
-    if (goals.length > 0 && savingsImprovement > 0) {
+    if (hasIncome && goals.length > 0 && savingsImprovement > 0) {
       const primaryGoal = goals[0];
       const remaining = parseFloat(primaryGoal.target_amount) - parseFloat(primaryGoal.current_progress);
+      const lastMonthSavings = income - lastMonthSpend;
+      const currentSavings = income - currentSpend;
       const oldMonthsToGoal = remaining / (lastMonthSavings > 0 ? lastMonthSavings : 1);
       const newMonthsToGoal = remaining / (currentSavings > 0 ? currentSavings : 1);
       const acceleration = oldMonthsToGoal - newMonthsToGoal;
@@ -120,21 +127,34 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
       }
     }
 
+    // 5.1 Personality & Tone Logic
+    const toneInstructions = {
+      gentle: "Use calm, encouraging language. Soften clinical terms with warmth. Lead with positive signals before addressing drift.",
+      balanced: "Maintain clarity and consistency. Clinical but approachable. Balance data with human context.",
+      driven: "Push with stronger accountability. Be direct and challenge complacency. Name patterns that need correction."
+    };
+
+    const toneGuidance = toneInstructions[(user.nova_tone as string || "balanced").toLowerCase() as keyof typeof toneInstructions]
+      || toneInstructions.balanced;
+
     const systemPrompt = `
       You are Nova, the Senior Behavioral Analyst.
       Analyze this telemetry with precision:
       - Subject: ${user?.user_name || 'Anonymous Subject'}
-      - Monthly Income: $${income.toFixed(2)}
+      - Monthly Income: ${hasIncome ? `$${income.toFixed(2)}` : "Not provided"}
       - Current Spend: $${currentSpend.toFixed(2)}
       - Last Month Spend: $${lastMonthSpend.toFixed(2)}
-      - Savings Improvement: $${savingsImprovement.toFixed(2)}
+      - Savings Improvement: ${hasIncome ? `$${savingsImprovement.toFixed(2)}` : "Calculating..."}
       - Top Catalyst: ${topTrigger ? topTrigger.trigger_name : 'Stable Rhythm'}
       - Goal Logic: ${goalInsight || 'Deterministic trajectory maintained.'}
+
+      Coaching Tone: ${toneGuidance}
 
       Report Requirements:
       1. Use clinical, high-fidelity terminology (Behavioral Velocity, Spending Drift).
       2. Keep it to 4 concise sentences.
       3. Suggest one "Brain Defrag" protocol to optimize velocity.
+      4. Honor the coaching tone in the report.
     `;
 
     console.log("[Nova Analysis] Engaging Claude Sonnet...");
@@ -151,7 +171,7 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
           model: "claude-sonnet-4-6",
           max_tokens: 1000,
           system: systemPrompt,
-          messages: [{ role: "user", content: systemPrompt }]
+          messages: [{ role: "user", content: "Generate the deep scan report based on the telemetry above." }]
         });
 
         report = response.content[0].type === "text" ? response.content[0].text : "";
@@ -167,7 +187,7 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
       report,
       summary: {
         currentSpend,
-        savingsImprovement,
+        savingsImprovement: hasIncome ? savingsImprovement : null,
         acceleration: goalInsight ? "Detected" : "Stable",
         topTrigger: topTrigger?.trigger_name || null
       },
@@ -175,10 +195,11 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
     });
 
   } catch (err: any) {
+    const isProd = process.env.NODE_ENV === "production";
     console.error("[Nova Analysis CRITICAL FAILURE]:", err.message);
     res.status(500).json({ 
       error: "Nova Uplink Interrupted", 
-      detail: err.message,
+      detail: isProd ? "Deep scan unavailable." : err.message,
       hint: "Verify DB connectivity." 
     });
   }

@@ -51,7 +51,7 @@ def pulse_wrangler(input_csv):
         df['trigger_id'] = ""
 
     # 5. Export to Star Schema structure (CSV format for Postgres ingestion)
-    output_path = "server/db/pulse_ingest.csv"
+    output_path = sys.argv[2] if len(sys.argv) > 2 else "server/db/pulse_ingest.csv"
     df.to_csv(output_path, index=False)
     print(f"[+] Transformation complete. High-fidelity data saved to: {output_path}")
 
@@ -59,4 +59,4 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         pulse_wrangler(sys.argv[1])
     else:
-        print("[!] No input CSV provided. Usage: python wrangler.py <data.csv>")
+        print("[!] No input CSV provided. Usage: python wrangler.py <data.csv> [output.csv]")
