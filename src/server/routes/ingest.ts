@@ -54,7 +54,7 @@ export const handleIngest = async (req: Request, res: Response) => {
           Analyze the following transactions and ensure they have a 'category' and 'risk_level'.
 
           Categories: Dining, Groceries, Transport, Entertainment, Utilities, Rent, Shopping, Healthcare, Misc.
-          Risk Levels (Categorical to Ordinal Mapping): Low, Medium, High, Critical.
+          Risk Levels (Behavioral Mapping): Essential, Lifestyle, Impulse, Critical.
 
           Return ONLY a valid JSON array of objects with the fields: date, amount, category, risk_level.
           Maintain absolute Data Integrity. If a category is ambiguous, use 'Misc'.
@@ -65,7 +65,7 @@ export const handleIngest = async (req: Request, res: Response) => {
         const result = await client.messages.create({
           model: "claude-sonnet-4-6",
           max_tokens: 2048,
-          system: "You are Nova's Behavioral Data Wrangler. Always return valid JSON.",
+          system: "You are Nova's Behavioral Data Wrangler. Always return valid JSON. Categories: Dining, Groceries, Transport, Entertainment, Utilities, Rent, Shopping, Healthcare, Misc. Risk Levels: Essential, Lifestyle, Impulse, Critical.",
           messages: [{ role: "user", content: prompt }]
         });
 

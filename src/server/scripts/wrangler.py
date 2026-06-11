@@ -28,9 +28,9 @@ def pulse_wrangler(input_csv):
     # 3. Categorical to Ordinal: Behavioral Risk Mapping
     # High-fidelity mapping of spending risk levels
     risk_mapping = {
-        'Low': 1,
-        'Medium': 2,
-        'High': 3,
+        'Essential': 1,
+        'Lifestyle': 2,
+        'Impulse': 3,
         'Critical': 4
     }
     

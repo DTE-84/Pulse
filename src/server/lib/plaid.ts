@@ -3,25 +3,56 @@ import {
   PlaidApi, 
   PlaidEnvironments 
 } from "plaid";
+import crypto from "crypto";
 import { query } from "../db/db.js";
+
+// 1. Plaid Credential Guard
+const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
+const PLAID_SECRET = process.env.PLAID_SECRET;
+
+if (!PLAID_CLIENT_ID || !PLAID_SECRET) {
+  console.warn("[PULSE PLAID] WARNING: PLAID credentials missing — bank linking will be disabled.");
+}
 
 const configuration = new Configuration({
   basePath: PlaidEnvironments[process.env.PLAID_ENV || "sandbox"],
   baseOptions: {
     headers: {
-      "PLAID-CLIENT-ID": process.env.PLAID_CLIENT_ID,
-      "PLAID-SECRET": process.env.PLAID_SECRET,
+      "PLAID-CLIENT-ID": PLAID_CLIENT_ID,
+      "PLAID-SECRET": PLAID_SECRET,
     },
   },
 });
 
 export const plaidClient = new PlaidApi(configuration);
 
+// 2. High-Fidelity Token Encryption
+const ENCRYPTION_KEY = process.env.PLAID_ENCRYPTION_KEY || ""; // Must be 32 chars
+const IV_LENGTH = 16; 
+
+export function encryptAccessToken(token: string) {
+  if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length < 32) {
+    console.error("[PULSE SECURITY] PLAID_ENCRYPTION_KEY missing or invalid. Storing in PLAINTEXT.");
+    return token;
+  }
+  const iv = crypto.randomBytes(IV_LENGTH);
+  const cipher = crypto.createCipheriv("aes-256-cbc", Buffer.from(ENCRYPTION_KEY), iv);
+  let encrypted = cipher.update(token);
+  encrypted = Buffer.concat([encrypted, cipher.final()]);
+  return iv.toString("hex") + ":" + encrypted.toString("hex");
+}
+
 /**
  * Silent Provisioning: Setup Trial Sandbox Item
  * Engineered to eliminate friction for new trial users by pre-linking a sandbox Chase account.
  */
 export async function setupTrialSandboxItem(userId: string) {
+  // 3. Production Guard: Prevent sandbox-only calls in live environment
+  if (process.env.PLAID_ENV === "production") {
+    console.warn("[PULSE PLAID] Sandbox provisioning skipped in production node.");
+    return { success: false, itemId: null };
+  }
+
   console.log(`[PULSE PLAID] Initializing silent provisioning for user: ${userId}`);
   
   try {
@@ -55,12 +86,13 @@ export async function setupTrialSandboxItem(userId: string) {
 
     const internalItemId = itemResult.rows[0].item_id;
 
-    // 4. Persist Plaid Secret (Encrypted - Placeholder for Encryption Logic)
+    // 4. Persist Plaid Secret (High-Fidelity Encryption)
+    const encryptedToken = encryptAccessToken(access_token);
     await query(
       `INSERT INTO public.plaid_secrets (item_id, access_token_encrypted)
        VALUES ($1, $2)
        ON CONFLICT (item_id) DO UPDATE SET access_token_encrypted = EXCLUDED.access_token_encrypted`,
-      [internalItemId, access_token]
+      [internalItemId, encryptedToken]
     );
 
     // 5. Fire Sandbox Webhook (Simulate Live Transaction Flow)

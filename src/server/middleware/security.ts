@@ -2,32 +2,31 @@ import { RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 import { createClient } from "@supabase/supabase-js";
 
-// 1. JWT SECRET GUARD — server exits if not set or too short
-const getJwtSecret = () => {
+// 1. JWT SECRET GUARD — server crashes if not set (Deterministic Security)
+export const JWT_SECRET: string = (() => {
   const secret = process.env.JWT_SECRET;
   const isProd = process.env.NODE_ENV === "production";
   const minLen = isProd ? 32 : 16;
 
-  if (!secret || secret.length < minLen) { 
-    console.warn(`[PULSE SECURITY] WARNING: JWT_SECRET is ${!secret ? "missing" : "too short"}.`);
-    // Return a dummy secret for non-auth paths, but auth will fail later
-    return secret || "dummy-secret-uplink-failure";
+  if (!secret) {
+    throw new Error("FATAL: JWT_SECRET environment variable is missing.");
+  }
+  if (secret.length < minLen) {
+    throw new Error(`FATAL: JWT_SECRET is too short for ${process.env.NODE_ENV} node.`);
   }
   return secret;
-};
-
-export const JWT_SECRET: string = process.env.JWT_SECRET || "temp-secret-for-build-only-1234567890";
+})();
 
 // Initialize Supabase Admin for token verification
 let _supabase: any;
 
 export function getSupabase() {
-  const url = process.env.VITE_SUPABASE_URL || "";
-  const key = process.env.VITE_SUPABASE_ANON_KEY || "";
+  const url = process.env.VITE_SUPABASE_URL;
+  const key = process.env.VITE_SUPABASE_ANON_KEY;
   
   if (!_supabase) {
     if (!url || !key) {
-      console.warn("[PULSE SECURITY] Supabase URL or Anon Key is missing.");
+      throw new Error("FATAL: Supabase Client credentials (URL/ANON_KEY) missing from environment.");
     }
     _supabase = createClient(url, key);
   }
@@ -38,12 +37,12 @@ export function getSupabase() {
 let _supabaseAdmin: any;
 
 export function getSupabaseAdmin() {
-  const url = process.env.VITE_SUPABASE_URL || "";
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+  const url = process.env.VITE_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!_supabaseAdmin) {
     if (!url || !serviceRoleKey) {
-      console.warn("[PULSE SECURITY] Supabase URL or Service Role Key is missing. Admin operations will fail.");
+      throw new Error("FATAL: Supabase Admin credentials (URL/SERVICE_ROLE) missing from environment.");
     }
     _supabaseAdmin = createClient(url, serviceRoleKey, {
       auth: {
@@ -66,7 +65,7 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
   
   // Strategy A: Try local JWT (custom auth routes)
   try {
-    const d = jwt.verify(token, getJwtSecret()) as { id: string; email: string };
+    const d = jwt.verify(token, JWT_SECRET) as { id: string; email: string };
     req.userId = d.id; req.userEmail = d.email;
     return next();
   } catch (err) {
@@ -80,8 +79,6 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
         req.userEmail = user.email;
         return next();
       }
-      
-      console.error("[PULSE AUTH] Verification failed:", error?.message || "Invalid local token");
     } catch (sErr: any) {
       console.error("[PULSE AUTH] Supabase client error:", sErr.message);
     }
@@ -133,8 +130,8 @@ export function validateTransaction(t: unknown): string | null {
 }
 
 // 6. TRIAL GATE LOGIC
-export function isTrialActive(user: { subscription_tier: string, trial_ends_at: string | Date }) {
-  if (user.subscription_tier === 'pro') return false; // Paid users skip trial logic
+export function isTrialActive(user: { subscription_status: string, trial_ends_at: string | Date }) {
+  if (user.subscription_status === 'active') return false; // Active paid users skip trial logic
   return new Date() < new Date(user.trial_ends_at);
 }
 

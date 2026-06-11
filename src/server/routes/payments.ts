@@ -7,16 +7,54 @@ const stripe = STRIPE_KEY ? new Stripe(STRIPE_KEY, {
 }) : null;
 
 export const createCheckoutSession = async (req: Request, res: Response) => {
+  const userId = req.userId;
+  if (!userId) return res.status(401).json({ message: "Authentication required." });
+
   if (!stripe) {
     return res.status(503).json({ 
       message: "Payment Uplink Offline", 
       detail: "Stripe API Key is missing from the environment. Secure payments are currently disabled." 
     });
   }
-  const { planName, isAnnual } = req.body;
-  const userId = req.userId;
 
-  if (!userId) return res.status(401).json({ message: "Authentication required." });
+  const { planName, isAnnual } = req.body;
+
+  // 1. Fetch User Context for Stripe Customer Mapping
+  let user;
+  try {
+    const userRes = await query(
+      "SELECT email, user_name, stripe_customer_id FROM dim_users WHERE user_id = $1",
+      [userId]
+    );
+    user = userRes.rows[0];
+  } catch (dbErr: any) {
+    console.error("[Stripe] DB Error (Customer Check):", dbErr.message);
+  }
+
+  if (!user) return res.status(404).json({ message: "User not found." });
+
+  let customerId = user.stripe_customer_id;
+
+  // 2. Deterministic Customer Initialization
+  if (!customerId) {
+    try {
+      console.log(`[Stripe] Initializing new customer identity for: ${user.email}`);
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name: user.user_name,
+        metadata: { userId },
+      });
+      customerId = customer.id;
+
+      await query(
+        "UPDATE dim_users SET stripe_customer_id = $1 WHERE user_id = $2",
+        [customerId, userId]
+      );
+    } catch (stripeErr: any) {
+      console.error("[Stripe] Customer Creation Failed:", stripeErr.message);
+      // Continue without customerId if it fails, Checkout can handle guest email
+    }
+  }
 
   // High-Fidelity Price Mapping
   const prices: Record<string, string> = {
@@ -35,6 +73,8 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
 
   try {
     const session = await stripe.checkout.sessions.create({
+      customer: customerId || undefined,
+      customer_email: customerId ? undefined : user.email,
       payment_method_types: ["card"],
       line_items: [
         {

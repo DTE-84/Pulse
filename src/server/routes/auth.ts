@@ -51,8 +51,12 @@ export const handleMe = async (req: Request, res: Response) => {
       trialEndsAt: user.trial_ends_at
     });
   } catch (err: any) { 
+    const isProd = process.env.NODE_ENV === "production";
     console.error("[AUTH ME] Error:", err.message);
-    res.status(500).json({ message: "Internal error.", detail: err.message }); 
+    res.status(500).json({ 
+      message: "Internal error.", 
+      detail: isProd ? "Identity uplink interrupted." : err.message 
+    }); 
   }
 };
 
@@ -107,8 +111,12 @@ export const handleLogin = async (req: Request, res: Response) => {
       } 
     });
   } catch (e: any) {
+    const isProd = process.env.NODE_ENV === "production";
     console.error("[AUTH LOGIN] General Error:", e.message);
-    res.status(500).json({ message: "Authentication error.", detail: e.message });
+    res.status(500).json({ 
+      message: "Authentication error.", 
+      detail: isProd ? "Uplink failed." : e.message 
+    });
   }
 };
 
@@ -141,8 +149,17 @@ export const handleSignup = async (req: Request, res: Response) => {
     const user = authData.user;
     if (!user) throw new Error("User creation failed.");
 
-    // Note: If email confirmation is required, authData.session will be null.
-    // The client-side handles this by showing the 'Verification Required' message.
+    // Fetch the actual record from DB to get the source-of-truth trial date (set by trigger)
+    let profile;
+    try {
+      const result = await query(
+        "SELECT subscription_status, trial_ends_at FROM dim_users WHERE user_id = $1",
+        [user.id]
+      );
+      profile = result.rows[0];
+    } catch (dbErr) {
+      console.warn("[AUTH SIGNUP] Profile fetch for trial date failed, using fallback.");
+    }
     
     return res.status(201).json({ 
       token: authData.session?.access_token || null,
@@ -153,13 +170,17 @@ export const handleSignup = async (req: Request, res: Response) => {
         name,
         onboardingCompleted: false, 
         isDemo: false,
-        subscriptionStatus: 'trialing',
-        trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        subscriptionStatus: profile?.subscription_status || 'trialing',
+        trialEndsAt: profile?.trial_ends_at || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
       } 
     });
   } catch (e: any) {
+    const isProd = process.env.NODE_ENV === "production";
     console.error("[AUTH SIGNUP] General Error:", e.message);
-    res.status(500).json({ message: "Signup error.", detail: e.message });
+    res.status(500).json({ 
+      message: "Signup error.", 
+      detail: isProd ? "Could not initialize account." : e.message 
+    });
   }
 };
 
@@ -297,17 +318,20 @@ export const handleGuestSignup = async (_req: Request, res: Response) => {
       } 
     });
   } catch (err: any) {
+    const isProd = process.env.NODE_ENV === "production";
     console.error("[PULSE AUTH] FATAL General Failure:", err.message);
-    console.error(err.stack);
     res.status(500).json({ 
       message: "Guest Protocol Failure", 
-      detail: err.message,
-      stack: process.env.NODE_ENV === "development" ? err.stack : undefined
+      detail: isProd ? "Sandbox initializing error." : err.message
     });
   }
 };
 
 export const handleDebug = async (_req: Request, res: Response) => {
+  if (process.env.NODE_ENV === "production") {
+    return res.status(404).json({ message: "Node not found." });
+  }
+
   const telemetry: any = {
     status: "Initializing",
     timestamp: new Date().toISOString(),
@@ -359,15 +383,38 @@ export const handleUpdateProfile = async (req: Request, res: Response) => {
     );
     if (result.rows.length === 0) return res.status(404).json({ message: "User not found." });
     res.json({ message: "Profile updated.", user: result.rows[0] });
-  } catch { res.status(500).json({ message: "Update error." }); }
+  } catch (err: any) { 
+    const isProd = process.env.NODE_ENV === "production";
+    res.status(500).json({ 
+      message: "Update error.",
+      detail: isProd ? "Could not commit profile changes." : err.message
+    }); 
+  }
 };
 
 export const handleDeleteAccount = async (req: Request, res: Response) => {
   try {
-    // Note: CASCADE in DB should handle transactions, goals, etc.
+    // 1. Terminate Supabase Auth Identity (Prevent Ghost Accounts)
+    console.log(`[AUTH DELETE] Terminating Supabase identity for: ${req.userId}`);
+    const supabaseAdmin = getSupabaseAdmin();
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(req.userId!);
+    
+    if (authError) {
+      console.error("[AUTH DELETE] Supabase Deletion Failed:", authError.message);
+      // We continue to local deletion to ensure local data is also wiped if possible
+    }
+
+    // 2. Local Data Purge (CASCADE handles associated nodes)
     await query("DELETE FROM dim_users WHERE user_id = $1", [req.userId]);
+    
     res.json({ message: "Account successfully terminated." });
-  } catch { res.status(500).json({ message: "Termination error." }); }
+  } catch (err: any) { 
+    const isProd = process.env.NODE_ENV === "production";
+    res.status(500).json({ 
+      message: "Termination error.",
+      detail: isProd ? "Account purge incomplete." : err.message
+    }); 
+  }
 };
 
 // Route Definitions
