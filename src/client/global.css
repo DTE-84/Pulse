@@ -118,3 +118,8 @@
     box-shadow: 0 10px 50px -15px rgba(0, 0, 0, 0.08);
   }
 }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

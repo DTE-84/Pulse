@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from "./components/theme-provider";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { Loader2 } from "lucide-react";
 
 import "./global.css";
 
@@ -31,15 +30,21 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
-  
+
   if (loading) return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <Loader2 className="w-10 h-10 animate-spin text-primary" />
+    <div style={{ 
+      display: "flex", 
+      alignItems: "center", 
+      justifyContent: "center", 
+      minHeight: "100vh",
+      background: "var(--color-background-tertiary)"
+    }}>
+      <i className="ti ti-loader-2" style={{ fontSize: 32, animation: "spin 1s linear infinite" }} />
     </div>
   );
-  
+
   if (!isAuthenticated) return <Navigate to="/auth" replace />;
-  
+
   return <>{children}</>;
 };
 

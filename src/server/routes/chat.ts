@@ -102,7 +102,7 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
       driven: "Push with stronger accountability. Be direct and challenge complacency. Name patterns that need correction."
     };
 
-    const toneGuidance = toneInstructions[(user.nova_tone as string || "balanced").toLowerCase() as keyof typeof toneInstructions]
+    const toneGuidance = toneInstructions[user.nova_tone?.toLowerCase() as keyof typeof toneInstructions]
       || toneInstructions.balanced;
 
     const incomeContext = user.monthly_income 

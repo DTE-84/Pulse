@@ -140,7 +140,7 @@ export const goalsAPI = {
 export const statsAPI = {
   get: async () => {
     const response = await API.get("/api/stats");
-    return response;
+    return { data: response.data };
   },
 };
 
