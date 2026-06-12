@@ -131,7 +131,7 @@ export const handleIngest = async (req: Request, res: Response) => {
         [uniqueCategories]
       );
       const catMap = new Map<string, number>();
-      catSearch.rows.forEach(r => catMap.set(r.category_name, r.category_id));
+      catSearch.rows.forEach((r: any) => catMap.set(r.category_name, r.category_id));
 
       // Handle missing categories
       for (const catName of uniqueCategories) {
@@ -148,7 +148,7 @@ export const handleIngest = async (req: Request, res: Response) => {
       for (const line of lines) {
         const parts = line.split(",");
         if (parts.length < 5) continue;
-        const [date, amount, category, risk_level, trigger_id] = parts;
+        const [date, amount, category, , trigger_id] = parts;
 
         const categoryId = catMap.get(category);
         const tid = trigger_id && trigger_id.trim() !== "" ? parseInt(trigger_id) : null;

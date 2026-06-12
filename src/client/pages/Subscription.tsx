@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { 
   Check, 
   ChevronRight, 
@@ -24,7 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { paymentsAPI } from "@/lib/api";
+import { paymentsAPI, authAPI } from "@/lib/api";
 
 const plans = [
   {
@@ -82,8 +83,26 @@ export default function SubscriptionPage() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const { user, hasActiveSubscription } = useAuth();
+  const { user, hasActiveSubscription, updateUser } = useAuth();
   const { toast } = useToast();
+  const location = useLocation();
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    if (query.get("success") === "true") {
+      toast({
+        title: "Uplink Established",
+        description: "Your Pulse Elite subscription has been activated.",
+      });
+      
+      // Refresh user profile to get latest subscription status
+      authAPI.me().then(res => {
+        updateUser(res.data);
+      }).catch(err => {
+        console.error("[PulseAi] Failed to refresh profile after subscription:", err);
+      });
+    }
+  }, [location.search]);
 
   const trialDaysLeft = user?.trialEndsAt 
     ? Math.max(0, Math.ceil((new Date(user.trialEndsAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))

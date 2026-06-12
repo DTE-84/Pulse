@@ -16,67 +16,26 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-const novaAPI = axios.create({
-  baseURL: API_BASE_URL,
-});
-
 /**
- * Pulse-Ai Supabase-Native API Layer
- * This replaces the local server entirely, utilizing Supabase client and RLS.
+ * Pulse-Ai API Layer
+ * This utilizes the unified backend for high-fidelity data integrity.
  */
 
 export const authAPI = {
   login: async ({ email, password }: any) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) throw error;
-
-    // Attempt to fetch profile
-    let { data: user, error: _userError } = await supabase
-      .from("dim_users")
-      .select("*")
-      .eq("user_id", data.user.id)
-      .maybeSingle();
-
-    // If profile missing, create one (healing the data integrity)
-    if (!user) {
-      const { data: newUser, error: insertError } = await supabase
-        .from("dim_users")
-        .insert([
-          {
-            user_id: data.user.id,
-            user_name: data.user.email?.split("@")[0] || "User",
-            email: data.user.email,
-            baseline_spend: 2500,
-            onboarding_completed: false,
-            subscription_status: 'trialing',
-            trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-          },
-        ])
-        .select()
-        .single();
-
-      if (insertError) throw insertError;
-      user = newUser;
+    const response = await API.post("/api/auth/login", { email, password });
+    const { token, refreshToken } = response.data;
+    
+    if (token) {
+      // Synchronize with Supabase Client to enable RLS and session persistence
+      await supabase.auth.setSession({
+        access_token: token,
+        refresh_token: refreshToken || "",
+      });
+      localStorage.setItem("token", token);
     }
-
-    return {
-      data: {
-        token: data.session?.access_token,
-        user: {
-          id: user.user_id,
-          name: user.user_name,
-          email: user.email,
-          baselineSpend: user.baseline_spend,
-          novaTone: user.nova_tone,
-          onboardingCompleted: user.onboarding_completed,
-          subscriptionStatus: user.subscription_status,
-          trialEndsAt: user.trial_ends_at
-        },
-      },
-    };
+    
+    return response;
   },
 
   signup: async ({ email, password, name }: any) => {
@@ -89,6 +48,7 @@ export const authAPI = {
         access_token: token,
         refresh_token: refreshToken || "",
       });
+      localStorage.setItem("token", token);
     }
     
     return response;
@@ -103,121 +63,33 @@ export const authAPI = {
         access_token: token,
         refresh_token: refreshToken || "",
       });
+      localStorage.setItem("token", token);
     }
     
     return response;
   },
   me: async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("Not authenticated");
-
-    let { data: profile, error: _error } = await supabase
-      .from("dim_users")
-      .select("*")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (!profile) {
-      console.log("[PulseAi] Profile missing for me() call, creating...");
-      // Auto-create profile if missing on 'me' call (Self-healing)
-      const { data: newProfile, error: insertError } = await supabase
-        .from("dim_users")
-        .insert([
-          {
-            user_id: user.id,
-            user_name: user.email?.split("@")[0] || "User",
-            email: user.email,
-            baseline_spend: 2500,
-            onboarding_completed: false,
-            subscription_status: 'trialing',
-            trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-          },
-        ])
-        .select()
-        .single();
-      if (insertError) {
-        console.error("[PulseAi] Self-healing failed:", insertError);
-        throw insertError;
-      }
-      profile = newProfile;
-    }
-
-    return {
-      data: {
-        ...profile,
-        name: profile.user_name,
-        id: profile.user_id,
-        baselineSpend: profile.baseline_spend,
-        novaTone: profile.nova_tone,
-        onboardingCompleted: profile.onboarding_completed,
-        subscriptionStatus: profile.subscription_status,
-        trialEndsAt: profile.trial_ends_at
-      },
-    };
+    const response = await API.get("/api/auth/me");
+    return response;
   },
 
   updateProfile: async (updates: any) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("Not authenticated");
-  
-    const dbUpdates: any = {};
-  
-    // Map frontend keys to DB columns
-    if (updates.name !== undefined) dbUpdates.user_name = updates.name;
-    if (updates.user_name !== undefined) dbUpdates.user_name = updates.user_name;
-    
-    if (updates.baselineSpend !== undefined) dbUpdates.baseline_spend = updates.baselineSpend;
-    if (updates.baseline_spend !== undefined) dbUpdates.baseline_spend = updates.baseline_spend;
-  
-    if (updates.novaTone !== undefined) dbUpdates.nova_tone = updates.novaTone;
-    if (updates.nova_tone !== undefined) dbUpdates.nova_tone = updates.nova_tone;
-  
-    if (updates.onboardingCompleted !== undefined) dbUpdates.onboarding_completed = updates.onboardingCompleted;
-    if (updates.onboarding_completed !== undefined) dbUpdates.onboarding_completed = updates.onboarding_completed;
+    // Map frontend keys to backend expected keys if necessary
+    const payload = {
+      name: updates.name || updates.user_name,
+      baselineSpend: updates.baselineSpend || updates.baseline_spend,
+      novaTone: updates.novaTone || updates.nova_tone,
+      onboardingCompleted: updates.onboardingCompleted ?? updates.onboarding_completed,
+      intentions: updates.intentions
+    };
 
-    if (updates.intentions !== undefined) dbUpdates.intentions = updates.intentions;
-  
-    const { data, error } = await supabase
-      .from("dim_users")
-      .update(dbUpdates)
-      .eq("user_id", user.id)
-      .select()
-      .maybeSingle();
-  
-    if (error) {
-      console.error("UpdateProfile Supabase Error:", error);
-      throw new Error(error.message || "Failed to update profile in database");
-    }
-    
-    if (!data) {
-      console.warn("[PulseAi] No profile found to update for user:", user.id, ". Auto-healing...");
-      // Auto-heal the profile on update if it somehow wasn't created during signup/login
-      const { data: newData, error: insertError } = await supabase
-        .from("dim_users")
-        .insert([{
-          user_id: user.id,
-          user_name: user.email?.split("@")[0] || "User",
-          email: user.email,
-          baseline_spend: 2500,
-          ...dbUpdates
-        }])
-        .select()
-        .single();
-        
-      if (insertError) {
-        console.error("UpdateProfile Auto-Heal Error:", insertError);
-        throw new Error(insertError.message || "Failed to create profile record.");
-      }
-      return { data: newData };
-    }
-
-    return { data };
+    const response = await API.patch("/api/auth/update", payload);
+    return response;
   },
 
   deleteAccount: async () => {
     const response = await API.delete("/api/auth/delete");
+    await supabase.auth.signOut();
     return response.data;
   },
 };
@@ -242,142 +114,33 @@ export const plaidAPI = {
 
 export const transactionsAPI = {
   getAll: async (params?: any) => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("Not authenticated");
-
-    let query = supabase
-      .from("fact_transactions")
-      .select(
-        `
-      *,
-      category:dim_categories(category_name),
-      trigger:dim_triggers(trigger_name)
-    `,
-      )
-      .eq("user_id", user.id)
-      .order("purchase_date", { ascending: false });
-
-    if (params?.limit) query = query.limit(params.limit);
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return { data };
+    const response = await API.get("/api/finance/transactions", { params });
+    return response;
   },
   ingest: async (payload: any) => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("Not authenticated");
-
     const txData = Array.isArray(payload) ? payload : payload.transactions;
     if (!txData) throw new Error("Invalid transaction payload.");
 
-    const formatted = txData.map((tx: any) => ({
-      user_id: user.id,
-      amount: tx.amount,
-      purchase_date: tx.date || new Date().toISOString(),
-      category_id: tx.category_id,
-      trigger_id: tx.trigger_id,
-      status: "Completed",
-    }));
-
-    const { data: result, error } = await supabase
-      .from("fact_transactions")
-      .insert(formatted)
-      .select();
-    if (error) throw error;
-    return { data: result };
+    const response = await API.post("/api/finance/ingest", { transactions: txData });
+    return response;
   },
 };
 
 export const goalsAPI = {
   getAll: async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("Not authenticated");
-
-    const { data, error } = await supabase
-      .from("dim_goals")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("updated_at", { ascending: false });
-    if (error) throw error;
-    const mapped = data.map((g) => ({
-      goal_id: g.goal_id,
-      name: g.goal_name,
-      target: g.target_amount,
-      current: g.current_progress,
-      deadline: g.deadline,
-    }));
-    return { data: mapped };
+    const response = await API.get("/api/finance/goals");
+    return response;
   },
   create: async (data: any) => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("Not authenticated");
-
-    const { data: result, error } = await supabase
-      .from("dim_goals")
-      .insert([
-        {
-          user_id: user.id,
-          goal_name: data.name,
-          target_amount: data.target,
-          deadline: data.deadline || null,
-        },
-      ])
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { data: result };
+    const response = await API.post("/api/finance/goals", data);
+    return response;
   },
 };
 
 export const statsAPI = {
   get: async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("Not authenticated");
-
-    const { data: profile } = await supabase
-      .from("dim_users")
-      .select("*")
-      .eq("user_id", user.id)
-      .single();
-    const { data: txs } = await supabase
-      .from("fact_transactions")
-      .select("*")
-      .eq("user_id", user.id);
-
-    const totalSpent =
-      txs?.reduce((acc, tx) => acc + parseFloat(tx.amount), 0) || 0;
-    const currentBalance = (profile?.initial_balance || 15000) - totalSpent;
-
-    const chartData = [
-      { month: "Jan", value: 12000 },
-      { month: "Feb", value: 13500 },
-      { month: "Mar", value: currentBalance },
-    ];
-
-    return {
-      data: {
-        totalBalance: currentBalance,
-        spendingDeltaPct: 12.5,
-        chartData,
-        novaInsight:
-          "Your spending rhythm is stabilizing. Keep focus on the Emergency Vault.",
-        triggers: [
-          { name: "Stress", count: 4, impact: 450 },
-          { name: "Late Night", count: 2, impact: 120 },
-        ],
-      },
-    };
+    const response = await API.get("/api/stats");
+    return response;
   },
 };
 
@@ -404,4 +167,4 @@ export const novaServiceAPI = {
   },
 };
 
-export { API, novaAPI };
+export { API };

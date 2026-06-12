@@ -1,11 +1,12 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from "./components/theme-provider";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { Loader2 } from "lucide-react";
 
 import "./global.css";
 
@@ -28,8 +29,21 @@ import { Layout } from "./components/Layout";
 
 const queryClient = new QueryClient();
 
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <Loader2 className="w-10 h-10 animate-spin text-primary" />
+    </div>
+  );
+  
+  if (!isAuthenticated) return <Navigate to="/auth" replace />;
+  
+  return <>{children}</>;
+};
+
 const App = () => {
-  console.log("[PulseAi] App Rendering");
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="pulse-theme">
@@ -48,26 +62,28 @@ const App = () => {
               <Routes>
                 {/* Public Routes */}
                 <Route path="/auth" element={<AuthPage />} />
+                <Route path="/legal" element={<LegalPage />} />
                 
                 {/* Protected Routes Wrapper */}
                 <Route path="/*" element={
-                  <Layout>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/onboarding" element={<OnboardingPage />} />
-                      <Route path="/nova" element={<NovaChat />} />
-                      <Route path="/spending" element={<SpendingPage />} />
-                      <Route path="/growth" element={<GrowthPage />} />
-                      <Route path="/settings" element={<SettingsPage />} />
-                      <Route path="/profile" element={<ProfilePage />} />
-                      <Route path="/legal" element={<LegalPage />} />
-                      <Route path="/outreach" element={<OutreachPage />} />
-                      <Route path="/triggers" element={<TriggersPage />} />
-                      <Route path="/reports" element={<ReportsPage />} />
-                      <Route path="/subscription" element={<SubscriptionPage />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Layout>
+                  <ProtectedRoute>
+                    <Layout>
+                      <Routes>
+                        <Route path="/" element={<Index />} />
+                        <Route path="/onboarding" element={<OnboardingPage />} />
+                        <Route path="/nova" element={<NovaChat />} />
+                        <Route path="/spending" element={<SpendingPage />} />
+                        <Route path="/growth" element={<GrowthPage />} />
+                        <Route path="/settings" element={<SettingsPage />} />
+                        <Route path="/profile" element={<ProfilePage />} />
+                        <Route path="/outreach" element={<OutreachPage />} />
+                        <Route path="/triggers" element={<TriggersPage />} />
+                        <Route path="/reports" element={<ReportsPage />} />
+                        <Route path="/subscription" element={<SubscriptionPage />} />
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </Layout>
+                  </ProtectedRoute>
                 } />
               </Routes>
             </BrowserRouter>

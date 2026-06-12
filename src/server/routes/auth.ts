@@ -372,14 +372,28 @@ export const handleDebug = async (_req: Request, res: Response) => {
 
 
 export const handleUpdateProfile = async (req: Request, res: Response) => {
-  const { name, baselineSpend, novaTone } = req.body;
+  const { name, baselineSpend, novaTone, onboardingCompleted, intentions } = req.body;
   const VALID_TONES = ["Gentle", "Balanced", "Driven"];
   if (novaTone && !VALID_TONES.includes(novaTone))
     return res.status(400).json({ message: "novaTone must be Gentle, Balanced, or Driven." });
   try {
     const result = await query(
-      "UPDATE dim_users SET user_name = COALESCE($1, user_name), baseline_spend = COALESCE($2, baseline_spend), nova_tone = COALESCE($3, nova_tone) WHERE user_id = $4 RETURNING user_id, user_name, email, baseline_spend, nova_tone, is_demo",
-      [name?.trim().slice(0,100) || null, baselineSpend || null, novaTone || null, req.userId]
+      `UPDATE dim_users SET 
+        user_name = COALESCE($1, user_name), 
+        baseline_spend = COALESCE($2, baseline_spend), 
+        nova_tone = COALESCE($3, nova_tone),
+        onboarding_completed = COALESCE($4, onboarding_completed),
+        intentions = COALESCE($5, intentions)
+       WHERE user_id = $6 
+       RETURNING user_id, user_name, email, baseline_spend, nova_tone, is_demo, onboarding_completed, intentions`,
+      [
+        name?.trim().slice(0,100) || null, 
+        baselineSpend || null, 
+        novaTone || null, 
+        onboardingCompleted ?? null,
+        intentions || null,
+        req.userId
+      ]
     );
     if (result.rows.length === 0) return res.status(404).json({ message: "User not found." });
     res.json({ message: "Profile updated.", user: result.rows[0] });

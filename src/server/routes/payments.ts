@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Stripe from "stripe";
+import { query } from "../db/db.js";
 
 const STRIPE_KEY = process.env.STRIPE_SECRET_KEY;
 const stripe = STRIPE_KEY ? new Stripe(STRIPE_KEY, {

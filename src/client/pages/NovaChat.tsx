@@ -98,7 +98,7 @@ export default function NovaChat() {
     statsAPI
       .get()
       .then((res) => setStats(res.data))
-      .catch(console.error);
+      .catch((err) => console.error("[Nova] Failed to initialize behavioral stats:", err));
   }, []);
 
   useEffect(() => {
@@ -115,7 +115,7 @@ export default function NovaChat() {
       content: input,
       timestamp: new Date().toLocaleTimeString(),
     };
-    setChatMessages((prev) => [...prev, userMsg]);
+    setChatMessages((prev) => [...prev, userMsg].slice(-50));
     setInput("");
     setIsTyping(true);
     try {
@@ -127,7 +127,7 @@ export default function NovaChat() {
           content: res.data.content,
           timestamp: new Date().toLocaleTimeString(),
         },
-      ]);
+      ].slice(-50));
     } catch (err: any) {
       console.error("[Nova] Chat error:", err);
       const errorMsg = err.response?.data?.message || err.message || "Nova is unavailable right now.";
@@ -138,7 +138,7 @@ export default function NovaChat() {
           content: `${errorMsg} Try again shortly.`,
           timestamp: new Date().toLocaleTimeString(),
         },
-      ]);
+      ].slice(-50));
     } finally {
       setIsTyping(false);
     }
@@ -157,7 +157,7 @@ export default function NovaChat() {
           content: res.data.report,
           timestamp: new Date().toLocaleTimeString(),
         },
-      ]);
+      ].slice(-50));
     } catch (err: any) {
       console.error("[Nova] Deep Scan error:", err);
       const errorMsg = err.response?.data?.message || "Deep scan failed. Please ensure your bank data is synced and try again.";
@@ -168,7 +168,7 @@ export default function NovaChat() {
           content: errorMsg,
           timestamp: new Date().toLocaleTimeString(),
         },
-      ]);
+      ].slice(-50));
     } finally {
       setIsTyping(false);
     }
@@ -310,7 +310,8 @@ export default function NovaChat() {
             />
             <button
               onClick={handleSend}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-primary flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+              disabled={!hasActiveSubscription || !input.trim()}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-primary flex items-center justify-center hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               <Send className="w-5 h-5 text-primary-foreground" />
             </button>

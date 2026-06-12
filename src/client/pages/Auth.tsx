@@ -15,6 +15,7 @@ import {
 import { authAPI } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/lib/supabase";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -41,6 +42,33 @@ export default function AuthPage() {
     if (!/[a-z]/.test(pass)) return "Include at least one lowercase letter.";
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(pass)) return "Include at least one special character.";
     return null;
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        variant: "destructive",
+        title: "Input Required",
+        description: "Please enter your email address first.",
+      });
+      return;
+    }
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?reset=true`,
+      });
+      if (error) throw error;
+      toast({
+        title: "Recovery Link Dispatched",
+        description: "Check your inbox for password reset instructions.",
+      });
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Recovery Failed",
+        description: err.message,
+      });
+    }
   };
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -72,10 +100,7 @@ export default function AuthPage() {
           description: "Welcome back to the Intelligence Hub.",
         });
         
-        // Small delay for context state to settle
-        setTimeout(() => {
-          navigate(res.data.user.onboardingCompleted ? "/" : "/onboarding");
-        }, 100);
+        navigate(res.data.user.onboardingCompleted ? "/" : "/onboarding");
       } else {
         const res = await authAPI.signup({ name, email, password });
         if (!res.data.token) {
@@ -91,9 +116,7 @@ export default function AuthPage() {
             description: "Preparing your Advanced Financial AI protocols.",
           });
           
-          setTimeout(() => {
-            navigate("/onboarding");
-          }, 100);
+          navigate("/onboarding");
         }
       }
     } catch (err: any) {
@@ -295,6 +318,7 @@ export default function AuthPage() {
                 <div className="flex justify-end px-2">
                   <button
                     type="button"
+                    onClick={handleForgotPassword}
                     className="text-[10px] font-black text-primary/60 hover:text-primary transition-colors uppercase tracking-widest"
                   >
                     Forgot Password?
@@ -342,10 +366,7 @@ export default function AuthPage() {
                       description: "Entering high-fidelity demo environment.",
                     });
                     
-                    // Give a small delay for state to settle before navigation
-                    setTimeout(() => {
-                      navigate("/");
-                    }, 100);
+                    navigate("/");
                   } catch (err: any) {
                     toast({
                       variant: "destructive",

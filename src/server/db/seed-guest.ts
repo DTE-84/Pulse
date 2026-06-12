@@ -35,7 +35,17 @@ export async function seedGuestData(userId: string) {
   console.log(`[PULSE SEED] Initializing Signal Ingestion for Guest: ${userId}`);
 
   try {
-    // 1. Ensure Categories Exist and map them
+    // 0. Duplicate Seed Guard
+    const existingTx = await query(
+      "SELECT COUNT(*) as count FROM fact_transactions WHERE user_id = $1",
+      [userId]
+    );
+    if (parseInt(existingTx.rows[0].count) > 0) {
+      console.log(`[PULSE SEED] Data already exists for ${userId}, skipping.`);
+      return true;
+    }
+
+    // 1. Ensure Categories Exist and map them (Optimized Batch Check)
     const categories = [
       { name: "Dining", risk: "Medium" },
       { name: "Groceries", risk: "Low" },
@@ -45,13 +55,25 @@ export async function seedGuestData(userId: string) {
       { name: "Housing", risk: "Low" }
     ];
 
+    const catNames = categories.map(c => c.name);
+    const existingCatsRes = await query(
+      "SELECT category_id, category_name FROM dim_categories WHERE category_name = ANY($1)",
+      [catNames]
+    );
+    
     const categoryMap: Record<string, number> = {};
+    existingCatsRes.rows.forEach((r: any) => {
+      categoryMap[r.category_name] = r.category_id;
+    });
+
     for (const cat of categories) {
-      let res = await query("SELECT category_id FROM dim_categories WHERE category_name = $1 LIMIT 1", [cat.name]);
-      if (res.rows.length === 0) {
-        res = await query("INSERT INTO dim_categories (category_name, risk_level) VALUES ($1, $2) RETURNING category_id", [cat.name, cat.risk]);
+      if (!categoryMap[cat.name]) {
+        const res = await query(
+          "INSERT INTO dim_categories (category_name, risk_level) VALUES ($1, $2) RETURNING category_id", 
+          [cat.name, cat.risk]
+        );
+        categoryMap[cat.name] = res.rows[0].category_id;
       }
-      categoryMap[cat.name] = res.rows[0].category_id;
     }
 
     // 2. Map Triggers
@@ -60,6 +82,13 @@ export async function seedGuestData(userId: string) {
     triggerRes.rows.forEach((t: any) => {
       triggerMap[t.trigger_name] = t.trigger_id;
     });
+
+    if (!triggerMap["Stress"]) {
+      console.warn("[PULSE SEED] 'Stress' trigger not found in dim_triggers — behavioral signals will be untagged.");
+    }
+    if (!triggerMap["Late Night"]) {
+      console.warn("[PULSE SEED] 'Late Night' trigger not found in dim_triggers — behavioral signals will be untagged.");
+    }
 
     const now = new Date();
     

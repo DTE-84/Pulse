@@ -6,7 +6,7 @@ interface User {
   name: string;
   email: string;
   onboardingCompleted?: boolean;
-  subscriptionStatus?: 'active' | 'trialing' | 'inactive';
+  subscriptionStatus?: 'active' | 'trialing' | 'inactive' | 'expired' | 'canceled' | 'past_due';
   trialEndsAt?: string;
   [key: string]: any;
 }
@@ -49,6 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const hasActiveSubscription = !!user && (
     user.subscriptionStatus === 'active' || 
+    user.subscriptionStatus === 'past_due' ||
     (user.subscriptionStatus === 'trialing' && (!user.trialEndsAt || new Date(user.trialEndsAt) > new Date()))
   );
 
@@ -216,13 +217,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }), [user, token, loading, hasActiveSubscription]);
 
   useEffect(() => {
-    console.log("[PulseAi] Auth V2.2 State Updated:", { 
-      hasUser: !!user, 
-      hasToken: !!token, 
-      loading, 
-      isAuthenticated: !!token && !!user,
-      subscription: user?.subscriptionStatus
-    });
+    if (import.meta.env.MODE !== 'production') {
+      console.log("[PulseAi] Auth V2.2 State Updated:", { 
+        hasUser: !!user, 
+        hasToken: !!token, 
+        loading, 
+        isAuthenticated: !!token && !!user,
+        subscription: user?.subscriptionStatus
+      });
+    }
   }, [user, token, loading]);
 
   return (

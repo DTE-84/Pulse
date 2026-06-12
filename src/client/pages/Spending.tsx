@@ -109,11 +109,14 @@ export default function SpendingPage() {
             All Spending
           </h1>
           <p className="text-muted-foreground font-semibold text-lg max-w-lg leading-snug">
-            You've spent <span className="text-foreground">$3,240</span> this month,{" "}
-            <span className="text-red-400 underline decoration-red-400/30 underline-offset-4 font-bold">
-              up 12%
+            You've spent <span className="text-foreground">${_stats?.monthlyExpenses?.toLocaleString() || "0"}</span> this month,{" "}
+            <span className={cn(
+              "underline underline-offset-4 font-bold",
+              (_stats?.spendingDeltaPct || 0) > 0 ? "text-red-400 decoration-red-400/30" : "text-emerald-400 decoration-emerald-400/30"
+            )}>
+              {(_stats?.spendingDeltaPct || 0) > 0 ? "up" : "down"} {Math.abs(_stats?.spendingDeltaPct || 0).toFixed(1)}%
             </span>{" "}
-            from September.
+            from baseline.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">

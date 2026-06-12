@@ -16,6 +16,12 @@ CREATE TABLE IF NOT EXISTS public.dim_users (
     onboarding_completed BOOLEAN DEFAULT FALSE,
     avatar_url TEXT,
     is_demo BOOLEAN DEFAULT FALSE,
+    subscription_status VARCHAR(50) DEFAULT 'trialing',
+    subscription_tier VARCHAR(50) DEFAULT 'trial',
+    trial_started_at TIMESTAMPTZ DEFAULT NOW(),
+    trial_ends_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '7 days'),
+    plaid_env VARCHAR(50) DEFAULT 'sandbox',
+    intentions TEXT,
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
