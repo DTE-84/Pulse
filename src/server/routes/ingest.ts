@@ -93,7 +93,7 @@ export const handleIngest = async (req: Request, res: Response) => {
       sanitizeCsvField(t.date),
       sanitizeCsvField(t.amount),
       sanitizeCsvField(t.category || "Misc"),
-      sanitizeCsvField(t.risk_level || "Medium"),
+      sanitizeCsvField(t.risk_level || "Lifestyle"),
       sanitizeCsvField(t.trigger_id || ""),
     ].join(",")).join("\n");
 

@@ -304,7 +304,9 @@ export default function SubscriptionPage() {
                 <div className="text-right">
                   <div className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Total</div>      
                   <div className="text-xl font-black text-foreground leading-none">
-                    {selectedPlan?.name === "Elite" ? (isAnnual ? "$143" : "$14.99") : (isAnnual ? `$${Math.round(parseFloat((selectedPlan?.price || "$0").replace('$','')) * 0.8 * 12)}` : selectedPlan?.price)}
+                    {isAnnual 
+                      ? `$${Math.round(parseFloat((selectedPlan?.price || "$0").replace('$','')) * 0.8 * 12)}` 
+                      : selectedPlan?.price}
                   </div>
                 </div>
               </div>
