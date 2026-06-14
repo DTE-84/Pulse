@@ -69,7 +69,24 @@ export function createServer() {
   }
 
   app.get("/api/ping", (_req, res) => res.json({ message: "ping", status: "Deterministic Uplink Active" }));
-  app.get("/api/health", (_req, res) => res.json({ status: "ok", message: "Pulse API is healthy", timestamp: new Date().toISOString() }));
+  app.get("/api/health", async (_req, res) => {
+    try {
+      const dbCheck = await query("SELECT NOW()");
+      res.json({ 
+        status: "Online", 
+        message: "Pulse Nexus Operational", 
+        database: "Connected",
+        timestamp: new Date().toISOString() 
+      });
+    } catch (err: any) {
+      res.status(500).json({ 
+        status: "Degraded", 
+        message: "Database Uplink Interrupted", 
+        error: err.message,
+        timestamp: new Date().toISOString() 
+      });
+    }
+  });
 
   // Financial Uplink Routes
   app.post("/api/payments/create-session", requireAuth, createCheckoutSession as any);

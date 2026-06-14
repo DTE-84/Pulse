@@ -30,11 +30,51 @@ export default function AuthPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!authLoading && isAuthenticated && user) {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("logout") === "true") {
+      supabase.auth.signOut().then(() => {
+        localStorage.clear();
+        window.location.href = "/auth";
+      });
+      return;
+    }
+
+    if (!authLoading && isAuthenticated && user && params.get("guest") !== "true") {
       console.log("[PulseAi] AuthPage: Already authenticated, redirecting to", user.onboardingCompleted ? "/" : "/onboarding");
       navigate(user.onboardingCompleted ? "/" : "/onboarding");
     }
   }, [isAuthenticated, authLoading, user, navigate]);
+
+  const handleGuestProtocol = async () => {
+    setLoading(true);
+    try {
+      const res = await authAPI.guestSignup();
+      if (!res.data.token) {
+        throw new Error("Sandbox initialized but no access token was provided.");
+      }
+      await login(res.data.token, res.data.user);
+      toast({
+        title: "Sandbox Protocol Initialized",
+        description: "Entering high-fidelity demo environment.",
+      });
+      navigate("/");
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Sandbox Offline",
+        description: String(err.response?.data?.message || "Could not established analytical link to guest environment."),
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("guest") === "true" && !loading && !isAuthenticated) {
+      handleGuestProtocol();
+    }
+  }, [isAuthenticated, loading]);
 
   const validatePassword = (pass: string) => {
     if (pass.length < 8) return "Password must be at least 8 characters.";
@@ -351,32 +391,7 @@ export default function AuthPage() {
 
               <button
                 type="button"
-                onClick={async () => {
-                  setLoading(true);
-                  try {
-                    const res = await authAPI.guestSignup();
-                    if (!res.data.token) {
-                      throw new Error("Sandbox initialized but no access token was provided.");
-                    }
-                    // First set the local context
-                    await login(res.data.token, res.data.user);
-                    
-                    toast({
-                      title: "Sandbox Protocol Initialized",
-                      description: "Entering high-fidelity demo environment.",
-                    });
-                    
-                    navigate("/");
-                  } catch (err: any) {
-                    toast({
-                      variant: "destructive",
-                      title: "Sandbox Offline",
-                      description: String(err.response?.data?.message || "Could not established analytical link to guest environment."),
-                    });
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
+                onClick={handleGuestProtocol}
                 disabled={loading}
                 className="w-full bg-muted border border-border text-foreground/60 font-black py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-muted/80 hover:text-foreground transition-all uppercase tracking-[0.2em] text-[10px] disabled:opacity-50"
               >
