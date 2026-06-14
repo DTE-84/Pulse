@@ -299,7 +299,8 @@ export const handleGuestSignup = async (_req: Request, res: Response) => {
       console.error("[PULSE AUTH] Session Generation Failed:", sessionError?.message || "No session data");
       return res.status(500).json({ 
         message: "Session Uplink Failed", 
-        detail: sessionError?.message || "Supabase did not return a session for the guest."
+        detail: sessionError?.message || "Supabase did not return a session for the guest. Identity provisioning may have timed out.",
+        hint: "This often occurs if project configuration or database migrations are incomplete."
       });
     }
 

@@ -22,7 +22,7 @@ import {
   apiLimiter,
 } from "./middleware/security.js";
 
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:5173,http://localhost:3000,https://pulse-nova-solutions.vercel.app,https://dte-solutions.icu")
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:5173,http://localhost:3000,https://pulse-nova-solutions.vercel.app,https://dte-solutions.icu,https://pulse-blond-three.vercel.app")
   .split(",").map((o: string) => o.trim());
 
 export function createServer() {

@@ -21,8 +21,8 @@ export const JWT_SECRET: string = (() => {
 let _supabase: any;
 
 export function getSupabase() {
-  const url = process.env.VITE_SUPABASE_URL;
-  const key = process.env.VITE_SUPABASE_ANON_KEY;
+  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const key = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
   
   if (!_supabase) {
     if (!url || !key) {
@@ -37,7 +37,7 @@ export function getSupabase() {
 let _supabaseAdmin: any;
 
 export function getSupabaseAdmin() {
-  const url = process.env.VITE_SUPABASE_URL;
+  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!_supabaseAdmin) {

@@ -90,8 +90,6 @@ export async function seedGuestData(userId: string) {
       console.warn("[PULSE SEED] 'Late Night' trigger not found in dim_triggers — behavioral signals will be untagged.");
     }
 
-    const now = new Date();
-    
     // 3. Define Behavioral Nodes
     const nodes = [
       // Baseline (Last Month)
@@ -114,13 +112,19 @@ export async function seedGuestData(userId: string) {
       { amount: 189.99, cat: "Shopping", date: subDays(now, 1), tid: triggerMap["Stress"] || null }
     ];
 
-    for (const node of nodes) {
-      await query(
-        `INSERT INTO fact_transactions (user_id, category_id, amount, purchase_date, trigger_id) 
-         VALUES ($1, $2, $3, $4, $5)`,
-        [userId, categoryMap[node.cat] || categoryMap["Dining"], node.amount, node.date.toISOString(), node.tid]
-      );
-    }
+    // Optimize with Batch Insert
+    const values: any[] = [];
+    const valuePlaceholders = nodes.map((node, i) => {
+      const offset = i * 5;
+      values.push(userId, categoryMap[node.cat] || categoryMap["Dining"], node.amount, node.date.toISOString(), node.tid);
+      return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5})`;
+    }).join(", ");
+
+    await query(
+      `INSERT INTO fact_transactions (user_id, category_id, amount, purchase_date, trigger_id) 
+       VALUES ${valuePlaceholders}`,
+      values
+    );
 
     // 4. Add Foundational Goal
     await query(`
