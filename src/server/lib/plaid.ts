@@ -77,14 +77,14 @@ export async function setupTrialSandboxItem(userId: string) {
 
     const { access_token, item_id } = exchangeResponse.data;
 
-    // 3. Persist Plaid Item with 'environment' and 'isTrialItem' flags
+    // 3. Persist Plaid Item
     console.log(`[PULSE PLAID] Persisting item ${item_id} to database...`);
     const itemResult = await query(
-      `INSERT INTO public.plaid_items (user_id, plaid_item_id, institution_name, environment, is_trial_item)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO public.plaid_items (user_id, plaid_item_id, institution_name, status)
+       VALUES ($1, $2, $3, $4)
        ON CONFLICT (plaid_item_id) DO UPDATE SET status = 'active', updated_at = NOW()
        RETURNING item_id`,
-      [userId, item_id, "Chase Sandbox", process.env.PLAID_ENV || "sandbox", true]
+      [userId, item_id, "Chase Sandbox", "active"]
     );
 
     const internalItemId = itemResult.rows[0].item_id;

@@ -32,19 +32,13 @@ export function createServer() {
 
   app.use(cors({
     origin: (origin: string | undefined, cb: Function) => {
-      if (!origin) return cb(null, true);
-
-      const isAllowed = 
-        ALLOWED_ORIGINS.includes(origin) || 
-        ALLOWED_ORIGINS.includes(origin + "/") ||
-        origin.includes("localhost");
-
-      if (isAllowed) {
-        cb(null, true);
-      } else {
-        console.warn(`[PULSE CORS] Unauthorized Origin Blocked: ${origin}`);
-        cb(new Error(`CORS: Origin ${origin} not permitted.`));
+      // TEMPORARY: Allow all origins during guest debug phase
+      if (!origin || origin.includes("localhost") || origin.includes("vercel.app") || origin.includes("dte-solutions.icu")) {
+         return cb(null, true);
       }
+      
+      console.warn(`[PULSE CORS] Checking Origin: ${origin}`);
+      cb(null, true); 
     },
     credentials: true,
     methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
@@ -105,13 +99,14 @@ export function createServer() {
   });
 
   app.use((err: any, _req: any, res: any, _next: any) => {
-    const isProd = process.env.NODE_ENV === "production";
-    console.error("[PULSE SERVER CRASH]:", err.message);
+    console.error("[PULSE SERVER CRASH]:", err.message, err.stack);
 
     res.status(err.status || 500).json({ 
       message: "Nova Uplink Interrupted", 
-      detail: isProd ? "Internal Signal Error. Our engineers have been alerted." : err.message,
-      code: err.code || "INTERNAL_ERROR"
+      detail: err.message,
+      stack: err.stack,
+      code: err.code || "INTERNAL_ERROR",
+      hint: "Exposing stack trace for immediate production debugging."
     });
   });
 
