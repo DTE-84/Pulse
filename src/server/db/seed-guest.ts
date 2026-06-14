@@ -68,11 +68,17 @@ export async function seedGuestData(userId: string) {
 
     for (const cat of categories) {
       if (!categoryMap[cat.name]) {
-        const res = await query(
-          "INSERT INTO dim_categories (category_name, risk_level) VALUES ($1, $2) RETURNING category_id", 
-          [cat.name, cat.risk]
-        );
-        categoryMap[cat.name] = res.rows[0].category_id;
+        try {
+          const res = await query(
+            "INSERT INTO dim_categories (category_name, risk_level) VALUES ($1, $2) RETURNING category_id", 
+            [cat.name, cat.risk]
+          );
+          if (res.rows[0]) {
+            categoryMap[cat.name] = res.rows[0].category_id;
+          }
+        } catch (catErr: any) {
+          console.warn(`[PULSE SEED] Could not ensure category ${cat.name}:`, catErr.message);
+        }
       }
     }
 
@@ -114,17 +120,27 @@ export async function seedGuestData(userId: string) {
 
     // Optimize with Batch Insert
     const values: any[] = [];
-    const valuePlaceholders = nodes.map((node, i) => {
-      const offset = i * 5;
-      values.push(userId, categoryMap[node.cat] || categoryMap["Dining"], node.amount, node.date.toISOString(), node.tid);
-      return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5})`;
-    }).join(", ");
+    const validNodes = nodes.filter(node => {
+      const cid = categoryMap[node.cat] || categoryMap["Dining"] || Object.values(categoryMap)[0];
+      return cid !== undefined;
+    });
 
-    await query(
-      `INSERT INTO fact_transactions (user_id, category_id, amount, purchase_date, trigger_id) 
-       VALUES ${valuePlaceholders}`,
-      values
-    );
+    if (validNodes.length === 0) {
+      console.warn("[PULSE SEED] No valid categories found to seed data.");
+    } else {
+      const valuePlaceholders = validNodes.map((node, i) => {
+        const offset = i * 5;
+        const cid = categoryMap[node.cat] || categoryMap["Dining"] || Object.values(categoryMap)[0];
+        values.push(userId, cid, node.amount, node.date.toISOString(), node.tid);
+        return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5})`;
+      }).join(", ");
+
+      await query(
+        `INSERT INTO fact_transactions (user_id, category_id, amount, purchase_date, trigger_id) 
+         VALUES ${valuePlaceholders}`,
+        values
+      );
+    }
 
     // 4. Add Foundational Goal
     await query(`

@@ -320,10 +320,14 @@ export const handleGuestSignup = async (_req: Request, res: Response) => {
     });
   } catch (err: any) {
     const isProd = process.env.NODE_ENV === "production";
-    console.error("[PULSE AUTH] FATAL General Failure:", err.message);
+    console.error("[PULSE AUTH] FATAL General Failure:", err.message, err.stack);
+    
+    // TEMPORARY: Return exact error to help Drew debug the Vercel deployment
     res.status(500).json({ 
       message: "Guest Protocol Failure", 
-      detail: isProd ? "Sandbox initializing error." : err.message
+      detail: err.message,
+      stack: isProd ? undefined : err.stack,
+      hint: "Check Vercel Logs for the full stack trace."
     });
   }
 };

@@ -57,6 +57,7 @@ export async function setupTrialSandboxItem(userId: string) {
   
   try {
     // 1. Create a public token for a sandbox institution (Chase)
+    console.log("[PULSE PLAID] Creating sandbox public token...");
     const sandboxResponse = await plaidClient.sandboxPublicTokenCreate({
       institution_id: "ins_109508",
       initial_products: ["transactions" as any],
@@ -69,6 +70,7 @@ export async function setupTrialSandboxItem(userId: string) {
     const publicToken = sandboxResponse.data.public_token;
 
     // 2. Exchange for access token
+    console.log("[PULSE PLAID] Exchanging public token for access token...");
     const exchangeResponse = await plaidClient.itemPublicTokenExchange({
       public_token: publicToken,
     });
@@ -76,6 +78,7 @@ export async function setupTrialSandboxItem(userId: string) {
     const { access_token, item_id } = exchangeResponse.data;
 
     // 3. Persist Plaid Item with 'environment' and 'isTrialItem' flags
+    console.log(`[PULSE PLAID] Persisting item ${item_id} to database...`);
     const itemResult = await query(
       `INSERT INTO public.plaid_items (user_id, plaid_item_id, institution_name, environment, is_trial_item)
        VALUES ($1, $2, $3, $4, $5)
@@ -87,6 +90,7 @@ export async function setupTrialSandboxItem(userId: string) {
     const internalItemId = itemResult.rows[0].item_id;
 
     // 4. Persist Plaid Secret (High-Fidelity Encryption)
+    console.log("[PULSE PLAID] Encrypting and persisting access token...");
     const encryptedToken = encryptAccessToken(access_token);
     await query(
       `INSERT INTO public.plaid_secrets (item_id, access_token_encrypted)
@@ -112,7 +116,8 @@ export async function setupTrialSandboxItem(userId: string) {
     console.log(`[PULSE PLAID] Trial sandbox item provisioned successfully: ${item_id}`);
     return { success: true, itemId: item_id };
   } catch (err: any) {
-    console.error("[PULSE PLAID] Trial Seeding Failed:", err.response?.data || err.message);
-    throw err;
+    const detail = err.response?.data || err.message;
+    console.error("[PULSE PLAID] Trial Seeding Failed:", detail);
+    throw new Error(`Plaid Provisioning Error: ${JSON.stringify(detail)}`);
   }
 }
