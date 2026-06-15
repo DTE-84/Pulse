@@ -8,7 +8,9 @@ import {
   Save,
   Loader2,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  Lock,
+  Key
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,6 +18,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { authAPI } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/lib/supabase";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,10 +37,16 @@ export default function Profile() {
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
     baselineSpend: user?.baselineSpend || 2500,
+  });
+
+  const [passwordData, setPasswordData] = useState({
+    newPassword: "",
+    confirmPassword: "",
   });
 
   useEffect(() => {
@@ -49,6 +58,50 @@ export default function Profile() {
       });
     }
   }, [user]);
+
+  const validatePassword = (pass: string) => {
+    if (pass.length < 8) return "Password must be at least 8 characters.";
+    if (!/[A-Z]/.test(pass)) return "Include at least one uppercase letter.";
+    if (!/[a-z]/.test(pass)) return "Include at least one lowercase letter.";
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pass)) return "Include at least one special character.";
+    return null;
+  };
+
+  const handleUpdatePassword = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast({ variant: "destructive", title: "Validation Error", description: "Passwords do not match." });
+      return;
+    }
+
+    const passwordError = validatePassword(passwordData.newPassword);
+    if (passwordError) {
+      toast({ variant: "destructive", title: "Security Policy", description: passwordError });
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ 
+        password: passwordData.newPassword 
+      });
+      
+      if (error) throw error;
+
+      toast({
+        title: "Password Updated",
+        description: "Your security credentials have been successfully rotated.",
+      });
+      setPasswordData({ newPassword: "", confirmPassword: "" });
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: err.message || "Could not update security credentials.",
+      });
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!formData.name.trim()) {
@@ -177,6 +230,67 @@ export default function Profile() {
             <>
               <Save className="w-4 h-4" />
               Synchronize Changes
+            </>
+          )}
+        </button>
+      </div>
+
+      <div className="bg-[#12110F] border border-white/5 rounded-[2.5rem] p-8 md:p-10 space-y-8 shadow-2xl">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
+            <ShieldCheck className="w-6 h-6 text-primary" />
+          </div>
+          <div>
+            <h3 className="text-lg font-black text-white uppercase tracking-tight">Security Protocol</h3>
+            <p className="text-xs text-muted-foreground font-semibold">Rotate credentials and manage access nodes.</p>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <Label htmlFor="new-password" title="Required" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">New Access Password</Label>
+            <div className="relative group">
+              <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <Input 
+                id="new-password"
+                name="new-password"
+                type="password"
+                placeholder="••••••••"
+                value={passwordData.newPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                className="bg-white/[0.02] border-white/5 rounded-2xl py-6 pl-12 focus:border-primary/40 transition-all font-semibold"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label htmlFor="confirm-password" title="Required" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Confirm Security Node</Label>
+            <div className="relative group">
+              <Key className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <Input 
+                id="confirm-password"
+                name="confirm-password"
+                type="password"
+                placeholder="••••••••"
+                value={passwordData.confirmPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                className="bg-white/[0.02] border-white/5 rounded-2xl py-6 pl-12 focus:border-primary/40 transition-all font-semibold"
+              />
+            </div>
+          </div>
+        </div>
+
+        <button 
+          onClick={handleUpdatePassword}
+          disabled={isUpdatingPassword || !passwordData.newPassword}
+          className="w-full py-5 bg-muted border border-white/5 text-white font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-white/5 transition-all uppercase tracking-[0.2em] text-xs disabled:opacity-50"
+        >
+          {isUpdatingPassword ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <>
+              <ShieldCheck className="w-4 h-4" />
+              Update Security Credentials
             </>
           )}
         </button>
