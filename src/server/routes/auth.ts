@@ -12,20 +12,8 @@ function validateAuthInput(email: unknown, password: unknown): string | null {
   if (typeof email !== "string" || !email.includes("@") || email.length > 254)
     return "A valid email address is required.";
   
-  if (typeof password !== "string")
+  if (typeof password !== "string" || password.length < 1)
     return "Password is required.";
-
-  if (password.length < 8)
-    return "Password must be at least 8 characters.";
-  
-  if (!/[A-Z]/.test(password))
-    return "Password must contain at least one uppercase letter.";
-  
-  if (!/[a-z]/.test(password))
-    return "Password must contain at least one lowercase letter.";
-  
-  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password))
-    return "Password must contain at least one special character.";
 
   return null;
 }
@@ -66,17 +54,18 @@ export const handleLogin = async (req: Request, res: Response) => {
   if (err) return res.status(400).json({ message: err });
 
   try {
-    console.log(`[AUTH LOGIN] Attempting Supabase login for: ${email}`);
+    console.log(`[AUTH LOGIN] Initiating authentication for: ${email}`);
     
-    const supabaseAdmin = getSupabaseAdmin();
+    // Use the standard client (anon key) for user-level login
+    const supabase = getSupabase();
     
-    const { data: authData, error: authError } = await supabaseAdmin.auth.signInWithPassword({
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password
     });
 
     if (authError) {
-      console.warn(`[AUTH LOGIN] Failed login for: ${email} - ${authError.message}`);
+      console.warn(`[AUTH LOGIN] Denied: ${email} - ${authError.message}`);
       return res.status(401).json({ 
         message: authError.message.includes("Email not confirmed") 
           ? "Please verify your email before logging in." 
@@ -86,7 +75,9 @@ export const handleLogin = async (req: Request, res: Response) => {
 
     const session = authData.session;
     const user = authData.user;
-    if (!session || !user) throw new Error("Authentication failed.");
+    if (!session || !user) throw new Error("Identity provisioning failed.");
+
+    console.log(`[AUTH LOGIN] Uplink successful: ${user.id}`);
 
     // Fetch profile from dim_users
     const result = await query(
@@ -111,11 +102,10 @@ export const handleLogin = async (req: Request, res: Response) => {
       } 
     });
   } catch (e: any) {
-    const isProd = process.env.NODE_ENV === "production";
-    console.error("[AUTH LOGIN] General Error:", e.message);
+    console.error("[AUTH LOGIN] FATAL Failure:", e.message);
     res.status(500).json({ 
-      message: "Authentication error.", 
-      detail: isProd ? "Uplink failed." : e.message 
+      message: "Authentication protocol interrupted.", 
+      detail: e.message 
     });
   }
 };
