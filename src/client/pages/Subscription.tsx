@@ -129,7 +129,7 @@ export default function SubscriptionPage() {
   };
 
   return (
-    <div className="p-8 md:p-12 max-w-7xl mx-auto space-y-12 text-foreground">
+    <div className="p-8 md:p-12 max-w-7xl mx-auto space-y-12 text-foreground font-inter">
       <div className="flex items-center gap-3 text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">
         <span className="hover:text-primary cursor-pointer transition-colors">Settings</span>
         <ChevronRight className="w-3.5 h-3.5 opacity-30" />
@@ -141,7 +141,7 @@ export default function SubscriptionPage() {
           <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest">
             Pulse Membership Status
           </Badge>
-          <h1 className="text-5xl font-black tracking-tighter text-foreground leading-tight">
+          <h1 className="text-5xl font-black tracking-tighter text-foreground leading-tight font-jura">
             {hasActiveSubscription ? (
               user?.subscriptionStatus === 'active' ? (
                 <>Your Elite <br /> <span className="text-primary underline underline-offset-8 decoration-primary/20">Uplink is Active.</span></>
@@ -202,7 +202,7 @@ export default function SubscriptionPage() {
 
             <div className="flex justify-between items-start mb-8">
               <div>
-                <h3 className="text-xl font-black text-foreground mb-2 uppercase tracking-tight flex items-center gap-2">   
+                <h3 className="text-xl font-black text-foreground mb-2 uppercase tracking-tight flex items-center gap-2 font-jura">   
                   {plan.name === "Elite" ? <Crown className="w-5 h-5 text-yellow-400 fill-yellow-400" /> : plan.name === "Pro" ? <Sparkles className="w-5 h-5 text-primary fill-primary" /> : <Star className="w-5 h-5 text-muted-foreground" />}
                   {plan.name}
                 </h3>
@@ -259,7 +259,7 @@ export default function SubscriptionPage() {
         <div className="space-y-4 flex-1">
           <div className="flex items-center gap-3">
              <ShieldCheck className="w-10 h-10 text-primary" />
-             <h3 className="text-2xl font-black text-foreground">The Pulse Guarantee</h3>
+             <h3 className="text-2xl font-black text-foreground font-jura">The Pulse Guarantee</h3>
           </div>
           <p className="text-muted-foreground font-semibold leading-relaxed">
             Not satisfied? Cancel anytime during your 7-day trial with zero commitments.
@@ -286,7 +286,7 @@ export default function SubscriptionPage() {
                 {selectedPlan?.name === "Elite" ? <Crown className="w-8 h-8 text-yellow-500" /> : <Sparkles className="w-8 h-8 text-primary" />}
               </div>
               <div>
-                <DialogTitle className="text-2xl font-black text-foreground uppercase tracking-tighter">
+                <DialogTitle className="text-2xl font-black text-foreground uppercase tracking-tighter font-jura">
                   Secure Pre-Order
                 </DialogTitle>
                 <DialogDescription className="text-xs font-semibold text-muted-foreground mt-2">
