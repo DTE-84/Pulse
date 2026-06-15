@@ -170,10 +170,10 @@ const Sidebar = () => {
 };
 
 const primaryNav = menuItems.filter((i) =>
-  ["/", "/nova", "/triggers", "/growth"].includes(i.href),
+  ["/", "/triggers", "/spending", "/growth"].includes(i.href),
 );
 const secondaryNav = menuItems.filter(
-  (i) => !["/", "/nova", "/triggers", "/growth"].includes(i.href),
+  (i) => !["/", "/triggers", "/spending", "/growth"].includes(i.href),
 );
 
 const MobileNav = () => {

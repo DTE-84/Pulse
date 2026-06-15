@@ -94,7 +94,7 @@ export default function SpendingPage() {
       )
     : transactions;
   return (
-    <div className="p-4 sm:p-8 md:p-12 max-w-7xl mx-auto space-y-12 text-foreground">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 md:space-y-12 text-foreground">
       <div className="flex items-center gap-3 text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">
         <span className="hover:text-primary cursor-pointer transition-colors">
           Home
@@ -105,10 +105,10 @@ export default function SpendingPage() {
 
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="space-y-3">
-          <h1 className="text-5xl font-black tracking-tighter text-foreground">
+          <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground leading-tight">
             All Spending
           </h1>
-          <p className="text-muted-foreground font-semibold text-lg max-w-lg leading-snug">
+          <p className="text-muted-foreground font-semibold text-base md:text-lg max-w-lg leading-snug">
             You've spent <span className="text-foreground">${_stats?.monthlyExpenses?.toLocaleString() || "0"}</span> this month,{" "}
             <span className={cn(
               "underline underline-offset-4 font-bold",
@@ -120,41 +120,43 @@ export default function SpendingPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="relative group">
+          <div className="relative group flex-1 sm:flex-none">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <input
               id="search-transactions"
               name="search-transactions"
               placeholder="Search transactions..."
-              className="bg-muted border border-border pl-12 pr-6 py-3 rounded-full text-xs font-bold text-foreground focus:outline-none focus:border-primary/30 transition-all w-full sm:w-64"
+              className="bg-muted border border-border pl-12 pr-6 py-3 rounded-full text-[10px] font-bold text-foreground focus:outline-none focus:border-primary/30 transition-all w-full sm:w-64"
             />
           </div>
-          <button className="flex items-center gap-2 bg-muted border border-border p-3 rounded-full hover:bg-muted/80 transition-all">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-          </button>
-          <button className="flex items-center gap-2 bg-muted border border-border p-3 rounded-full hover:bg-muted/80 transition-all">
-            <Download className="w-4 h-4 text-muted-foreground" />
-          </button>
+          <div className="flex gap-2">
+            <button className="flex items-center gap-2 bg-muted border border-border p-3 rounded-full hover:bg-muted/80 transition-all">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+            </button>
+            <button className="flex items-center gap-2 bg-muted border border-border p-3 rounded-full hover:bg-muted/80 transition-all">
+              <Download className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-col gap-12">
+      <div className="flex flex-col gap-8 md:gap-12">
         {/* Category Overview Card */}
-        <div className="bg-card border border-border rounded-[2.5rem] p-8 md:p-12 space-y-12 shadow-2xl relative overflow-hidden">
+        <div className="bg-card border border-border rounded-[1.5rem] md:rounded-[2.5rem] p-6 md:p-12 space-y-8 md:space-y-12 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
           
           <div className="flex flex-col items-center justify-center text-center space-y-8">
             <div className="space-y-2">
-              <h3 className="text-xl font-black text-foreground uppercase tracking-widest flex items-center justify-center gap-3">
-                <PieChartIcon className="w-6 h-6 text-primary" />
+              <h3 className="text-lg md:text-xl font-black text-foreground uppercase tracking-widest flex items-center justify-center gap-3">
+                <PieChartIcon className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                 Spending Allocation
               </h3>
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] opacity-60">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] opacity-60">
                 Behavioral weight by category
               </p>
             </div>
 
-            <div className="h-72 w-72 relative group">
+            <div className="h-64 w-64 md:h-72 md:w-72 relative group">
               <div className="absolute inset-0 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -162,8 +164,8 @@ export default function SpendingPage() {
                     data={categoryData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={80}
-                    outerRadius={120}
+                    innerRadius={70}
+                    outerRadius={110}
                     paddingAngle={8}
                     dataKey="value"
                     animationBegin={0}
@@ -182,45 +184,36 @@ export default function SpendingPage() {
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-4xl font-black text-foreground tracking-tighter">$3.2k</span>
-                <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">
+                <span className="text-3xl md:text-4xl font-black text-foreground tracking-tighter">$3.2k</span>
+                <span className="text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest">
                   Total Volume
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6 pt-12 border-t border-border/50">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-6 pt-8 md:pt-12 border-t border-border/50">
             {categoryData.map((cat, i) => {
               const Icon = getIcon(cat.name);
               return (
                 <div
                   key={i}
                   onClick={() => setSelectedCategory(cat)}
-                  className="group bg-muted/30 border border-border p-6 rounded-[2rem] flex flex-col items-center text-center gap-4 cursor-pointer hover:bg-muted hover:border-primary/30 transition-all hover:-translate-y-1"
+                  className="group bg-muted/30 border border-border p-4 md:p-6 rounded-2xl md:rounded-[2rem] flex flex-col items-center text-center gap-3 md:gap-4 cursor-pointer hover:bg-muted hover:border-primary/30 transition-all hover:-translate-y-1"
                 >
                   <div 
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg transition-transform group-hover:scale-110"
+                    className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg transition-transform group-hover:scale-110"
                     style={{ backgroundColor: cat.color }}
                   >
-                    <Icon className="w-6 h-6" />
+                    <Icon className="w-5 h-5 md:w-6 md:h-6" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                    <p className="text-[9px] md:text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                       {cat.name}
                     </p>
-                    <p className="text-xl font-black text-foreground">
+                    <p className="text-lg md:text-xl font-black text-foreground">
                       {cat.value}%
                     </p>
-                  </div>
-                  <div className="w-full h-1 bg-border rounded-full mt-2 overflow-hidden">
-                    <div 
-                      className="h-full rounded-full transition-all duration-1000"
-                      style={{ 
-                        backgroundColor: cat.color,
-                        width: `${cat.value}%` 
-                      }}
-                    />
                   </div>
                 </div>
               );

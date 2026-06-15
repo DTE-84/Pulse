@@ -110,7 +110,7 @@ export default function GrowthPage() {
   ];
 
   return (
-    <div className="p-4 sm:p-8 md:p-12 max-w-7xl mx-auto space-y-12">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 md:space-y-12">
       <div className="flex items-center gap-3 text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">
         <span className="hover:text-white cursor-pointer transition-colors">
           Home
@@ -121,7 +121,7 @@ export default function GrowthPage() {
 
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="space-y-3">
-          <h1 className="text-5xl font-black tracking-tighter text-white">
+          <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-white leading-tight">
             Financial Growth
           </h1>
           <p className="text-muted-foreground font-semibold text-lg max-w-lg leading-snug">

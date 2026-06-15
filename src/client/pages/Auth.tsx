@@ -130,7 +130,7 @@ export default function AuthPage() {
 
     try {
       if (isLogin) {
-        const res = await authAPI.login({ email, password });
+        const res = await authAPI.login({ email: email.trim(), password });
         if (!res.data.token) {
           throw new Error("Authentication succeeded but no session token was issued.");
         }
@@ -142,7 +142,7 @@ export default function AuthPage() {
         
         navigate(res.data.user.onboardingCompleted ? "/" : "/onboarding");
       } else {
-        const res = await authAPI.signup({ name, email, password });
+        const res = await authAPI.signup({ name, email: email.trim(), password });
         if (!res.data.token) {
           toast({
             title: "Verification Required",
@@ -249,9 +249,8 @@ export default function AuthPage() {
           </div>
         </div>
 
-        {/* Right Side: Auth Interface */}
         <div className="flex justify-center lg:justify-end">
-          <div className="w-full max-w-[480px] bg-card border border-border rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 md:p-14 shadow-2xl relative overflow-hidden">
+          <div className="w-full max-w-[480px] bg-card border border-border rounded-3xl md:rounded-[3rem] p-5 sm:p-10 md:p-14 shadow-2xl relative overflow-hidden">
             {/* Header for Mobile */}
             <div className="lg:hidden flex flex-col items-center text-center mb-6 sm:mb-10">
               <div className="relative w-20 h-20 flex items-center justify-center mb-4">

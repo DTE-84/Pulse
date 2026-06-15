@@ -49,7 +49,8 @@ export const handleMe = async (req: Request, res: Response) => {
 };
 
 export const handleLogin = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { email: rawEmail, password } = req.body;
+  const email = typeof rawEmail === "string" ? rawEmail.trim() : rawEmail;
   const err = validateAuthInput(email, password);
   if (err) return res.status(400).json({ message: err });
 
@@ -111,7 +112,8 @@ export const handleLogin = async (req: Request, res: Response) => {
 };
 
 export const handleSignup = async (req: Request, res: Response) => {
-  const { email, password, name } = req.body;
+  const { email: rawEmail, password, name } = req.body;
+  const email = typeof rawEmail === "string" ? rawEmail.trim() : rawEmail;
   const err = validateAuthInput(email, password);
   if (err) return res.status(400).json({ message: err });
   if (typeof name !== "string" || name.trim().length < 1)

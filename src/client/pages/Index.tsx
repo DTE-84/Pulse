@@ -505,7 +505,7 @@ export default function Index() {
   const monthlyTrendUp = (stats?.monthlyDiff || 0) > 0;
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-10 text-foreground">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 md:space-y-10 text-foreground">
       <div className="flex items-center gap-2 text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em] overflow-x-auto whitespace-nowrap scrollbar-hide">
         <span className="hover:text-primary cursor-pointer transition-colors">
           Home
@@ -518,10 +518,43 @@ export default function Index() {
         <span className="text-primary">Insights</span>
       </div>
 
+      {/* High-Density Metric Node (Top Priority) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+         <div className="bg-card border border-border rounded-[1.5rem] p-5 relative overflow-hidden group hover:border-primary/20 transition-all">
+            <div className="absolute top-0 left-0 w-1 h-full bg-primary opacity-20" />
+            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-2">Total Balance</p>
+            <h4 className="text-2xl font-black text-foreground tracking-tighter font-jura">${stats?.totalBalance?.toLocaleString() || "0"}</h4>
+            <p className="text-[8px] font-bold text-primary uppercase tracking-widest mt-1">Uplink Active</p>
+         </div>
+         <div className="bg-card border border-border rounded-[1.5rem] p-5 relative overflow-hidden group hover:border-primary/20 transition-all">
+            <div className="absolute top-0 left-0 w-1 h-full bg-blue-500 opacity-20" />
+            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-2">Monthly Spend</p>
+            <h4 className="text-2xl font-black text-foreground tracking-tighter font-jura">${stats?.monthlyExpenses?.toLocaleString() || "0"}</h4>
+            <p className={cn(
+              "text-[8px] font-bold uppercase tracking-widest mt-1",
+              (stats?.spendingDeltaPct || 0) > 0 ? "text-red-400" : "text-emerald-400"
+            )}>
+              {Math.abs(stats?.spendingDeltaPct || 0).toFixed(1)}% vs baseline
+            </p>
+         </div>
+         <div className="bg-card border border-border rounded-[1.5rem] p-5 relative overflow-hidden group hover:border-primary/20 transition-all">
+            <div className="absolute top-0 left-0 w-1 h-full bg-muted-foreground opacity-20" />
+            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-2">Monthly Baseline</p>
+            <h4 className="text-2xl font-black text-foreground tracking-tighter font-jura">${stats?.baselineSpend?.toLocaleString() || "0"}</h4>
+            <p className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest mt-1">Target Limit</p>
+         </div>
+         <div className="bg-card border border-border rounded-[1.5rem] p-5 relative overflow-hidden group hover:border-primary/20 transition-all">
+            <div className="absolute top-0 left-0 w-1 h-full bg-yellow-500 opacity-20" />
+            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-2">Active Signals</p>
+            <h4 className="text-2xl font-black text-foreground tracking-tighter font-jura">{stats?.activeSignals || "12"}</h4>
+            <p className="text-[8px] font-bold text-yellow-500 uppercase tracking-widest mt-1">Telemetry Nodes</p>
+         </div>
+      </div>
+
       <div className="flex flex-col gap-6">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground">
+            <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground leading-tight">
               Your financial heartbeat
             </h1>
             {user?.subscriptionStatus === 'trialing' && (
@@ -541,7 +574,7 @@ export default function Index() {
           </p>
         </div>
 
-        <div className="bg-primary/5 border border-primary/20 rounded-[2rem] p-6 relative overflow-hidden group transition-all hover:bg-primary/10">
+        <div className="bg-primary/5 border border-primary/20 rounded-[1.5rem] md:rounded-[2rem] p-6 relative overflow-hidden group transition-all hover:bg-primary/10">
           <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
             <Sparkles size={120} className="text-primary" />
           </div>
@@ -584,7 +617,7 @@ export default function Index() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-card border border-border rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 flex flex-col md:flex-row items-center gap-6 sm:gap-12 relative overflow-hidden group">
+          <div className="lg:col-span-2 bg-card border border-border rounded-[1.5rem] md:rounded-[3.5rem] p-6 md:p-10 flex flex-col md:flex-row items-center gap-6 sm:gap-12 relative overflow-hidden group">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
             <WealthVault stats={stats} />
             <div className="flex-1 space-y-6">
@@ -643,14 +676,14 @@ export default function Index() {
             </div>
           </div>
 
-          <div className="bg-card border border-border rounded-[3rem] p-10 flex flex-col justify-center space-y-6 relative overflow-hidden">
+          <div className="bg-card border border-border rounded-[1.5rem] md:rounded-[3rem] p-8 md:p-10 flex flex-col justify-center space-y-6 relative overflow-hidden">
             <div className="flex items-center gap-3">
               <TrendingUp className="w-6 h-6 text-primary" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
                 Pulse Signal
               </span>
             </div>
-            <h2 className="text-3xl font-black text-foreground tracking-tighter leading-tight">
+            <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tighter leading-tight">
               Catch drift before it becomes a pattern.
             </h2>
             <p className="text-sm text-muted-foreground leading-relaxed">

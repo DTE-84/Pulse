@@ -28,7 +28,13 @@ export function getSupabase() {
     if (!url || !key) {
       throw new Error("FATAL: Supabase Client credentials (URL/ANON_KEY) missing from environment.");
     }
-    _supabase = createClient(url, key);
+    _supabase = createClient(url, key, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false
+      }
+    });
   }
   return _supabase;
 }
