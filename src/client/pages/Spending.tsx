@@ -93,19 +93,12 @@ export default function SpendingPage() {
           .includes(selectedCategory.name.toLowerCase()),
       )
     : transactions;
+
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 md:space-y-12 text-foreground">
-      <div className="flex items-center gap-3 text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">
-        <span className="hover:text-primary cursor-pointer transition-colors">
-          Home
-        </span>
-        <ChevronRight className="w-3.5 h-3.5 opacity-30" />
-        <span className="text-primary">Spending Breakdown</span>
-      </div>
-
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="space-y-3">
-          <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground leading-tight">
+          <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground leading-tight uppercase">
             All Spending
           </h1>
           <p className="text-muted-foreground font-semibold text-base md:text-lg max-w-lg leading-snug">
@@ -116,7 +109,7 @@ export default function SpendingPage() {
             )}>
               {(_stats?.spendingDeltaPct || 0) > 0 ? "up" : "down"} {Math.abs(_stats?.spendingDeltaPct || 0).toFixed(1)}%
             </span>{" "}
-            from baseline.
+            from target.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -125,7 +118,7 @@ export default function SpendingPage() {
             <input
               id="search-transactions"
               name="search-transactions"
-              placeholder="Search transactions..."
+              placeholder="Search..."
               className="bg-muted border border-border pl-12 pr-6 py-3 rounded-full text-[10px] font-bold text-foreground focus:outline-none focus:border-primary/30 transition-all w-full sm:w-64"
             />
           </div>
@@ -142,7 +135,7 @@ export default function SpendingPage() {
 
       <div className="flex flex-col gap-8 md:gap-12">
         {/* Category Overview Card */}
-        <div className="bg-card border border-border rounded-[1.5rem] md:rounded-[2.5rem] p-6 md:p-12 space-y-8 md:space-y-12 shadow-2xl relative overflow-hidden">
+        <div className="bg-card border border-border rounded-[1.5rem] md:rounded-[2.5rem] p-6 md:p-12 space-y-8 md:space-y-12 shadow-2xl relative overflow-hidden min-h-[500px]">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
           
           <div className="flex flex-col items-center justify-center text-center space-y-8">
@@ -156,7 +149,7 @@ export default function SpendingPage() {
               </p>
             </div>
 
-            <div className="h-64 w-64 md:h-72 md:w-72 relative group">
+            <div className="h-64 w-64 md:h-80 md:w-80 relative group">
               <div className="absolute inset-0 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -184,7 +177,7 @@ export default function SpendingPage() {
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-3xl md:text-4xl font-black text-foreground tracking-tighter">$3.2k</span>
+                <span className="text-3xl md:text-4xl font-black text-foreground tracking-tighter">${_stats?.monthlyExpenses?.toLocaleString() || "0"}</span>
                 <span className="text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest">
                   Total Volume
                 </span>
@@ -192,20 +185,20 @@ export default function SpendingPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-6 pt-8 md:pt-12 border-t border-border/50">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 pt-8 md:pt-12 border-t border-border/50">
             {categoryData.map((cat, i) => {
               const Icon = getIcon(cat.name);
               return (
                 <div
                   key={i}
                   onClick={() => setSelectedCategory(cat)}
-                  className="group bg-muted/30 border border-border p-4 md:p-6 rounded-2xl md:rounded-[2rem] flex flex-col items-center text-center gap-3 md:gap-4 cursor-pointer hover:bg-muted hover:border-primary/30 transition-all hover:-translate-y-1"
+                  className="group bg-muted/30 border border-border p-4 md:p-6 rounded-2xl md:rounded-[2rem] flex flex-col items-center text-center gap-3 md:gap-4 cursor-pointer hover:bg-muted hover:border-primary/30 transition-all hover:-translate-y-1 last:col-span-2 last:md:col-span-1"
                 >
                   <div 
                     className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg transition-transform group-hover:scale-110"
                     style={{ backgroundColor: cat.color }}
                   >
-                    <Icon className="w-5 h-5 md:w-6 md:h-6" />
+                    <Icon className="w-4 h-4 md:w-5 md:h-5" />
                   </div>
                   <div className="space-y-1">
                     <p className="text-[9px] md:text-[10px] font-black text-muted-foreground uppercase tracking-widest">
@@ -238,8 +231,7 @@ export default function SpendingPage() {
                 </DialogTitle>
               </div>
               <DialogDescription className="text-muted-foreground font-medium">
-                Analysis of behavioral nodes within the {selectedCategory?.name}{" "}
-                category.
+                Analysis of behavioral nodes within the {selectedCategory?.name} category.
               </DialogDescription>
             </DialogHeader>
 
@@ -248,7 +240,7 @@ export default function SpendingPage() {
                 <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
                   Nova Analysis
                 </p>
-                <p className="text-sm italic text-foreground/90">
+                <p className="text-sm italic text-foreground/90 leading-relaxed">
                   "Your spending in {selectedCategory?.name} represents{" "}
                   {selectedCategory?.value}% of your current monthly volume.
                   I've detected a stable rhythm here, with most nodes aligning
@@ -292,22 +284,22 @@ export default function SpendingPage() {
         </Dialog>
 
         {/* Transactions List (Full Width) */}
-        <div className="bg-card border border-border rounded-[2.5rem] md:rounded-[3.5rem] p-8 md:p-12 space-y-10 shadow-2xl relative overflow-hidden">
+        <div className="bg-card border border-border rounded-[2.5rem] md:rounded-[3.5rem] p-6 sm:p-8 md:p-12 space-y-10 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 p-12 opacity-[0.02] pointer-events-none">
             <History className="w-64 h-64 text-foreground" />
           </div>
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
             <div className="space-y-1">
-              <h3 className="text-3xl font-black text-foreground uppercase tracking-tighter">
-                Recent Transactions
+              <h3 className="text-2xl md:text-3xl font-black text-foreground uppercase tracking-tighter">
+                Recent Purchases
               </h3>
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
                 Live behavioral telemetry feed
               </p>
             </div>
             <button className="w-full md:w-auto bg-muted border border-border px-8 py-4 rounded-2xl text-[10px] font-black text-primary hover:bg-primary/10 hover:border-primary/20 transition-all uppercase tracking-widest">
-              View Historical Archive
+              View Archive
             </button>
           </div>
 
@@ -318,36 +310,36 @@ export default function SpendingPage() {
               return (
                 <div
                   key={tx.transaction_id}
-                  className="group flex items-center justify-between p-6 rounded-[2.5rem] bg-muted/20 border border-transparent hover:border-border hover:bg-muted/50 transition-all"
+                  className="group flex items-center justify-between p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] bg-muted/20 border border-transparent hover:border-border hover:bg-muted/50 transition-all"
                 >
-                  <div className="flex items-center gap-6 flex-1">
+                  <div className="flex items-center gap-4 sm:gap-6 flex-1 min-w-0">
                     <div
                       className={cn(
-                        "w-16 h-16 rounded-[1.5rem] bg-card border border-border flex items-center justify-center group-hover:scale-105 transition-transform text-primary shadow-sm",
+                        "w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-[1.5rem] bg-card border border-border flex items-center justify-center group-hover:scale-105 transition-transform text-primary shadow-sm shrink-0",
                       )}
                     >
-                      <Icon className="w-8 h-8" />
+                      <Icon className="w-6 h-6 sm:w-8 sm:h-8" />
                     </div>
-                    <div className="overflow-hidden">
-                      <div className="text-lg font-bold text-foreground mb-1 truncate">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-base sm:text-lg font-bold text-foreground mb-1 truncate uppercase tracking-tight">
                         {tx.merchant_name || tx.category_name}
                       </div>
-                      <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                        <span className="flex items-center gap-1.5">
-                          <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                      <div className="flex items-center gap-2 sm:gap-3 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        <span className="flex items-center gap-1.5 truncate">
+                          <div className="w-1.5 h-1.5 rounded-full bg-primary/40 shrink-0" />
                           {tx.category_name}
                         </span>
                         <span className="opacity-30">•</span>
-                        <span>
+                        <span className="shrink-0">
                           {new Date(tx.purchase_date).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-8 shrink-0 ml-4">
+                  <div className="flex items-center gap-4 sm:gap-8 shrink-0 ml-4">
                     <div className="text-right">
-                      <div className="text-xl font-black text-foreground">
+                      <div className="text-lg sm:text-xl font-black text-foreground">
                         {isExpense ? "-" : "+"}${Math.abs(tx.amount).toFixed(2)}
                       </div>
                       {tx.trigger_name && (
@@ -363,26 +355,26 @@ export default function SpendingPage() {
 
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="w-10 h-10 flex items-center justify-center hover:bg-muted rounded-xl transition-colors">
-                          <MoreVertical className="w-5 h-5 text-muted-foreground" />
+                        <button className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-muted rounded-xl transition-colors">
+                          <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
                         align="end"
-                        className="bg-card border border-border text-foreground w-56 p-2 rounded-xl"
+                        className="bg-card border border-border text-foreground w-56 p-2 rounded-xl shadow-2xl"
                       >
                         <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest opacity-40 px-3 py-2">
                           Telemetry Actions
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-muted mx-2" />
                         <DropdownMenuItem className="flex items-center gap-3 px-3 py-3 rounded-lg text-xs font-bold focus:bg-primary/10 focus:text-primary cursor-pointer transition-colors">
-                          <Flag className="w-4 h-4" /> Flag Inaccuracy
+                          <Flag className="w-4 h-4" /> Flag Node
                         </DropdownMenuItem>
                         <DropdownMenuItem className="flex items-center gap-3 px-3 py-3 rounded-lg text-xs font-bold focus:bg-primary/10 focus:text-primary cursor-pointer transition-colors">
-                          <History className="w-4 h-4" /> Behavioral Audit
+                          <History className="w-4 h-4" /> Audit Signal
                         </DropdownMenuItem>
                         <DropdownMenuItem className="flex items-center gap-3 px-3 py-3 rounded-lg text-xs font-bold focus:bg-red-500/10 focus:text-red-400 cursor-pointer transition-colors">
-                          <EyeOff className="w-4 h-4" /> Suppress Signal
+                          <EyeOff className="w-4 h-4" /> Suppress Feed
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -392,33 +384,13 @@ export default function SpendingPage() {
             })}
 
             {transactions.length === 0 && !loading && (
-              <div className="text-center py-24 border border-dashed border-border rounded-[3rem] bg-muted/10">
+              <div className="text-center py-24 border border-dashed border-border rounded-[2.5rem] bg-muted/10">
                 <Database className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
                 <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">
-                  No telemetry detected
+                  No transactions yet — sync your accounts to get started
                 </p>
               </div>
             )}
-          </div>
-
-          <div className="bg-primary/5 border border-primary/10 rounded-[2.5rem] p-8 flex flex-col md:flex-row items-center justify-between gap-8 group cursor-pointer hover:bg-primary/10 transition-all relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="flex items-center gap-6 relative z-10">
-              <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center shrink-0 shadow-[0_0_30px_rgba(45,237,156,0.3)] group-hover:scale-110 transition-transform">
-                <Flame className="w-8 h-8 text-primary" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">
-                  Nova Signal
-                </p>
-                <p className="text-lg font-bold text-foreground group-hover:text-primary transition-colors italic leading-tight">
-                  "Your behavioral drift is stabilizing. Optimal liquidity preservation detected."
-                </p>
-              </div>
-            </div>
-            <button className="relative z-10 bg-primary text-primary-foreground px-10 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all">
-              Claim Efficiency Bonus
-            </button>
           </div>
         </div>
       </div>

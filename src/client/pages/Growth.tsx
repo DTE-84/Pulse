@@ -111,29 +111,21 @@ export default function GrowthPage() {
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 md:space-y-12">
-      <div className="flex items-center gap-3 text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">
-        <span className="hover:text-white cursor-pointer transition-colors">
-          Home
-        </span>
-        <ChevronRight className="w-3.5 h-3.5 opacity-30" />
-        <span className="text-primary">Wealth Growth</span>
-      </div>
-
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="space-y-3">
-          <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-white leading-tight">
+          <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-white uppercase leading-tight">
             Financial Growth
           </h1>
-          <p className="text-muted-foreground font-semibold text-lg max-w-lg leading-snug">
+          <p className="text-muted-foreground font-semibold text-base md:text-lg max-w-lg leading-snug">
             Your net worth is{" "}
             <span className="text-primary font-black">
               ${stats?.totalBalance?.toLocaleString() || "0"}
             </span>
-            , growing{" "}
+            , growing at a{" "}
             <span className="text-primary font-black">
               +{stats?.spendingDeltaPct || "0"}%
             </span>{" "}
-            rhythm.
+            rate.
           </p>
         </div>
         <div className="flex items-center gap-1 bg-white/5 border border-white/10 p-1.5 rounded-2xl shrink-0 flex-wrap">
@@ -156,7 +148,7 @@ export default function GrowthPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Main Growth Chart */}
-        <div className="lg:col-span-3 bg-[#12110F] border border-white/5 rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-10 space-y-6 sm:space-y-8 flex flex-col min-h-[350px] sm:min-h-[500px] relative overflow-hidden group">
+        <div className="lg:col-span-3 bg-[#12110F] border border-white/5 rounded-[1.5rem] md:rounded-[2.5rem] p-5 md:p-10 space-y-6 sm:space-y-8 flex flex-col min-h-[350px] sm:min-h-[500px] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
              <TrendingUp size={200} className="text-primary" />
           </div>
@@ -236,7 +228,7 @@ export default function GrowthPage() {
 
         {/* Goals & AI Insights */}
         <div className="lg:col-span-1 space-y-6 flex flex-col h-full">
-          <div className="bg-[#12110F] border border-white/5 rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 space-y-6 sm:space-y-8 flex-1 flex flex-col">
+          <div className="bg-[#12110F] border border-white/5 rounded-[1.5rem] md:rounded-[2.5rem] p-6 md:p-8 space-y-6 sm:space-y-8 flex-1 flex flex-col">
             <h3 className="text-lg font-black text-white uppercase tracking-widest mb-4 flex items-center gap-3">
               <Target className="w-5 h-5 text-primary" />
               Active Goals
@@ -295,7 +287,7 @@ export default function GrowthPage() {
                 <div className="text-center py-10 opacity-30">
                   <Sparkles className="w-8 h-8 mx-auto mb-2" />
                   <p className="text-[10px] font-bold uppercase">
-                    No active goal nodes
+                    No goals yet
                   </p>
                 </div>
               )}
@@ -396,30 +388,30 @@ export default function GrowthPage() {
       </div>
 
       {/* Behavioral Intelligence Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 pt-6">
          {[
-           { label: "Savings Velocity", value: stats?.monthlyIncome ? `$${Math.round((stats.monthlyIncome - stats.monthlyExpenses) / 30)}/day` : "Calculated", drift: "+12%", trend: "up", desc: "Average daily wealth accumulation." },
+           { label: "Savings Velocity", value: stats?.monthlyIncome ? `$${Math.round((stats.monthlyIncome - stats.monthlyExpenses) / 30)}/day` : "$0/day", drift: "+12%", trend: "up", desc: "Average daily wealth accumulation." },
            { label: "Spending Drift", value: stats?.monthlyDiff ? `$${stats.monthlyDiff}` : "$0", drift: "-4%", trend: "down", desc: "Deviation from linear baseline." },
-           { label: "Data Integrity", value: "99.8%", drift: "Secure", trend: "up", desc: "Sync fidelity and encryption health." },
+           { label: "Data Status", value: "99.8%", drift: "Secure", trend: "up", desc: "Your data is secure and up to date." },
            { label: "Goal Acceleration", value: "2.4 Mo", drift: "+0.8", trend: "up", desc: "Months gained via behavioral shifts." }
          ].map((node, i) => (
-           <div key={i} className="bg-[#12110F] border border-white/5 rounded-3xl p-6 group hover:border-primary/20 transition-all relative overflow-hidden">
+           <div key={i} className="bg-[#12110F] border border-white/5 rounded-2xl md:rounded-3xl p-4 md:p-6 group hover:border-primary/20 transition-all relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                 {node.trend === "up" ? <ArrowUpRight className="w-12 h-12 text-primary" /> : <ArrowDownRight className="w-12 h-12 text-red-400" />}
               </div>
-              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-4">
+              <p className="text-[9px] md:text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-3 md:mb-4">
                 {node.label}
               </p>
               <div className="flex items-end justify-between gap-2 mb-2">
-                <h4 className="text-2xl font-black text-white">{node.value}</h4>
+                <h4 className="text-xl md:text-2xl font-black text-white">{node.value}</h4>
                 <Badge variant="outline" className={cn(
-                  "text-[9px] px-1.5 py-0 border-0 bg-transparent font-black",
+                  "text-[8px] md:text-[9px] px-1.5 py-0 border-0 bg-transparent font-black",
                   node.trend === "up" ? "text-primary" : "text-red-400"
                 )}>
                   {node.drift}
                 </Badge>
               </div>
-              <p className="text-[10px] font-medium text-muted-foreground/60 leading-relaxed">
+              <p className="text-[9px] md:text-[10px] font-medium text-muted-foreground/60 leading-relaxed">
                 {node.desc}
               </p>
            </div>

@@ -23,10 +23,10 @@ import { PlaidLinkButton } from "@/components/PlaidLink";
 const SettingGroup = ({ title, description, children }: any) => (
   <div className="space-y-6">
     <div className="space-y-1">
-      <h3 className="text-xl font-bold text-foreground tracking-tight">{title}</h3>
+      <h3 className="text-xl font-bold text-foreground tracking-tight uppercase leading-none">{title}</h3>
       <p className="text-sm text-muted-foreground font-medium">{description}</p>
     </div>
-    <div className="bg-card border border-border rounded-[2rem] overflow-hidden shadow-sm">
+    <div className="bg-card border border-border rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-sm">
       {children}
     </div>
   </div>
@@ -41,19 +41,19 @@ const SettingItem = ({
 }: any) => (
   <div
     className={cn(
-      "flex items-center justify-between p-4 sm:p-6 gap-3 transition-colors hover:bg-muted/50",
+      "flex items-center justify-between p-4 sm:p-6 gap-4 sm:gap-6 transition-colors hover:bg-muted/50",
       border && "border-b border-border",
     )}
   >
     <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-      <div className="w-10 h-10 rounded-xl bg-muted border border-border flex items-center justify-center">
+      <div className="w-10 h-10 rounded-xl bg-muted border border-border flex items-center justify-center shrink-0">
         <Icon className="w-5 h-5 text-primary" />
       </div>
-      <div className="min-w-0">
-        <div className="text-sm font-bold text-foreground uppercase tracking-wider truncate">
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-bold text-foreground uppercase tracking-wider">
           {label}
         </div>
-        <div className="text-[11px] text-muted-foreground font-medium mt-0.5 truncate">
+        <div className="text-[11px] text-muted-foreground font-medium mt-0.5 leading-relaxed">
           {description}
         </div>
       </div>
@@ -111,12 +111,7 @@ export default function Settings() {
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-12">
       <div className="space-y-2">
-        <div className="flex items-center gap-2 text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em]">
-          <span>Home</span>
-          <ChevronRight className="w-3 h-3 opacity-30" />
-          <span className="text-primary">Settings</span>
-        </div>
-        <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground">
+        <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase leading-none">
           Settings
         </h1>
         <p className="text-muted-foreground font-semibold text-sm">
@@ -139,12 +134,12 @@ export default function Settings() {
                 key={m.id}
                 onClick={() => setTheme(m.id as any)}
                 className={cn(
-                  "flex flex-col items-center gap-3 py-8 transition-all hover:bg-muted/50",
+                  "flex flex-col items-center gap-3 py-6 md:py-8 transition-all hover:bg-muted/50",
                   theme === m.id ? "bg-muted text-primary" : "text-muted-foreground"
                 )}
               >
-                <m.icon className={cn("w-6 h-6", theme === m.id ? "text-primary" : "text-muted-foreground")} />
-                <span className={cn("text-[10px] font-black uppercase tracking-[0.2em]", theme === m.id ? "text-primary" : "text-muted-foreground")}>
+                <m.icon className={cn("w-5 h-5 md:w-6 md:h-6", theme === m.id ? "text-primary" : "text-muted-foreground")} />
+                <span className={cn("text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em]", theme === m.id ? "text-primary" : "text-muted-foreground")}>
                   {m.label}
                 </span>
                 {theme === m.id && (
@@ -202,13 +197,15 @@ export default function Settings() {
               modeDescriptions[protocol] || modeDescriptions.Balanced
             }
             rightElement={
-              <Badge
-                variant="outline"
-                className="text-[9px] font-black uppercase tracking-[0.2em] border-primary/30 text-primary px-3 py-1 cursor-pointer hover:bg-primary/5 transition-colors"
+              <button
                 onClick={toggleProtocol}
+                className="flex items-center gap-2 bg-primary/10 text-primary border border-primary/20 rounded-full px-4 py-1.5 hover:bg-primary/20 transition-all group"
               >
-                {protocol}
-              </Badge>
+                <span className="text-[9px] font-black uppercase tracking-[0.2em]">
+                  {protocol}
+                </span>
+                <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+              </button>
             }
             border={false}
           />
@@ -261,7 +258,7 @@ export default function Settings() {
             rightElement={
               <button 
                 onClick={() => navigate("/profile")}
-                className="w-10 h-10 rounded-xl bg-muted border border-border flex items-center justify-center hover:bg-muted/80 transition-colors"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-muted border border-border flex items-center justify-center hover:bg-muted/80 transition-colors"
               >
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </button>

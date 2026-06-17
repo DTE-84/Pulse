@@ -31,7 +31,7 @@ const plans = [
   {
     name: "Standard",
     price: "$9.99",
-    period: "/MO",
+    period: "/mo",
     description: "Essential tools for basic financial tracking.",
     features: [
       "Basic bank connection (1 account)",
@@ -48,11 +48,10 @@ const plans = [
     period: "/mo",
     description: "Harness the full power of Nova AI.",
     features: [
-      "Two bank connections",
-      "Real-time Nova AI trigger detection",
-      "Stress Index analysis",
+      "Unlimited bank connections",
+      "Real-time trigger detection",
+      "Advanced Stress Index",
       "Behavioral coaching with Nova",
-      "Advanced growth forecasting",
       "Priority expert support"
     ],
     cta: "Start 7-Day Free Trial",
@@ -63,15 +62,13 @@ const plans = [
     name: "Elite",
     price: "$19.99",
     period: "/mo",
-    description: "Secure the early-bird pre-order rate. Full Elite benefits at launch.",
+    description: "The ultimate behavioral engine for elite performers.",
     features: [
       "Everything in Pro",
-      "Early-Bird Locked Rate ($14.99 vs $19.99)",
-      "Priority support",
-      "Tax optimization strategies",
-      "Wealth management reporting",
-      "Exclusive access to investor network",
-      "Custom trigger development"
+      "Predictive Capital Forecasting",
+      "Tax Optimization Strategy",
+      "Exclusive Investor Network",
+      "1:1 Neural Protocol Customization"
     ],
     cta: "Pre-Order Now",
     popular: false,
@@ -130,18 +127,12 @@ export default function SubscriptionPage() {
 
   return (
     <div className="p-5 md:p-12 max-w-7xl mx-auto space-y-8 md:space-y-12 text-foreground font-inter">
-      <div className="flex items-center gap-3 text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">
-        <span className="hover:text-primary cursor-pointer transition-colors">Settings</span>
-        <ChevronRight className="w-3.5 h-3.5 opacity-30" />
-        <span className="text-primary">Subscription</span>
-      </div>
-
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="space-y-4">
           <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest">
-            Pulse Membership Status
+            Membership Protocol
           </Badge>
-          <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground leading-tight font-jura">
+          <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground leading-tight font-jura uppercase">
             {hasActiveSubscription ? (
               user?.subscriptionStatus === 'active' ? (
                 <>Your Elite <br /> <span className="text-primary underline underline-offset-8 decoration-primary/20">Uplink is Active.</span></>
@@ -155,11 +146,11 @@ export default function SubscriptionPage() {
           <p className="text-muted-foreground font-semibold text-base md:text-lg max-w-xl leading-snug">
             {hasActiveSubscription 
               ? "You have full access to Nova AI's behavioral coaching and deep analysis protocols."
-              : "Unlock Nova AI's full potential and transform your relationship with money. Join thousands of users who have saved an average of $640/month."}
+              : "Unlock Nova AI's full potential and transform your relationship with money."}
           </p>
         </div>
 
-        <div className="bg-card border border-border p-2 rounded-2xl flex items-center shrink-0 w-full md:w-auto">
+        <div className="bg-card border border-border p-1.5 rounded-2xl flex items-center shrink-0 w-full md:w-auto">
           <button
             onClick={() => setIsAnnual(false)}
             className={cn(
@@ -177,9 +168,9 @@ export default function SubscriptionPage() {
             )}
           >
             Annual
-            <span className="absolute -top-3 -right-2 bg-primary text-primary-foreground text-[9px] font-black px-1.5 py-0.5 rounded-full rotate-12 shadow-[0_0_10px_rgba(45,237,156,0.5)]">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[8px] font-black px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(45,237,156,0.5)] uppercase tracking-tighter">
               SAVE 20%
-            </span>
+            </div>
           </button>
         </div>
       </div>
@@ -206,7 +197,7 @@ export default function SubscriptionPage() {
                   {plan.name === "Elite" ? <Crown className="w-5 h-5 text-yellow-400 fill-yellow-400" /> : plan.name === "Pro" ? <Sparkles className="w-5 h-5 text-primary fill-primary" /> : <Star className="w-5 h-5 text-muted-foreground" />}
                   {plan.name}
                 </h3>
-                <p className="text-xs text-muted-foreground font-semibold h-10 overflow-hidden">{plan.description}</p> 
+                <p className="text-xs text-muted-foreground font-semibold h-10 overflow-hidden uppercase tracking-tight">{plan.description}</p> 
               </div>
             </div>
 
@@ -214,19 +205,19 @@ export default function SubscriptionPage() {
               <span className="text-5xl font-black text-foreground leading-none">
                 {plan.price === "$0" ? plan.price : isAnnual ? `$${Math.round(parseFloat(plan.price.replace('$','')) * 0.8 * 12)}` : plan.price}
               </span>
-              <span className="text-muted-foreground font-black text-sm uppercase tracking-widest">{isAnnual && plan.name !== "Standard" ? "/year" : plan.period}</span>
+              <span className="text-muted-foreground font-black text-sm uppercase tracking-widest">{isAnnual && plan.name !== "Standard" ? "/yr" : plan.period}</span>
             </div>
 
             {plan.elite && (
               <div className="mb-6 flex items-center gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl">
                 <Clock className="w-4 h-4 text-yellow-500 animate-pulse" />
                 <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest">
-                  Locked in $14.99 for life with Pre-Order.
+                  Locked in $14.99 for life.
                 </span>
               </div>
             )}
 
-            <div className="space-y-4 mb-12 flex-1 pt-6 border-t border-border">
+            <div className="space-y-4 mb-10 flex-1 pt-6 border-t border-border">
               {plan.features.map((feature, fi) => (
                 <div key={fi} className="flex items-start gap-3 group/feature">
                   <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5 group-hover/feature:bg-primary/20 transition-colors">
@@ -259,7 +250,7 @@ export default function SubscriptionPage() {
         <div className="space-y-4 flex-1">
           <div className="flex items-center gap-3">
              <ShieldCheck className="w-10 h-10 text-primary" />
-             <h3 className="text-2xl font-black text-foreground font-jura">The Pulse Guarantee</h3>
+             <h3 className="text-2xl font-black text-foreground font-jura uppercase">The Pulse Guarantee</h3>
           </div>
           <p className="text-muted-foreground font-semibold leading-relaxed">
             Not satisfied? Cancel anytime during your 7-day trial with zero commitments.

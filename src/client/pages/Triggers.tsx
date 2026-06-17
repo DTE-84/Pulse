@@ -23,7 +23,7 @@ const StatCard = ({
   icon: Icon,
   colorClass,
 }: any) => (
-  <div className="bg-[#0A0907] border border-white/[0.03] rounded-3xl p-6 relative overflow-hidden group hover:bg-[#11100D] transition-all hover:border-white/10 shadow-2xl">
+  <div className="bg-[#0A0907] border border-white/[0.03] rounded-3xl p-4 md:p-6 relative overflow-hidden group hover:bg-[#11100D] transition-all hover:border-white/10 shadow-2xl">
     <div
       className={cn(
         "absolute top-0 left-0 w-1 h-full opacity-30 group-hover:opacity-100 transition-opacity",
@@ -37,18 +37,17 @@ const StatCard = ({
     </div>
 
     <div className="flex justify-between items-start mb-4">
-      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.25em]">
+      <span className="text-[9px] md:text-[10px] font-black text-muted-foreground uppercase tracking-[0.25em]">
         {label}
       </span>
       {Icon && (
         <Icon className="w-4 h-4 text-primary opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all" />
       )}
     </div>
-    <div className="text-3xl font-black mb-3 tracking-tighter text-white flex items-baseline gap-1">
+    <div className="text-2xl md:text-3xl font-black mb-3 tracking-tighter text-white flex items-baseline gap-1">
       {value}
-      <span className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-tighter">Nodes</span>
     </div>
-    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+    <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest">
       <span
         className={cn(
           trend === "up" ? "text-red-400" : "text-primary",
@@ -100,7 +99,7 @@ const TriggerCard = ({
         {emoji}
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="text-xl font-black text-white mb-1 tracking-tighter truncate uppercase">
+        <h3 className="text-xl font-black text-white mb-1 tracking-tighter uppercase leading-tight">
           {name}
         </h3>
         <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest leading-tight opacity-70">
@@ -128,9 +127,9 @@ const TriggerCard = ({
     {/* Stats row */}
     <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8 pt-6 border-t border-white/5 relative z-10">
       {[
-        { val: `$${amount}`, label: "Current Cycle", color: "text-white" },
-        { val: `${count}×`, label: "Trigger Signal", color: "text-primary" },
-        { val: peak, label: "Peak Alpha", color: "text-blue-400" },
+        { val: `$${amount}`, label: "Cycle Spend", color: "text-white" },
+        { val: `${count}×`, label: "Frequency", color: "text-primary" },
+        { val: peak, label: "Peak Window", color: "text-blue-400" },
       ].map(({ val, label, color }) => (
         <div key={label}>
           <div className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1.5 opacity-50">
@@ -192,7 +191,7 @@ const TriggerCard = ({
             Nova Protocol Suggestion
           </p>
           <p
-            className="text-[12px] font-black text-white group-hover/nova:text-primary transition-colors uppercase tracking-tight"
+            className="text-[12px] font-black text-white group-hover/nova:text-primary transition-colors tracking-tight"
             dangerouslySetInnerHTML={{ __html: novaSuggestion }}
           />
         </div>
@@ -206,35 +205,22 @@ export default function TriggersPage() {
   const [filter, setFilter] = useState("This Month");
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-10 text-foreground">
-      <div className="flex items-center gap-2 text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em] overflow-x-auto whitespace-nowrap scrollbar-hide">
-        <span className="hover:text-primary cursor-pointer transition-colors">
-          Home
-        </span>
-        <ChevronRight className="w-3 h-3 opacity-30" />
-        <span className="hover:text-primary cursor-pointer transition-colors">
-          Insights
-        </span>
-        <ChevronRight className="w-3 h-3 opacity-30" />
-        <span className="text-primary">Triggers</span>
-      </div>
-
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 md:space-y-10 text-foreground">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground uppercase">
+            <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase leading-none">
               Behavioral Triggers
             </h1>
             <Badge
               variant="outline"
               className="bg-primary/10 text-primary border-primary/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest animate-pulse"
             >
-              4 Patterns Active
+              4 Active
             </Badge>
           </div>
           <p className="text-muted-foreground font-semibold text-sm max-w-2xl leading-snug">
-            Deep analysis of behavioral spending nodes and impulse signals
-            detected in your financial telemetry.
+            Deep analysis of behavioral spending and impulse signals detected in your telemetry.
           </p>
         </div>
 
@@ -257,7 +243,7 @@ export default function TriggersPage() {
       </div>
 
       {/* Summary row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <StatCard
           label="Trigger Spend"
           value="$684"
@@ -369,8 +355,8 @@ export default function TriggersPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto pb-4 scrollbar-hide">
-          <div className="min-w-[600px] grid grid-cols-[80px_repeat(7,1fr)] gap-2 items-center">
+        <div className="overflow-x-auto pb-4 scrollbar-hide -mx-2 px-2">
+          <div className="min-w-[750px] grid grid-cols-[80px_repeat(7,1fr)] gap-2 items-center">
             {/* Header row */}
             <div />
             {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
@@ -404,6 +390,11 @@ export default function TriggersPage() {
               ),
             )}
           </div>
+        </div>
+        <div className="flex justify-center mt-2 md:hidden">
+           <div className="text-[8px] font-bold text-muted-foreground uppercase tracking-[0.3em] flex items-center gap-2 animate-pulse">
+              <ChevronRight className="w-3 h-3" /> Swipe to see full week
+           </div>
         </div>
       </div>
 

@@ -229,46 +229,60 @@ export default function NovaChat() {
           ref={scrollRef}
           className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 sm:space-y-8 scrollbar-hide"
         >
-          {chatMessages.map((msg, i) => (
-            <div
-              key={i}
-              className={cn(
-                "flex flex-col",
-                msg.role === "user" ? "items-end" : "items-start",
-              )}
-            >
-              {msg.type === "insight" ? (
-                <div className="max-w-2xl bg-card border border-border rounded-3xl p-6 space-y-6 shadow-2xl">
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant="outline"
-                      className="bg-primary/10 text-primary border-primary/20 px-2 py-0 text-[10px] font-bold flex gap-1"
-                    >
-                      <Sparkles className="w-3 h-3 fill-primary" />
-                      Deep Analysis Complete
-                    </Badge>
-                  </div>
-                  <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                    {msg.content}
-                  </p>
-                </div>
-              ) : (
-                <div
-                  className={cn(
-                    "max-w-[80%] rounded-3xl p-4 text-sm leading-relaxed",
-                    msg.role === "user"
-                      ? "bg-primary/10 border border-primary/20 text-foreground"
-                      : "bg-muted border border-border text-muted-foreground",
-                  )}
-                >
-                  {msg.content}
-                </div>
-              )}
-              <span className="text-[10px] text-muted-foreground font-bold mt-2 px-2 uppercase tracking-tighter opacity-50">
-                {msg.timestamp}
-              </span>
+          {chatMessages.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-center space-y-6 opacity-40">
+              <div className="w-20 h-20 rounded-3xl bg-primary/20 flex items-center justify-center border border-primary/20">
+                <Sparkles className="w-10 h-10 text-primary fill-primary" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-black uppercase tracking-tighter text-foreground">Neural Uplink Standby</h3>
+                <p className="text-xs font-semibold text-muted-foreground max-w-[240px] leading-relaxed mx-auto">
+                  Nova is ready to analyze your spending rhythms. Choose a protocol below or ask a question.
+                </p>
+              </div>
             </div>
-          ))}
+          ) : (
+            chatMessages.map((msg, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "flex flex-col",
+                  msg.role === "user" ? "items-end" : "items-start",
+                )}
+              >
+                {msg.type === "insight" ? (
+                  <div className="max-w-2xl bg-card border border-border rounded-3xl p-6 space-y-6 shadow-2xl">
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className="bg-primary/10 text-primary border-primary/20 px-2 py-0 text-[10px] font-bold flex gap-1"
+                      >
+                        <Sparkles className="w-3 h-3 fill-primary" />
+                        Deep Analysis Complete
+                      </Badge>
+                    </div>
+                    <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                      {msg.content}
+                    </p>
+                  </div>
+                ) : (
+                  <div
+                    className={cn(
+                      "max-w-[80%] rounded-3xl p-4 text-sm leading-relaxed",
+                      msg.role === "user"
+                        ? "bg-primary/10 border border-primary/20 text-foreground"
+                        : "bg-muted border border-border text-muted-foreground",
+                    )}
+                  >
+                    {msg.content}
+                  </div>
+                )}
+                <span className="text-[10px] text-muted-foreground font-bold mt-2 px-2 uppercase tracking-tighter opacity-50">
+                  {msg.timestamp}
+                </span>
+              </div>
+            ))
+          )}
           {isTyping && (
             <div className="items-start flex flex-col">
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex gap-1">

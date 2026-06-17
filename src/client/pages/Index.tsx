@@ -152,51 +152,6 @@ const fallbackChartData = [
   { day: "S", value: 20 },
 ];
 
-const StatCard = ({
-  label,
-  value,
-  trend,
-  trendValue,
-  icon: Icon,
-  colorClass,
-}: any) => (
-  <div className="bg-card border border-border rounded-3xl p-6 relative overflow-hidden group hover:bg-muted/50 transition-all shadow-2xl">
-    <div
-      className={cn(
-        "absolute top-0 left-0 w-1.5 h-full opacity-30 group-hover:opacity-100 transition-opacity",
-        colorClass,
-      )}
-    />
-    <div className="flex justify-between items-start mb-4">
-      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.25em]">
-        {label}
-      </span>
-      {Icon && (
-        <Icon className="w-4 h-4 text-primary opacity-40 group-hover:opacity-100 transition-all" />
-      )}
-    </div>
-    <div className="text-3xl font-black mb-3 tracking-tighter text-foreground">
-      {value}
-    </div>
-    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
-      <span
-        className={cn(
-          trend === "up" ? "text-red-400" : "text-primary",
-          "flex items-center gap-0.5 bg-muted px-2 py-0.5 rounded-full",
-        )}
-      >
-        {trend === "up" ? (
-          <ArrowUpRight className="w-3 h-3" />
-        ) : (
-          <ArrowDownRight className="w-3 h-3" />
-        )}
-        {trendValue}
-      </span>
-      <span className="text-muted-foreground/40 italic">vs baseline</span>
-    </div>
-  </div>
-);
-
 const TriggerCard = ({
   title,
   subtitle,
@@ -502,94 +457,58 @@ export default function Index() {
     );
   }
 
-  const monthlyTrendUp = (stats?.monthlyDiff || 0) > 0;
-
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 md:space-y-10 text-foreground">
-      <div className="flex items-center gap-2 text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em] overflow-x-auto whitespace-nowrap scrollbar-hide">
-        <span className="hover:text-primary cursor-pointer transition-colors">
-          Home
-        </span>
-        <ChevronRight className="w-3 h-3 opacity-30" />
-        <span className="hover:text-primary cursor-pointer transition-colors">
-          Dashboard
-        </span>
-        <ChevronRight className="w-3 h-3 opacity-30" />
-        <span className="text-primary">Insights</span>
-      </div>
-
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 md:space-y-10 text-foreground">
       {/* High-Density Metric Node (Top Priority) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-         <div className="bg-card border border-border rounded-[1.5rem] p-5 relative overflow-hidden group hover:border-primary/20 transition-all">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+         <div className="bg-card border border-border rounded-2xl md:rounded-[1.5rem] p-4 md:p-5 relative overflow-hidden group hover:border-primary/20 transition-all">
             <div className="absolute top-0 left-0 w-1 h-full bg-primary opacity-20" />
-            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-2">Total Balance</p>
-            <h4 className="text-2xl font-black text-foreground tracking-tighter font-jura">${stats?.totalBalance?.toLocaleString() || "0"}</h4>
-            <p className="text-[8px] font-bold text-primary uppercase tracking-widest mt-1">Uplink Active</p>
+            <p className="text-[8px] md:text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Total Balance</p>
+            <h4 className="text-xl md:text-2xl font-black text-foreground tracking-tighter font-jura">${stats?.totalBalance?.toLocaleString() || "0"}</h4>
+            <p className="text-[7px] md:text-[8px] font-bold text-primary uppercase tracking-widest mt-1">Live Account</p>
          </div>
-         <div className="bg-card border border-border rounded-[1.5rem] p-5 relative overflow-hidden group hover:border-primary/20 transition-all">
+         <div className="bg-card border border-border rounded-2xl md:rounded-[1.5rem] p-4 md:p-5 relative overflow-hidden group hover:border-primary/20 transition-all">
             <div className="absolute top-0 left-0 w-1 h-full bg-blue-500 opacity-20" />
-            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-2">Monthly Spend</p>
-            <h4 className="text-2xl font-black text-foreground tracking-tighter font-jura">${stats?.monthlyExpenses?.toLocaleString() || "0"}</h4>
+            <p className="text-[8px] md:text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Monthly Spend</p>
+            <h4 className="text-xl md:text-2xl font-black text-foreground tracking-tighter font-jura">${stats?.monthlyExpenses?.toLocaleString() || "0"}</h4>
             <p className={cn(
-              "text-[8px] font-bold uppercase tracking-widest mt-1",
+              "text-[7px] md:text-[8px] font-bold uppercase tracking-widest mt-1",
               (stats?.spendingDeltaPct || 0) > 0 ? "text-red-400" : "text-emerald-400"
             )}>
-              {Math.abs(stats?.spendingDeltaPct || 0).toFixed(1)}% vs baseline
+              {Math.abs(stats?.spendingDeltaPct || 0).toFixed(1)}% vs target
             </p>
          </div>
-         <div className="bg-card border border-border rounded-[1.5rem] p-5 relative overflow-hidden group hover:border-primary/20 transition-all">
+         <div className="bg-card border border-border rounded-2xl md:rounded-[1.5rem] p-4 md:p-5 relative overflow-hidden group hover:border-primary/20 transition-all">
             <div className="absolute top-0 left-0 w-1 h-full bg-muted-foreground opacity-20" />
-            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-2">Monthly Baseline</p>
-            <h4 className="text-2xl font-black text-foreground tracking-tighter font-jura">${stats?.baselineSpend?.toLocaleString() || "0"}</h4>
-            <p className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest mt-1">Target Limit</p>
+            <p className="text-[8px] md:text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Target Limit</p>
+            <h4 className="text-xl md:text-2xl font-black text-foreground tracking-tighter font-jura">${stats?.baselineSpend?.toLocaleString() || "0"}</h4>
+            <p className="text-[7px] md:text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest mt-1">Monthly Goal</p>
          </div>
-         <div className="bg-card border border-border rounded-[1.5rem] p-5 relative overflow-hidden group hover:border-primary/20 transition-all">
+         <div className="bg-card border border-border rounded-2xl md:rounded-[1.5rem] p-4 md:p-5 relative overflow-hidden group hover:border-primary/20 transition-all">
             <div className="absolute top-0 left-0 w-1 h-full bg-yellow-500 opacity-20" />
-            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-2">Active Signals</p>
-            <h4 className="text-2xl font-black text-foreground tracking-tighter font-jura">{stats?.activeSignals || "12"}</h4>
-            <p className="text-[8px] font-bold text-yellow-500 uppercase tracking-widest mt-1">Telemetry Nodes</p>
+            <p className="text-[8px] md:text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Risk Triggers</p>
+            <h4 className="text-xl md:text-2xl font-black text-foreground tracking-tighter font-jura">{stats?.activeSignals || "12"}</h4>
+            <p className="text-[7px] md:text-[8px] font-bold text-yellow-500 uppercase tracking-widest mt-1">Active Alerts</p>
          </div>
       </div>
 
       <div className="flex flex-col gap-6">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground leading-tight">
-              Your financial heartbeat
-            </h1>
-            {user?.subscriptionStatus === 'trialing' && (
-              <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest">
-                Elite Preview: {trialDaysLeft} Days Remaining
-              </Badge>
-            )}
-            {stats?.projection?.isHighVelocity && (
-              <Badge className="bg-red-500/10 text-red-400 border-red-500/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest animate-pulse">
-                High-Velocity Surge
-              </Badge>
-            )}
-          </div>
-          <p className="text-muted-foreground font-semibold text-sm max-w-2xl leading-snug">
-            Pulse tracks your spending rhythm. Nova helps you understand what it
-            means and where your habits are helping or hurting your progress.
-          </p>
-        </div>
-
-        <div className="bg-primary/5 border border-primary/20 rounded-[1.5rem] md:rounded-[2rem] p-6 relative overflow-hidden group transition-all hover:bg-primary/10">
+        <div className="bg-primary/5 border border-primary/20 rounded-[1.5rem] md:rounded-[2rem] p-5 md:p-6 relative overflow-hidden group transition-all hover:bg-primary/10">
           <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
             <Sparkles size={120} className="text-primary" />
           </div>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0 border border-primary/20 shadow-[0_0_20px_rgba(45,237,156,0.2)]">
+              <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0 border border-primary/20 shadow-[0_0_20px_rgba(45,237,156,0.25)]">
                 <div className="w-5 h-5 rounded-full bg-primary shadow-[0_0_15px_rgba(45,237,156,1)]" />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">
-                    Nova’s insight
+                  <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">
+                    Nova’s Analysis
                   </span>
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-muted px-2 py-0.5 rounded-full">
-                    {stats?.novaTone || "Balanced"} mode
+                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest bg-muted px-2 py-0.5 rounded-full">
+                    {stats?.novaTone || "Balanced"}
                   </span>
                 </div>
                 <p className="text-sm md:text-base text-foreground font-medium leading-relaxed max-w-3xl italic">
@@ -611,7 +530,7 @@ export default function Index() {
               ) : (
                 <Sparkles className="w-3.5 h-3.5" />
               )}
-              Initialize Deep Scan
+              Update Insights
             </button>
           </div>
         </div>
@@ -628,7 +547,7 @@ export default function Index() {
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Nova is measuring your{" "}
                   <span className="text-foreground font-bold">Savings Velocity</span>{" "}
-                  against your deterministic baseline. Currently, you are
+                  against your target baseline. Currently, you are
                   protecting{" "}
                   <span className="text-primary font-bold">
                     {100 -
@@ -717,7 +636,7 @@ export default function Index() {
               ) : (
                 <Zap className="w-3 h-3" />
               )}
-              {syncing ? "Initializing..." : "Initialize Sandbox Telemetry"}
+              {syncing ? "Initializing..." : "Load Demo Data"}
             </button>
           ) : (
             <button
@@ -730,7 +649,7 @@ export default function Index() {
               ) : (
                 <Play className="w-3 h-3 fill-red-400" />
               )}
-              {analyzing ? "Reviewing..." : "Run Nova review"}
+              {analyzing ? "Reviewing..." : "Scan Patterns"}
             </button>
           )}
 
@@ -745,7 +664,7 @@ export default function Index() {
                 ) : (
                   <Database className="w-3 h-3" />
                 )}
-                {syncing ? "Syncing..." : user?.subscriptionStatus === 'active' ? "Sync Bank Telemetry" : "Manual Transaction Sync"}
+                {syncing ? "Syncing..." : user?.subscriptionStatus === 'active' ? "Sync Bank" : "Add Transactions"}
               </button>
             </DialogTrigger>
             <DialogContent className="bg-card border border-border text-foreground max-w-2xl">
@@ -812,41 +731,6 @@ export default function Index() {
             </DialogContent>
           </Dialog>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label="Current Balance"
-          value={`$${stats?.totalBalance?.toLocaleString?.() ?? stats?.totalBalance ?? 0}`}
-          trend="down"
-          trendValue="Live"
-          colorClass="bg-primary"
-          icon={Wallet}
-        />
-        <StatCard
-          label="Monthly Spend"
-          value={`$${stats?.monthlyExpenses?.toLocaleString?.() ?? stats?.monthlyExpenses ?? 0}`}
-          trend={monthlyTrendUp ? "up" : "down"}
-          trendValue={`${Math.abs(stats?.spendingDeltaPct || 0)}%`}
-          colorClass={monthlyTrendUp ? "bg-red-500" : "bg-primary"}
-          icon={TrendingUp}
-        />
-        <StatCard
-          label="Monthly Baseline"
-          value={`$${stats?.baselineSpend || 2500}`}
-          trend="down"
-          trendValue="Target"
-          colorClass="bg-blue-400"
-          icon={Target}
-        />
-        <StatCard
-          label="Active Signals"
-          value={`${stats?.triggers?.length || 0}`}
-          trend="down"
-          trendValue="Review"
-          colorClass="bg-primary"
-          icon={Flame}
-        />
       </div>
 
       {/* Pre-Order Banner Card */}
