@@ -41,11 +41,11 @@ const SettingItem = ({
 }: any) => (
   <div
     className={cn(
-      "flex items-center justify-between p-4 sm:p-6 gap-4 sm:gap-6 transition-colors hover:bg-muted/50",
+      "flex flex-col sm:flex-row sm:items-center justify-between p-5 sm:p-6 gap-4 sm:gap-6 transition-colors hover:bg-muted/50",
       border && "border-b border-border",
     )}
   >
-    <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+    <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 w-full">
       <div className="w-10 h-10 rounded-xl bg-muted border border-border flex items-center justify-center shrink-0">
         <Icon className="w-5 h-5 text-primary" />
       </div>
@@ -58,7 +58,7 @@ const SettingItem = ({
         </div>
       </div>
     </div>
-    <div className="shrink-0">{rightElement}</div>
+    <div className="shrink-0 w-full sm:w-auto flex justify-end">{rightElement}</div>
   </div>
 );
 
@@ -226,7 +226,7 @@ export default function Settings() {
           <SettingItem
             icon={Cpu}
             label="Bank connections"
-            description="Link your financial institutions for live telemetry ingestion."
+            description="Link your bank accounts for live transaction tracking."
             rightElement={
               <PlaidLinkButton 
                 className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 text-[9px] font-black uppercase tracking-widest h-9 px-4 rounded-xl"

@@ -143,7 +143,7 @@ const TriggerCard = ({
     {/* Timeline bars */}
     <div className="mb-8 h-12 relative z-10">
       <div className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.25em] mb-3 opacity-50">
-        Pattern Intensity // 7D Telemetry
+        Pattern Intensity // 7D History
       </div>
       <div className="flex items-end gap-1.5 h-8">
         {timeline.map((v: number, i: number) => (
@@ -220,7 +220,7 @@ export default function TriggersPage() {
             </Badge>
           </div>
           <p className="text-muted-foreground font-semibold text-sm max-w-2xl leading-snug">
-            Deep analysis of behavioral spending and impulse signals detected in your telemetry.
+            Deep analysis of behavioral spending and impulse signals detected in your patterns.
           </p>
         </div>
 
@@ -355,7 +355,10 @@ export default function TriggersPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto pb-4 scrollbar-hide -mx-2 px-2">
+        <div className="overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 relative group/heatmap">
+          {/* Deliberate Peekthrough Fade (Visible on mobile to invite swipe) */}
+          <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-card via-card/80 to-transparent z-10 pointer-events-none md:hidden" />
+          
           <div className="min-w-[750px] grid grid-cols-[80px_repeat(7,1fr)] gap-2 items-center">
             {/* Header row */}
             <div />
@@ -484,7 +487,7 @@ export default function TriggersPage() {
             ].map((r) => (
               <div
                 key={r.label}
-                className="flex items-center gap-4 p-4 bg-muted border border-border rounded-2xl
+                className="flex items-start gap-4 p-5 bg-muted border border-border rounded-2xl
                               hover:bg-muted/80 hover:border-primary/20 transition-all cursor-pointer group/item"
               >
                 <span className="text-2xl group-hover/item:scale-110 transition-transform">
@@ -494,7 +497,7 @@ export default function TriggersPage() {
                   <div className="text-sm font-black text-foreground tracking-tight uppercase">
                     {r.label}
                   </div>
-                  <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider truncate">
+                  <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider leading-relaxed">
                     {r.sub}
                   </div>
                 </div>

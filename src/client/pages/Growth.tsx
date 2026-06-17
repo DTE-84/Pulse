@@ -381,7 +381,7 @@ export default function GrowthPage() {
             </div>
             <p className="text-sm font-semibold text-white/90 leading-relaxed italic relative z-10">
               {stats?.novaInsight ||
-                "Establishing telemetry for growth recommendations..."}
+                "Connect your accounts so Nova can start building your growth plan."}
             </p>
           </div>
         </div>

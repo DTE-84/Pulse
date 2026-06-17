@@ -286,7 +286,7 @@ export default function Index() {
     setSyncing(true);
     toast({
       title: "Initializing Sandbox",
-      description: "Generating high-fidelity behavioral telemetry for your trial...",
+      description: "Generating sample transaction data for your trial...",
     });
 
     try {
@@ -304,13 +304,13 @@ export default function Index() {
 
       toast({
         title: "Sandbox Primed",
-        description: "Nova now has behavioral nodes to analyze. Explore the dashboard to see Pulse in action.",
+        description: "Nova now has data to analyze. Explore the dashboard to see Pulse in action.",
       });
     } catch (err) {
       toast({
         variant: "destructive",
         title: "Sandbox Error",
-        description: "Could not establish the mock telemetry link.",
+        description: "Could not establish the sample data link.",
       });
     } finally {
       setSyncing(false);
@@ -387,7 +387,7 @@ export default function Index() {
     setAnalyzing(true);
     toast({
       title: "Nova is reviewing your patterns",
-      description: "Performing high-fidelity behavioral telemetry scan...",
+      description: "Analyzing your spending behavior and rhythm...",
     });
 
     try {
@@ -530,13 +530,13 @@ export default function Index() {
               ) : (
                 <Sparkles className="w-3.5 h-3.5" />
               )}
-              Update Insights
+              Connect Accounts
             </button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-card border border-border rounded-[1.5rem] md:rounded-[3.5rem] p-6 md:p-10 flex flex-col md:flex-row items-center gap-6 sm:gap-12 relative overflow-hidden group">
+          <div className="lg:col-span-2 bg-card border border-border rounded-[1.5rem] md:rounded-[3.5rem] p-6 md:p-10 min-h-[550px] flex flex-col md:flex-row items-center gap-6 sm:gap-12 relative overflow-hidden group">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
             <WealthVault stats={stats} />
             <div className="flex-1 space-y-6">

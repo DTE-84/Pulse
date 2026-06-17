@@ -197,7 +197,7 @@ export default function SubscriptionPage() {
                   {plan.name === "Elite" ? <Crown className="w-5 h-5 text-yellow-400 fill-yellow-400" /> : plan.name === "Pro" ? <Sparkles className="w-5 h-5 text-primary fill-primary" /> : <Star className="w-5 h-5 text-muted-foreground" />}
                   {plan.name}
                 </h3>
-                <p className="text-xs text-muted-foreground font-semibold h-10 overflow-hidden uppercase tracking-tight">{plan.description}</p> 
+                <p className="text-xs text-muted-foreground font-semibold h-10 overflow-hidden tracking-tight">{plan.description}</p> 
               </div>
             </div>
 

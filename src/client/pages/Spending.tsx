@@ -185,14 +185,14 @@ export default function SpendingPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 pt-8 md:pt-12 border-t border-border/50">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 pt-8 md:pt-12 pb-8 border-t border-border/50">
             {categoryData.map((cat, i) => {
               const Icon = getIcon(cat.name);
               return (
                 <div
                   key={i}
                   onClick={() => setSelectedCategory(cat)}
-                  className="group bg-muted/30 border border-border p-4 md:p-6 rounded-2xl md:rounded-[2rem] flex flex-col items-center text-center gap-3 md:gap-4 cursor-pointer hover:bg-muted hover:border-primary/30 transition-all hover:-translate-y-1 last:col-span-2 last:md:col-span-1"
+                  className="group bg-muted/30 border border-border p-4 md:p-6 rounded-2xl md:rounded-[2rem] flex flex-col items-center text-center gap-3 md:gap-4 cursor-pointer hover:bg-muted hover:border-primary/30 transition-all hover:-translate-y-1 last:col-span-2 lg:last:col-span-1"
                 >
                   <div 
                     className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg transition-transform group-hover:scale-110"
@@ -295,7 +295,7 @@ export default function SpendingPage() {
                 Recent Purchases
               </h3>
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-                Live behavioral telemetry feed
+                Your recent transactions
               </p>
             </div>
             <button className="w-full md:w-auto bg-muted border border-border px-8 py-4 rounded-2xl text-[10px] font-black text-primary hover:bg-primary/10 hover:border-primary/20 transition-all uppercase tracking-widest">
@@ -364,14 +364,14 @@ export default function SpendingPage() {
                         className="bg-card border border-border text-foreground w-56 p-2 rounded-xl shadow-2xl"
                       >
                         <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest opacity-40 px-3 py-2">
-                          Telemetry Actions
+                          Actions
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-muted mx-2" />
                         <DropdownMenuItem className="flex items-center gap-3 px-3 py-3 rounded-lg text-xs font-bold focus:bg-primary/10 focus:text-primary cursor-pointer transition-colors">
-                          <Flag className="w-4 h-4" /> Flag Node
+                          <Flag className="w-4 h-4" /> Flag Transaction
                         </DropdownMenuItem>
                         <DropdownMenuItem className="flex items-center gap-3 px-3 py-3 rounded-lg text-xs font-bold focus:bg-primary/10 focus:text-primary cursor-pointer transition-colors">
-                          <History className="w-4 h-4" /> Audit Signal
+                          <History className="w-4 h-4" /> Audit Pattern
                         </DropdownMenuItem>
                         <DropdownMenuItem className="flex items-center gap-3 px-3 py-3 rounded-lg text-xs font-bold focus:bg-red-500/10 focus:text-red-400 cursor-pointer transition-colors">
                           <EyeOff className="w-4 h-4" /> Suppress Feed
