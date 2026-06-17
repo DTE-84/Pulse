@@ -110,6 +110,10 @@ export const plaidAPI = {
     const response = await API.post("/api/plaid/exchange-token", { publicToken, institutionName });
     return response.data;
   },
+  sandboxSeed: async () => {
+    const response = await API.post("/api/plaid/sandbox-seed");
+    return response.data;
+  }
 };
 
 export const transactionsAPI = {

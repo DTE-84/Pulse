@@ -21,7 +21,7 @@ import { BarChart, Bar, ResponsiveContainer, Cell, XAxis } from "recharts";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Link, useNavigate } from "react-router-dom";
-import { statsAPI, transactionsAPI, novaServiceAPI } from "@/lib/api";
+import { statsAPI, transactionsAPI, novaServiceAPI, plaidAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -286,31 +286,25 @@ export default function Index() {
     setSyncing(true);
     toast({
       title: "Initializing Sandbox",
-      description: "Generating sample transaction data for your trial...",
+      description: "Establishing direct Plaid sandbox uplink...",
     });
 
     try {
-      const mockTransactions = [
-        { date: new Date().toISOString().split('T')[0], amount: 45.20, category: "Dining", risk_category: "Lifestyle", merchant_name: "Stellar Coffee" },
-        { date: new Date(Date.now() - 86400000).toISOString().split('T')[0], amount: 120.00, category: "Shopping", risk_category: "Impulse", merchant_name: "Amazon Hub", trigger_id: 2 },
-        { date: new Date(Date.now() - 172800000).toISOString().split('T')[0], amount: 8.50, category: "Transport", risk_category: "Essential", merchant_name: "Uber Protocol" },
-        { date: new Date(Date.now() - 259200000).toISOString().split('T')[0], amount: 250.00, category: "Groceries", risk_category: "Essential", merchant_name: "Whole Foods" },
-        { date: new Date(Date.now() - 345600000).toISOString().split('T')[0], amount: 55.00, category: "Entertainment", risk_category: "Lifestyle", merchant_name: "Netflix & Pulse", trigger_id: 1 }
-      ];
-
-      await transactionsAPI.ingest({ transactions: mockTransactions });
+      await plaidAPI.sandboxSeed();
+      
+      // Refresh stats to get latest data
       const res = await statsAPI.get();
       setStats(res.data);
 
       toast({
         title: "Sandbox Primed",
-        description: "Nova now has data to analyze. Explore the dashboard to see Pulse in action.",
+        description: "Pulse is now linked to a Chase Sandbox account. Nova is ready for analysis.",
       });
-    } catch (err) {
+    } catch (err: any) {
       toast({
         variant: "destructive",
         title: "Sandbox Error",
-        description: "Could not establish the sample data link.",
+        description: err.response?.data?.message || "Could not established analytical link to sandbox.",
       });
     } finally {
       setSyncing(false);

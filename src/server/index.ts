@@ -12,7 +12,11 @@ import { handleGetTransactions } from "./routes/transactions.js";
 import { handleGetGoals, handleCreateGoal } from "./routes/goals.js";
 import { handleStripeWebhook } from "./routes/webhooks.js";
 import { createCheckoutSession } from "./routes/payments.js";
-import { createLinkToken, exchangePublicToken } from "./routes/plaid.js";
+import { 
+  createLinkToken, 
+  exchangePublicToken, 
+  sandboxSeed 
+} from "./routes/plaid.js";
 
 // 2. Middleware
 import {
@@ -92,6 +96,7 @@ export function createServer() {
   app.post("/api/payments/create-session", requireAuth, createCheckoutSession as any);
   app.post("/api/plaid/create-link-token", requireAuth, createLinkToken as any);
   app.post("/api/plaid/exchange-token", requireAuth, exchangePublicToken as any);
+  app.post("/api/plaid/sandbox-seed", requireAuth, sandboxSeed as any);
 
   app.get("/api/demo", apiLimiter, handleDemo as any);
   app.get("/api/stats", apiLimiter, requireAuth, handleStats as any);

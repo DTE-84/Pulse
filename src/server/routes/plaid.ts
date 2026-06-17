@@ -4,7 +4,12 @@ import {
   CountryCode 
 } from "plaid";
 import { query } from "../db/db.js";
-import { plaidClient as client, encryptAccessToken } from "../lib/plaid.js";
+import { 
+  plaidClient as client, 
+  encryptAccessToken, 
+  setupTrialSandboxItem, 
+  syncTransactions 
+} from "../lib/plaid.js";
 
 export const createLinkToken = async (req: Request, res: Response) => {
   const userId = req.userId;
@@ -85,5 +90,36 @@ export const exchangePublicToken = async (req: Request, res: Response) => {
   } catch (err: any) {
     console.error("[Plaid] Exchange Error:", err.response?.data || err.message);
     res.status(500).json({ message: "Could not established analytical link to bank." });
+  }
+};
+
+export const sandboxSeed = async (req: Request, res: Response) => {
+  const userId = req.userId;
+  if (!userId) return res.status(401).json({ message: "Authentication required." });
+
+  try {
+    console.log(`[Plaid] Initializing direct sandbox seed for user: ${userId}`);
+    
+    // 1. Provision Sandbox Item
+    const { success, itemId } = await setupTrialSandboxItem(userId);
+    
+    if (!success || !itemId) {
+      throw new Error("Sandbox provisioning returned failure status.");
+    }
+
+    // 2. Sync Transactions immediately
+    const { count } = await syncTransactions(userId, itemId);
+
+    res.json({ 
+      status: "Provisioned", 
+      message: `Direct sandbox uplink established. ${count} transactions synchronized.`,
+      itemId 
+    });
+  } catch (err: any) {
+    console.error("[Plaid] Sandbox Seed Error:", err.response?.data || err.message);
+    res.status(500).json({ 
+      message: "Sandbox protocol failed.",
+      detail: err.message
+    });
   }
 };

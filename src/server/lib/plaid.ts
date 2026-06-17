@@ -42,6 +42,101 @@ export function encryptAccessToken(token: string) {
   return iv.toString("hex") + ":" + encrypted.toString("hex");
 }
 
+export function decryptAccessToken(encryptedData: string) {
+  if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length < 32 || !encryptedData.includes(":")) {
+    return encryptedData;
+  }
+  try {
+    const parts = encryptedData.split(":");
+    const iv = Buffer.from(parts[0], "hex");
+    const encryptedText = Buffer.from(parts[1], "hex");
+    const decipher = crypto.createDecipheriv("aes-256-cbc", Buffer.from(ENCRYPTION_KEY), iv);
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString();
+  } catch (err) {
+    console.error("[PULSE SECURITY] Decryption failed:", err);
+    return encryptedData;
+  }
+}
+
+/**
+ * High-Fidelity Sync: Pull Transactions from Plaid
+ */
+export async function syncTransactions(userId: string, plaidItemId: string) {
+  console.log(`[PULSE PLAID] Syncing transactions for user ${userId}, item ${plaidItemId}`);
+
+  try {
+    // 1. Fetch and Decrypt Access Token
+    const secretRes = await query(
+      `SELECT ps.access_token_encrypted 
+       FROM public.plaid_secrets ps
+       JOIN public.plaid_items pi ON ps.item_id = pi.item_id
+       WHERE pi.user_id = $1 AND pi.plaid_item_id = $2`,
+      [userId, plaidItemId]
+    );
+
+    if (secretRes.rows.length === 0) {
+      console.error("[PULSE PLAID] Sync failed: Item/Secret mismatch.");
+      return { success: false, count: 0 };
+    }
+
+    const accessToken = decryptAccessToken(secretRes.rows[0].access_token_encrypted);
+
+    // 2. Fetch from Plaid
+    const response = await plaidClient.transactionsSync({
+      access_token: accessToken,
+    });
+
+    const added = response.data.added;
+    console.log(`[PULSE PLAID] Plaid returned ${added.length} new transactions.`);
+
+    // 3. Persist to Fact Schema
+    let count = 0;
+    for (const tx of added) {
+      // a. Resolve Category
+      const plaidCat = tx.category?.[0] || "Misc";
+      const catRes = await query(
+        "SELECT category_id FROM dim_categories WHERE category_name = $1",
+        [plaidCat]
+      );
+
+      let categoryId;
+      if (catRes.rows.length > 0) {
+        categoryId = catRes.rows[0].category_id;
+      } else {
+        const newCat = await query(
+          "INSERT INTO dim_categories (category_name, risk_level) VALUES ($1, $2) RETURNING category_id",
+          [plaidCat, "Medium"]
+        );
+        categoryId = newCat.rows[0].category_id;
+      }
+
+      // b. Insert Transaction (with Deduplication Guard)
+      await query(
+        `INSERT INTO fact_transactions (user_id, category_id, amount, purchase_date, merchant_name, external_id, status)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         ON CONFLICT (external_id) DO NOTHING`,
+        [
+          userId,
+          categoryId,
+          tx.amount,
+          tx.date,
+          tx.merchant_name || tx.name,
+          tx.transaction_id,
+          "Completed"
+        ]
+      );
+      count++;
+    }
+
+    return { success: true, count };
+  } catch (err: any) {
+    console.error("[PULSE PLAID] Sync Error:", err.response?.data || err.message);
+    throw err;
+  }
+}
+
 /**
  * Silent Provisioning: Setup Trial Sandbox Item
  * Engineered to eliminate friction for new trial users by pre-linking a sandbox Chase account.
