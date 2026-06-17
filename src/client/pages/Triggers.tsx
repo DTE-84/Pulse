@@ -141,29 +141,36 @@ const TriggerCard = ({
     </div>
 
     {/* Timeline bars */}
-    <div className="mb-8 h-12 relative z-10">
+    <div className="mb-8 relative z-10">
       <div className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.25em] mb-3 opacity-50">
         Pattern Intensity // 7D History
       </div>
-      <div className="flex items-end gap-1.5 h-8">
-        {timeline.map((v: number, i: number) => (
-          <div
-            key={i}
-            className="flex-1 rounded-sm transition-all duration-700 bg-primary/20 hover:scale-x-110"
-            style={{
-              height: `${Math.max(15, (v / Math.max(...timeline)) * 100)}%`,
-              backgroundColor:
-                v > 0
-                  ? severity === "HIGH"
-                    ? "#ef4444"
-                    : severity === "MED"
-                    ? "#f59e0b"
-                    : "#2DED9C"
-                  : "rgba(255,255,255,0.05)",
-              opacity: v > 0 ? 0.4 + (v / Math.max(...timeline)) * 0.6 : 0.1,
-            }}
-          />
-        ))}
+      <div className="flex items-end gap-1.5 h-12">
+        {timeline.map((v: number, i: number) => {
+          const days = ["M", "T", "W", "T", "F", "S", "S"];
+          return (
+            <div key={i} className="flex-1 flex flex-col items-center gap-1.5 h-full">
+              <div
+                className="w-full rounded-sm transition-all duration-700 bg-primary/20 hover:scale-x-110 mt-auto"
+                style={{
+                  height: `${Math.max(15, (v / Math.max(...timeline)) * 100)}%`,
+                  backgroundColor:
+                    v > 0
+                      ? severity === "HIGH"
+                        ? "#ef4444"
+                        : severity === "MED"
+                        ? "#f59e0b"
+                        : "#2DED9C"
+                      : "rgba(255,255,255,0.05)",
+                  opacity: v > 0 ? 0.4 + (v / Math.max(...timeline)) * 0.6 : 0.1,
+                }}
+              />
+              <span className="text-[7px] font-black text-muted-foreground/30 uppercase">
+                {days[i]}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
 
