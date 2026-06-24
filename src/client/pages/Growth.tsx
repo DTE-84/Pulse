@@ -203,6 +203,7 @@ export default function GrowthPage() {
                 <YAxis hide domain={['auto', 'auto']} />
                 <Tooltip
                   cursor={{ stroke: '#2DED9C', strokeWidth: 1, strokeDasharray: '4 4' }}
+                  formatter={(value: number) => [`$${value.toLocaleString()}`, "Projected Value"]}
                   contentStyle={{
                     backgroundColor: "#0A0908",
                     border: "1px solid rgba(255,255,255,0.1)",

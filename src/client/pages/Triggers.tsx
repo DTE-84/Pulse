@@ -142,8 +142,13 @@ const TriggerCard = ({
 
     {/* Timeline bars */}
     <div className="mb-8 relative z-10">
-      <div className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.25em] mb-3 opacity-50">
-        Pattern Intensity // 7D History
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.25em] opacity-50">
+          Pattern Intensity // 7D History
+        </div>
+        <div className="text-[7px] text-primary font-bold uppercase tracking-widest opacity-80">
+          Bar Height = Spend Volume
+        </div>
       </div>
       <div className="flex items-end gap-1.5 h-12">
         {timeline.map((v: number, i: number) => {

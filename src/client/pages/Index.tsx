@@ -453,6 +453,27 @@ export default function Index() {
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 md:space-y-10 text-foreground">
+      {/* Empty State Banner for New Users */}
+      {stats?.totalBalance === 0 && user?.subscriptionStatus === 'trialing' && (
+        <div className="bg-primary/10 border border-primary/20 rounded-[1.5rem] p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden group">
+          <div className="absolute -right-10 -top-10 opacity-10 pointer-events-none">
+            <Zap size={150} className="text-primary" />
+          </div>
+          <div className="relative z-10">
+            <h2 className="text-xl md:text-2xl font-black tracking-tighter text-primary mb-2 uppercase">Welcome to Pulse</h2>
+            <p className="text-xs md:text-sm text-muted-foreground font-medium max-w-md leading-relaxed">Your dashboard is currently empty. Load our high-fidelity demo data to see the behavioral engine in action.</p>
+          </div>
+          <button
+            onClick={handleSeedSandbox}
+            disabled={syncing}
+            className="w-full md:w-auto relative z-10 flex items-center justify-center gap-3 bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-4 rounded-2xl text-[12px] font-black transition-all uppercase tracking-widest shadow-[0_0_20px_rgba(45,237,156,0.3)] disabled:opacity-50 hover:scale-105 active:scale-95"
+          >
+            {syncing ? <RefreshCcw className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+            {syncing ? "Initializing..." : "Load Demo Data"}
+          </button>
+        </div>
+      )}
+
       {/* High-Density Metric Node (Top Priority) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
          <div className="bg-card border border-border rounded-2xl md:rounded-[1.5rem] p-4 md:p-5 relative overflow-hidden group hover:border-primary/20 transition-all">
@@ -619,20 +640,7 @@ export default function Index() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          {user?.subscriptionStatus === 'trialing' ? (
-            <button
-              onClick={handleSeedSandbox}
-              disabled={syncing}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 border border-yellow-500/20 px-5 py-3 rounded-full text-[10px] font-black transition-all uppercase tracking-widest disabled:opacity-50"
-            >
-              {syncing ? (
-                <RefreshCcw className="w-3 h-3 animate-spin" />
-              ) : (
-                <Zap className="w-3 h-3" />
-              )}
-              {syncing ? "Initializing..." : "Load Demo Data"}
-            </button>
-          ) : (
+          {user?.subscriptionStatus !== 'trialing' && (
             <button
               onClick={runAnalysis}
               disabled={analyzing}

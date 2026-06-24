@@ -392,7 +392,7 @@ export default function AuthPage() {
                 type="button"
                 onClick={handleGuestProtocol}
                 disabled={loading}
-                className="w-full bg-muted border border-border text-foreground/60 font-black py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-muted/80 hover:text-foreground transition-all uppercase tracking-[0.2em] text-[10px] disabled:opacity-50"
+                className="w-full bg-primary/10 border border-primary/30 text-primary font-black py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-primary/20 transition-all uppercase tracking-[0.2em] text-[10px] shadow-[0_0_15px_rgba(45,237,156,0.15)] hover:shadow-[0_0_25px_rgba(45,237,156,0.25)] disabled:opacity-50 mt-4"
               >
                 <Sparkles className="w-4 h-4 text-primary" />
                 Launch Sandbox Protocol

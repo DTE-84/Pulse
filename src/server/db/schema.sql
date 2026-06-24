@@ -32,6 +32,8 @@ CREATE TABLE IF NOT EXISTS "fact_transactions" (
     category_id INT REFERENCES "dim_categories"(category_id),
     amount DECIMAL(10, 2) NOT NULL,
     purchase_date TIMESTAMPTZ DEFAULT NOW(),
+    merchant_name VARCHAR(255),
+    external_id VARCHAR(255) UNIQUE,
     status VARCHAR(50) DEFAULT 'Completed' -- Completed, Pending, Flagged
 );
 
@@ -126,5 +128,27 @@ INSERT INTO dim_triggers (trigger_name, risk_level) VALUES
 ('Celebration', 'Low'),
 ('Late Night', 'High')
 ON CONFLICT DO NOTHING;
+
+-- 6. Dimension: Plaid Items (Bank Links)
+CREATE TABLE IF NOT EXISTS public.plaid_items (
+    item_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id uuid, -- Reference to the UUID version of user_id
+    plaid_item_id TEXT UNIQUE NOT NULL,
+    institution_name TEXT,
+    environment TEXT DEFAULT 'sandbox',
+    status TEXT DEFAULT 'active',
+    is_trial_item BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 7. Fact: Plaid Secrets (Encrypted Access Tokens)
+CREATE TABLE IF NOT EXISTS public.plaid_secrets (
+    secret_id SERIAL PRIMARY KEY,
+    item_id uuid REFERENCES public.plaid_items(item_id) ON DELETE CASCADE UNIQUE,
+    access_token_encrypted TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 
 COMMIT;
