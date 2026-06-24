@@ -52,14 +52,17 @@ export default function GrowthPage() {
 
   const fetchData = async () => {
     try {
-      const [goalsRes, statsRes] = await Promise.all([
-        goalsAPI.getAll(),
-        statsAPI.get(),
-      ]);
-      setGoals(goalsRes.data);
+      const statsRes = await statsAPI.get();
       setStats(statsRes.data);
     } catch (err) {
-      console.error("Failed to fetch growth data:", err);
+      console.error("Failed to fetch stats data:", err);
+    }
+    
+    try {
+      const goalsRes = await goalsAPI.getAll();
+      setGoals(goalsRes.data);
+    } catch (err) {
+      console.error("Failed to fetch goals data:", err);
     }
   };
 
@@ -123,7 +126,7 @@ export default function GrowthPage() {
             </span>
             , growing at a{" "}
             <span className="text-primary font-black">
-              +{stats?.spendingDeltaPct || "0"}%
+              {(stats?.spendingDeltaPct && stats.spendingDeltaPct > 0) ? "+" : ""}{stats?.spendingDeltaPct || "0"}%
             </span>{" "}
             rate.
           </p>

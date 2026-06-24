@@ -212,7 +212,7 @@ export default function SubscriptionPage() {
               <div className="mb-6 flex items-center gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl">
                 <Clock className="w-4 h-4 text-yellow-500 animate-pulse" />
                 <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest">
-                  Locked in $14.99 for life.
+                  Locked in $14.99/mo for life.
                 </span>
               </div>
             )}

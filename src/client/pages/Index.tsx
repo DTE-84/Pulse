@@ -747,7 +747,7 @@ export default function Index() {
               <Crown className="w-6 h-6 text-yellow-400 animate-bounce" />
             </div>
             <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tighter">
-              Pre-Order to get Elite for $14.99 for Life
+              Pre-Order to lock in Elite at $14.99/mo for Life
             </h2>
             <p className="text-muted-foreground font-semibold max-w-xl leading-relaxed">
               Lock in the{" "}

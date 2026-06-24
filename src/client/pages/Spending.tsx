@@ -310,42 +310,53 @@ export default function SpendingPage() {
               return (
                 <div
                   key={tx.transaction_id}
-                  className="group flex items-center justify-between p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] bg-muted/20 border border-transparent hover:border-border hover:bg-muted/50 transition-all"
+                  className="group flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] bg-muted/20 border border-transparent hover:border-border hover:bg-muted/50 transition-all"
                 >
-                  <div className="flex items-center gap-4 sm:gap-6 flex-1 min-w-0">
+                  <div className="flex items-start sm:items-center gap-4 sm:gap-6 flex-1 min-w-0">
                     <div
                       className={cn(
-                        "w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-[1.5rem] bg-card border border-border flex items-center justify-center group-hover:scale-105 transition-transform text-primary shadow-sm shrink-0",
+                        "w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-[1.5rem] bg-card border border-border flex items-center justify-center group-hover:scale-105 transition-transform text-primary shadow-sm shrink-0 mt-1 sm:mt-0",
                       )}
                     >
                       <Icon className="w-6 h-6 sm:w-8 sm:h-8" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-base sm:text-lg font-bold text-foreground mb-1 truncate uppercase tracking-tight">
+                      <div className="text-base sm:text-lg font-bold text-foreground mb-1.5 leading-tight uppercase tracking-tight break-words pr-2">
                         {tx.merchant_name || tx.category_name}
                       </div>
-                      <div className="flex items-center gap-2 sm:gap-3 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                        <span className="flex items-center gap-1.5 truncate">
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        <span className="flex items-center gap-1.5 shrink-0">
                           <div className="w-1.5 h-1.5 rounded-full bg-primary/40 shrink-0" />
                           {tx.category_name}
                         </span>
-                        <span className="opacity-30">•</span>
+                        <span className="opacity-30 hidden sm:inline-block">•</span>
                         <span className="shrink-0">
                           {new Date(tx.purchase_date).toLocaleDateString()}
                         </span>
+                        {/* Show trigger next to date on mobile, hidden on desktop */}
+                        {tx.trigger_name && (
+                          <Badge
+                            variant="outline"
+                            className="sm:hidden bg-red-500/10 text-red-400 border-red-500/20 px-2 py-0.5 text-[8px] font-black flex items-center gap-1 uppercase tracking-widest"
+                          >
+                            <Zap className="w-2.5 h-2.5 fill-red-400" />
+                            {tx.trigger_name}
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 sm:gap-8 shrink-0 ml-4">
-                    <div className="text-right">
+                  <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-8 shrink-0 ml-0 sm:ml-4 pl-16 sm:pl-0">
+                    <div className="text-left sm:text-right flex-1 sm:flex-none">
                       <div className="text-lg sm:text-xl font-black text-foreground">
                         {isExpense ? "-" : "+"}${Math.abs(tx.amount).toFixed(2)}
                       </div>
+                      {/* Show trigger below price on desktop, hidden on mobile */}
                       {tx.trigger_name && (
                         <Badge
                           variant="outline"
-                          className="bg-red-500/10 text-red-400 border-red-500/20 px-2 py-0 text-[8px] font-black flex gap-1 uppercase tracking-widest mt-1"
+                          className="hidden sm:flex bg-red-500/10 text-red-400 border-red-500/20 px-2 py-0 text-[8px] font-black items-center gap-1 uppercase tracking-widest mt-1.5 ml-auto w-max"
                         >
                           <Zap className="w-2.5 h-2.5 fill-red-400" />
                           {tx.trigger_name}
@@ -355,7 +366,7 @@ export default function SpendingPage() {
 
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-muted rounded-xl transition-colors">
+                        <button className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-muted rounded-xl transition-colors shrink-0">
                           <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                         </button>
                       </DropdownMenuTrigger>
