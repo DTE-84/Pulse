@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS "dim_triggers" (
 -- 5. Dimension: Goals (Target Nodes)
 CREATE TABLE IF NOT EXISTS "dim_goals" (
     goal_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES dim_users(user_id),
+    user_id UUID REFERENCES dim_users(user_id) ON DELETE CASCADE,
     goal_name VARCHAR(100) NOT NULL,
     target_amount DECIMAL(12, 2) NOT NULL,
     current_progress DECIMAL(12, 2) DEFAULT 0,
