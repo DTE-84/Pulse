@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   TrendingUp,
   ChevronRight,
@@ -66,9 +67,12 @@ export default function GrowthPage() {
     }
   };
 
+  const { isAuthenticated, loading } = useAuth();
+
   useEffect(() => {
+    if (loading || !isAuthenticated) return;
     fetchData();
-  }, []);
+  }, [loading, isAuthenticated]);
 
   const handleCreateGoal = async () => {
     if (!newGoal.name || !newGoal.target) return;
