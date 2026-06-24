@@ -575,8 +575,8 @@ export default function Index() {
                   of your target liquidity.
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-muted rounded-2xl p-4 border border-border">
+              <div className="grid grid-cols-2 gap-4 h-full">
+                <div className="bg-muted rounded-2xl p-4 border border-border flex flex-col justify-between h-full">
                   <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">
                     Projected Spend
                   </p>
@@ -585,7 +585,7 @@ export default function Index() {
                     {stats?.projection?.projectedSpend?.toLocaleString() || "0"}
                   </p>
                 </div>
-                <div className="bg-muted rounded-2xl p-4 border border-border">
+                <div className="bg-muted rounded-2xl p-4 border border-border flex flex-col justify-between h-full">
                   <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">
                     Daily Velocity
                   </p>

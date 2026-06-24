@@ -23,7 +23,7 @@ const StatCard = ({
   icon: Icon,
   colorClass,
 }: any) => (
-  <div className="bg-[#0A0907] border border-white/[0.03] rounded-3xl p-4 md:p-6 relative overflow-hidden group hover:bg-[#11100D] transition-all hover:border-white/10 shadow-2xl">
+  <div className="bg-[#0A0907] border border-white/[0.03] rounded-3xl p-4 md:p-6 relative overflow-hidden group hover:bg-[#11100D] transition-all hover:border-white/10 shadow-2xl flex flex-col h-full">
     <div
       className={cn(
         "absolute top-0 left-0 w-1 h-full opacity-30 group-hover:opacity-100 transition-opacity",
@@ -47,7 +47,7 @@ const StatCard = ({
     <div className="text-2xl md:text-3xl font-black mb-3 tracking-tighter text-white flex items-baseline gap-1">
       {value}
     </div>
-    <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest">
+    <div className="mt-auto pt-2 flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest">
       <span
         className={cn(
           trend === "up" ? "text-red-400" : "text-primary",
