@@ -158,7 +158,7 @@ export async function setupTrialSandboxItem(userId: string) {
       initial_products: ["transactions" as any],
       options: {
         override_username: "user_good",
-        override_password: "password_good",
+        override_password: "pass_good",
       },
     });
 

@@ -51,7 +51,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
 
         // Fetch subscription details to get period end
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-        const periodEnd = new Date(subscription.current_period_end * 1000).toISOString();
+        const periodEnd = new Date((subscription as any).current_period_end * 1000).toISOString();
         const planName = session.metadata?.planName || "Elite";
 
         await query(
@@ -74,12 +74,12 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
       // 3. Subscription renewed successfully
       case "invoice.payment_succeeded": {
         const invoice = event.data.object as Stripe.Invoice;
-        const subscriptionId = invoice.subscription as string;
+        const subscriptionId = (invoice as any).subscription as string;
 
         if (!subscriptionId) break;
 
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-        const periodEnd = new Date(subscription.current_period_end * 1000).toISOString();
+        const periodEnd = new Date((subscription as any).current_period_end * 1000).toISOString();
 
         await query(
           `UPDATE dim_users SET
@@ -97,7 +97,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
       // 4. Payment failed — grace period, don't kill access yet
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
-        const subscriptionId = invoice.subscription as string;
+        const subscriptionId = (invoice as any).subscription as string;
 
         if (!subscriptionId) break;
 

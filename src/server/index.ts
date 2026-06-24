@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { query } from "./db/db.js";
 
 // 1. Direct Imports for Core Routes (Eliminate lazy-load bundling issues)
 import { handleDemo } from "./routes/demo.js";
@@ -26,8 +27,6 @@ import {
   apiLimiter,
 } from "./middleware/security.js";
 
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:5173,http://localhost:3000,https://pulse-nova-solutions.vercel.app,https://dte-solutions.icu,https://pulse-blond-three.vercel.app")
-  .split(",").map((o: string) => o.trim());
 
 export function createServer() {
   const app = express();
@@ -75,7 +74,7 @@ export function createServer() {
   app.get("/api/ping", (_req, res) => res.json({ message: "ping", status: "Deterministic Uplink Active" }));
   app.get("/api/health", async (_req, res) => {
     try {
-      const dbCheck = await query("SELECT NOW()");
+      await query("SELECT NOW()");
       res.json({ 
         status: "Online", 
         message: "Pulse Nexus Operational", 

@@ -97,6 +97,7 @@ export async function seedGuestData(userId: string) {
     }
 
     // 3. Define Behavioral Nodes
+    const now = new Date();
     const nodes = [
       // Baseline (Last Month)
       { amount: 1200.00, cat: "Housing", date: subMonths(now, 1), tid: null },

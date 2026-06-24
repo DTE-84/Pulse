@@ -201,14 +201,14 @@ const TriggerCard = ({
 
     <div className="h-32 mb-8 -mx-2">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={stats.chartData || fallbackChartData}>
+        <BarChart data={stats?.chartData || fallbackChartData}>
           <Bar dataKey="value" radius={[6, 6, 6, 6]}>
-            {(stats.chartData || fallbackChartData).map(
+            {(stats?.chartData || fallbackChartData).map(
               (_entry: any, index: number) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={
-                    index === (stats.chartData || fallbackChartData).length - 1
+                    index === (stats?.chartData || fallbackChartData).length - 1
                       ? chartColor
                       : "rgba(0,0,0,0.05)"
                   }
@@ -454,7 +454,7 @@ export default function Index() {
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 md:space-y-10 text-foreground">
       {/* Empty State Banner for New Users */}
-      {stats?.totalBalance === 0 && user?.subscriptionStatus === 'trialing' && (
+      {(!stats || stats?.totalBalance === 0) && user?.subscriptionStatus === 'trialing' && (
         <div className="bg-primary/10 border border-primary/20 rounded-[1.5rem] p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden group">
           <div className="absolute -right-10 -top-10 opacity-10 pointer-events-none">
             <Zap size={150} className="text-primary" />

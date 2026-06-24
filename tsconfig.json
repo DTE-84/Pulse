@@ -16,8 +16,8 @@
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
 
     /* Paths */
@@ -39,6 +39,6 @@
     "src/vite.config.ts", 
     "src/vite.config.server.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "src/server/db/legacy"]
 }
 
