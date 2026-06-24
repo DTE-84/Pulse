@@ -243,9 +243,9 @@ export default function GrowthPage() {
             </h3>
             <div className="space-y-8 flex-1 overflow-y-auto max-h-[400px] scrollbar-hide">
               {goals.map((goal) => {
-                const Icon = getGoalIcon(goal.goal_name);
-                const current = parseFloat(goal.current_progress) || 0;
-                const target = parseFloat(goal.target_amount) || 1;
+                const Icon = getGoalIcon(goal.name);
+                const current = parseFloat(goal.current) || 0;
+                const target = parseFloat(goal.target) || 1;
                 const progress = Math.min(100, (current / target) * 100);
                 return (
                   <div
@@ -262,7 +262,7 @@ export default function GrowthPage() {
                           <Icon className="w-5 h-5" />
                         </div>
                         <span className="text-sm font-bold text-white group-hover:text-primary transition-colors">
-                          {goal.goal_name}
+                          {goal.name}
                         </span>
                       </div>
                       <ArrowUpRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
