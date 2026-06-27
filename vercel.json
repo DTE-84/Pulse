@@ -1,10 +1,17 @@
 {
   "version": 2,
   "rewrites": [
+    { "source": "/api/cron/generate-transactions", "destination": "/api/cron/generate-transactions.ts" },
     { "source": "/api/ping", "destination": "/api/ping.ts" },
     { "source": "/api/status-check", "destination": "/api/ping.ts" },
     { "source": "/api/debug/system", "destination": "/api/index.ts" },
     { "source": "/api/:path*", "destination": "/api/index.ts" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/generate-transactions",
+      "schedule": "*/10 * * * *"
+    }
   ]
 }

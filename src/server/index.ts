@@ -18,6 +18,7 @@ import {
   exchangePublicToken, 
   sandboxSeed 
 } from "./routes/plaid.js";
+import handleCronGenerateTransactions from "../../api/cron/generate-transactions.js";
 
 // 2. Middleware
 import {
@@ -96,6 +97,8 @@ export function createServer() {
   app.post("/api/plaid/create-link-token", requireAuth, createLinkToken as any);
   app.post("/api/plaid/exchange-token", requireAuth, exchangePublicToken as any);
   app.post("/api/plaid/sandbox-seed", requireAuth, sandboxSeed as any);
+  app.get("/api/cron/generate-transactions", handleCronGenerateTransactions as any);
+  app.post("/api/cron/generate-transactions", handleCronGenerateTransactions as any);
 
   app.get("/api/demo", apiLimiter, handleDemo as any);
   app.get("/api/stats", apiLimiter, requireAuth, handleStats as any);

@@ -14,6 +14,7 @@
     "build:server": "vite build --config vite.config.server.mjs",
     "test": "vitest run",
     "start": "node server-dist/production.mjs",
+    "seed:sandbox": "tsx scripts/seed-sandbox-transactions.ts",
     "typecheck": "tsc"
   },
   "dependencies": {
