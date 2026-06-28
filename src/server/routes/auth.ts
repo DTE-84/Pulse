@@ -1,4 +1,5 @@
 import { Request, Response, Router } from "express";
+import jwt from "jsonwebtoken";
 import { query } from "../db/db.js";
 import { getSupabase, getSupabaseAdmin, authLimiter, requireAuth } from "../middleware/security.js";
 
@@ -177,21 +178,17 @@ export const handleGuestSignup = async (_req: Request, res: Response) => {
   const sandboxUserId = process.env.SANDBOX_USER_ID || 'ddeaa710-caf5-4b3f-949c-5e1e27b0959b';
 
   try {
-    const supabaseAdmin = getSupabaseAdmin();
+    const secret = process.env.JWT_SECRET;
+    if (!secret) throw new Error('JWT_SECRET missing.');
 
-    // Sign in as the fixed sandbox user to get a real Supabase session
-    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.createSession({
-      user_id: sandboxUserId,
-    });
-
-    if (sessionError || !sessionData?.session) {
-      console.error("[PULSE AUTH] Sandbox session failed:", sessionError?.message);
-      return res.status(500).json({ message: "Sandbox login failed.", detail: sessionError?.message });
-    }
+    const token = jwt.sign(
+      { id: sandboxUserId, email: 'sandbox@pulse.demo' },
+      secret,
+      { expiresIn: '24h' }
+    );
 
     return res.status(200).json({
-      token: sessionData.session.access_token,
-      refreshToken: sessionData.session.refresh_token,
+      token,
       user: {
         id: sandboxUserId,
         email: 'sandbox@pulse.demo',
