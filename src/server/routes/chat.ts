@@ -151,8 +151,10 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
 
     let result;
     try {
+      const MODEL = "claude-3-haiku-20240307";
+      console.log(`[Nova Chat] Using model: ${MODEL}`);
       result = await client.messages.create({
-        model: "claude-3-5-sonnet-20241022",
+        model: MODEL,
         max_tokens: 1024,
         system: systemPrompt,
         messages: claudeHistory,
