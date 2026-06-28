@@ -1,6 +1,5 @@
 import { RequestHandler } from "express";
 import Anthropic from "@anthropic-ai/sdk";
-
 import { query } from "../db/db.js";
 
 export const handleNovaChat: RequestHandler = async (req, res) => {
@@ -140,9 +139,7 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
 
     const client = new Anthropic({ apiKey });
 
-    // Manage context and cost: Keep last 20 messages (10 exchanges)
     const trimmedHistory = (history || []).slice(-20);
-
     const claudeHistory = trimmedHistory
       .filter((msg: any) => msg.role === "user" || msg.role === "assistant")
       .map((msg: any) => ({

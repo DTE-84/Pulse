@@ -148,7 +148,7 @@ export default function SpendingPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={(_stats?.monthlyExpenses || 0) > 0 ? categoryData : []}
+                    data={categoryData.length > 0 ? categoryData : []}
                     cx="50%"
                     cy="50%"
                     innerRadius={70}
