@@ -148,7 +148,11 @@ export default function SpendingPage() {
         setLoading(false);
       }
     };
+
     fetchData();
+
+    const interval = setInterval(fetchData, 60000); // refresh every 60 seconds
+    return () => clearInterval(interval);
   }, []);
 
   const getIcon = (cat: string) => {

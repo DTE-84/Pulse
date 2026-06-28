@@ -151,7 +151,7 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
 
     let result;
     try {
-      const MODEL = "claude-3-haiku-20240307";
+      const MODEL = "claude-sonnet-4-6";
       console.log(`[Nova Chat] Using model: ${MODEL}`);
       result = await client.messages.create({
         model: MODEL,
