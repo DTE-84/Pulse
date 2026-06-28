@@ -18,7 +18,7 @@ import {
   exchangePublicToken, 
   sandboxSeed 
 } from "./routes/plaid.js";
-import handleCronGenerateTransactions from "../../api/cron/generate-transactions.js";
+import handleCronGenerateTransactions from "./routes/cron.js";
 
 // 2. Middleware
 import {
