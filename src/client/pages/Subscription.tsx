@@ -175,13 +175,13 @@ export default function SubscriptionPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 pt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 pt-6 items-stretch">
         {plans.map((plan, i) => (
           <div
             key={i}
             className={cn(
               "bg-card border border-border rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-10 flex flex-col h-full relative transition-all group hover:bg-muted/30",
-              plan.popular ? "ring-2 ring-primary/30 shadow-[0_0_50px_rgba(45,237,156,0.1)] md:scale-105 z-10" : "scale-100",
+              plan.popular ? "ring-2 ring-primary/30 shadow-[0_0_50px_rgba(45,237,156,0.1)]" : "",
               plan.elite ? "border-yellow-500/20 bg-gradient-to-b from-yellow-500/[0.02] to-transparent" : ""
             )}
           >
