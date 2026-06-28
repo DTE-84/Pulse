@@ -79,7 +79,9 @@ export const handleStats: RequestHandler = async (req, res) => {
         COALESCE(SUM(amount), 0) as current_month_spend,
         COUNT(*) as transaction_count
       FROM fact_transactions
-      WHERE user_id = $1 AND purchase_date >= $2
+      WHERE user_id = $1 
+        AND purchase_date >= $2
+        AND amount > 0
     `,
       [userId, monthStart]
     );
@@ -92,7 +94,9 @@ export const handleStats: RequestHandler = async (req, res) => {
         TO_CHAR(purchase_date, 'DY') as day,
         SUM(amount) as value
       FROM fact_transactions
-      WHERE user_id = $1 AND purchase_date >= NOW() - INTERVAL '7 days'
+      WHERE user_id = $1 
+        AND purchase_date >= NOW() - INTERVAL '7 days'
+        AND amount > 0
       GROUP BY TO_CHAR(purchase_date, 'DY'), EXTRACT(DOW FROM purchase_date)
       ORDER BY EXTRACT(DOW FROM purchase_date)
     `,
@@ -107,7 +111,16 @@ export const handleStats: RequestHandler = async (req, res) => {
     const categoryRes = await query(
       `
       SELECT 
-        c.category_name,
+        CASE 
+          WHEN c.category_name IN ('GENERAL_MERCHANDISE','Shops','Shopping') THEN 'Shopping'
+          WHEN c.category_name IN ('FOOD_AND_DRINK','Food and Drink','Dining') THEN 'Dining'
+          WHEN c.category_name IN ('GROCERIES','Groceries') THEN 'Groceries'
+          WHEN c.category_name IN ('GAS_AND_CONVENIENCE','TRANSPORTATION','Transport','Travel') THEN 'Transport'
+          WHEN c.category_name IN ('ENTERTAINMENT','Entertainment') THEN 'Entertainment'
+          WHEN c.category_name IN ('HOME_IMPROVEMENT','Housing') THEN 'Housing'
+          WHEN c.category_name IN ('GENERAL_SERVICES','Service') THEN 'Services'
+          ELSE 'Other'
+        END as category_name,
         COALESCE(SUM(t.amount), 0) as total,
         COUNT(*) as count
       FROM fact_transactions t
@@ -115,7 +128,7 @@ export const handleStats: RequestHandler = async (req, res) => {
       WHERE t.user_id = $1 
         AND t.purchase_date >= $2
         AND t.amount > 0
-      GROUP BY c.category_name
+      GROUP BY 1
       ORDER BY total DESC
       `,
       [userId, monthStart]
@@ -128,6 +141,8 @@ export const handleStats: RequestHandler = async (req, res) => {
       'Transport':     '#FACC15',
       'Entertainment': '#A855F7',
       'Housing':       '#94A3B8',
+      'Services':      '#F472B6',
+      'Other':         '#64748B',
     };
     
     const categoryBreakdown = categoryRes.rows.map((row: any) => {
