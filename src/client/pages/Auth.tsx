@@ -410,6 +410,20 @@ export default function AuthPage() {
                 </button>
               </p>
             </div>
+
+            {/* Add to Home Screen */}
+            <div className="mt-6 p-4 bg-muted/50 border border-border rounded-2xl space-y-1">
+              <p className="text-[9px] font-black text-primary uppercase tracking-widest">Install Pulse</p>
+              <p className="text-[9px] font-medium text-muted-foreground leading-relaxed">
+                <span className="text-foreground font-bold">iOS Safari:</span> Tap the Share icon → "Add to Home Screen"<br />
+                <span className="text-foreground font-bold">Android Chrome:</span> Tap the menu (⋮) → "Add to Home Screen"
+              </p>
+            </div>
+
+            {/* Legal Footnote */}
+            <p className="mt-4 text-[8px] text-muted-foreground/40 text-center leading-relaxed">
+              Pulse is not a registered financial advisor. Financial data aggregation is securely powered by Plaid. Payment processing is secured by Stripe.
+            </p>
           </div>
         </div>
       </div>

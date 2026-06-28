@@ -33,10 +33,9 @@ export default async function handleCronGenerateTransactions(req: Request, res: 
   }
 
   try {
-    const users = [{
-      user_id: process.env.SANDBOX_TEST_USER_ID!,
-      plaid_account_id: process.env.SANDBOX_TEST_ACCOUNT_ID!,
-    }];
+    const { data: users, error } = await supabase
+    .from('users')          // ← your users table name
+    .select('user_id');     // ← your user ID column name
 
     let totalInserted = 0;
     const errors: string[] = [];
@@ -57,6 +56,7 @@ export default async function handleCronGenerateTransactions(req: Request, res: 
         merchant_name: tx.merchant_name,
         external_id: tx.plaid_transaction_id,
         status: tx.pending ? 'pending' : 'posted',
+        category_id: tx.category_id,
         is_synthetic: true,
         // category_id and trigger_id left null — add defaults if your schema requires them
       }));

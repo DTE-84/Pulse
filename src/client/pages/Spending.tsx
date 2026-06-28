@@ -44,19 +44,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const categoryData = [
-  { name: "Shopping", value: 35, color: "#60A5FA" },
-  { name: "Food & Drink", value: 25, color: "#FB923C" },
-  { name: "Fixed Bills", value: 20, color: "#A855F7" },
-  { name: "Transport", value: 15, color: "#FACC15" },
-  { name: "Others", value: 5, color: "#94A3B8" },
-];
-
 export default function SpendingPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [_stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
+
+  const categoryData: { name: string; value: number; color: string }[] = _stats?.categoryBreakdown || [];
 
   useEffect(() => {
     const fetchData = async () => {

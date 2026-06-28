@@ -104,6 +104,49 @@ export const handleStats: RequestHandler = async (req, res) => {
       value: parseFloat(row.value),
     }));
 
+    const categoryRes = await query(
+      `
+      SELECT 
+        c.category_name,
+        COALESCE(SUM(t.amount), 0) as total,
+        COUNT(*) as count
+      FROM fact_transactions t
+      LEFT JOIN dim_categories c ON t.category_id = c.category_id
+      WHERE t.user_id = $1 
+        AND t.purchase_date >= $2
+        AND t.amount > 0
+      GROUP BY c.category_name
+      ORDER BY total DESC
+      `,
+      [userId, monthStart]
+    );
+    
+    const CATEGORY_COLORS: Record<string, string> = {
+      'Dining':        '#FB923C',
+      'Groceries':     '#34D399',
+      'Shopping':      '#60A5FA',
+      'Transport':     '#FACC15',
+      'Entertainment': '#A855F7',
+      'Housing':       '#94A3B8',
+    };
+    
+    const categoryBreakdown = categoryRes.rows.map((row: any) => {
+      const total = parseFloat(row.total);
+      return {
+        name: row.category_name || 'Other',
+        total: Number(total.toFixed(2)),
+        count: Number(row.count),
+        color: CATEGORY_COLORS[row.category_name] || '#64748B',
+      };
+    });
+    
+    // Add pct after totals are known
+    const grandTotal = categoryBreakdown.reduce((sum: number, c: any) => sum + c.total, 0);
+    const categoryBreakdownWithPct = categoryBreakdown.map((c: any) => ({
+      ...c,
+      value: grandTotal > 0 ? Math.round((c.total / grandTotal) * 100) : 0,
+    }));
+
     const totalBalance = parseFloat(user.initial_balance) - lifetimeSpend;
 
     const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
@@ -179,6 +222,7 @@ export const handleStats: RequestHandler = async (req, res) => {
       novaInsight,
       triggers,
       projection,
+      categoryBreakdown: categoryBreakdownWithPct,
       chartData:
         chartData.length > 0
           ? chartData

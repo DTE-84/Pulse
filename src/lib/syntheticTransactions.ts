@@ -18,6 +18,7 @@ export interface SyntheticTransaction {
   datetime: string;               // ISO 8601
   category: string[];             // Plaid-style category array
   personal_finance_category: string;
+  category_id: number;
   pending: boolean;
   is_synthetic: boolean;          // flag so you can filter these out later
   created_at: string;
@@ -29,63 +30,63 @@ export interface SyntheticTransaction {
 const MERCHANTS = {
   // Recurring / subscriptions — predictable, low emotion
   subscription: [
-    { name: 'Netflix',          category: ['Service', 'Subscription'],  finance_cat: 'ENTERTAINMENT',      range: [15.99, 15.99] },
-    { name: 'Spotify',          category: ['Service', 'Subscription'],  finance_cat: 'ENTERTAINMENT',      range: [9.99,  9.99]  },
-    { name: 'Amazon Prime',     category: ['Service', 'Subscription'],  finance_cat: 'GENERAL_MERCHANDISE',range: [14.99, 14.99] },
-    { name: 'Apple iCloud',     category: ['Service', 'Subscription'],  finance_cat: 'GENERAL_SERVICES',   range: [0.99,  9.99]  },
-    { name: 'YouTube Premium',  category: ['Service', 'Subscription'],  finance_cat: 'ENTERTAINMENT',      range: [13.99, 13.99] },
-    { name: 'Adobe Creative',   category: ['Service', 'Subscription'],  finance_cat: 'GENERAL_SERVICES',   range: [54.99, 54.99] },
+    { name: 'Netflix',          category_id: 6,  category: ['Service', 'Subscription'],  finance_cat: 'ENTERTAINMENT',      range: [15.99, 15.99] },
+    { name: 'Spotify',          category_id: 6,  category: ['Service', 'Subscription'],  finance_cat: 'ENTERTAINMENT',      range: [9.99,  9.99]  },
+    { name: 'Amazon Prime',     category_id: 6,  category: ['Service', 'Subscription'],  finance_cat: 'GENERAL_MERCHANDISE',range: [14.99, 14.99] },
+    { name: 'Apple iCloud',     category_id: 6,  category: ['Service', 'Subscription'],  finance_cat: 'GENERAL_SERVICES',   range: [0.99,  9.99]  },
+    { name: 'YouTube Premium',  category_id: 6,  category: ['Service', 'Subscription'],  finance_cat: 'ENTERTAINMENT',      range: [13.99, 13.99] },
+    { name: 'Adobe Creative',   category_id: 6,  category: ['Service', 'Subscription'],  finance_cat: 'GENERAL_SERVICES',   range: [54.99, 54.99] },
   ],
 
   // Food & drink — high frequency, emotional spending patterns
   food: [
-    { name: 'Starbucks',        category: ['Food and Drink', 'Coffee'], finance_cat: 'FOOD_AND_DRINK',     range: [4.50, 8.75]  },
-    { name: "McDonald's",       category: ['Food and Drink', 'Restaurants'], finance_cat: 'FOOD_AND_DRINK',range: [7.00, 14.00] },
-    { name: "Chick-fil-A",      category: ['Food and Drink', 'Restaurants'], finance_cat: 'FOOD_AND_DRINK',range: [9.00, 18.00] },
-    { name: 'Chipotle',         category: ['Food and Drink', 'Restaurants'], finance_cat: 'FOOD_AND_DRINK',range: [10.00, 16.00]},
-    { name: 'Panera Bread',     category: ['Food and Drink', 'Restaurants'], finance_cat: 'FOOD_AND_DRINK',range: [8.00, 14.00] },
-    { name: 'Subway',           category: ['Food and Drink', 'Restaurants'], finance_cat: 'FOOD_AND_DRINK',range: [7.00, 12.00] },
+    { name: 'Starbucks',        category_id: 2,  category: ['Food and Drink', 'Coffee'], finance_cat: 'FOOD_AND_DRINK',     range: [4.50, 8.75]  },
+    { name: "McDonald's",       category_id: 2,  category: ['Food and Drink', 'Restaurants'], finance_cat: 'FOOD_AND_DRINK',range: [7.00, 14.00] },
+    { name: "Chick-fil-A",      category_id: 2,  category: ['Food and Drink', 'Restaurants'], finance_cat: 'FOOD_AND_DRINK',range: [9.00, 18.00] },
+    { name: 'Chipotle',         category_id: 2,  category: ['Food and Drink', 'Restaurants'], finance_cat: 'FOOD_AND_DRINK',range: [10.00, 16.00]},
+    { name: 'Panera Bread',     category_id: 2,  category: ['Food and Drink', 'Restaurants'], finance_cat: 'FOOD_AND_DRINK',range: [8.00, 14.00] },
+    { name: 'Subway',           category_id: 2,  category: ['Food and Drink', 'Restaurants'], finance_cat: 'FOOD_AND_DRINK',range: [7.00, 12.00] },
   ],
 
   // Delivery — impulse signal, often late night
   delivery: [
-    { name: 'DoorDash',         category: ['Food and Drink', 'Delivery'], finance_cat: 'FOOD_AND_DRINK',   range: [22.00, 48.00] },
-    { name: 'Uber Eats',        category: ['Food and Drink', 'Delivery'], finance_cat: 'FOOD_AND_DRINK',   range: [20.00, 45.00] },
-    { name: 'Grubhub',          category: ['Food and Drink', 'Delivery'], finance_cat: 'FOOD_AND_DRINK',   range: [18.00, 42.00] },
-    { name: 'Instacart',        category: ['Food and Drink', 'Delivery'], finance_cat: 'FOOD_AND_DRINK',   range: [55.00, 110.00]},
+    { name: 'DoorDash',         category_id: 2,  category: ['Food and Drink', 'Delivery'], finance_cat: 'FOOD_AND_DRINK',   range: [22.00, 48.00] },
+    { name: 'Uber Eats',        category_id: 2,  category: ['Food and Drink', 'Delivery'], finance_cat: 'FOOD_AND_DRINK',   range: [20.00, 45.00] },
+    { name: 'Grubhub',          category_id: 2,  category: ['Food and Drink', 'Delivery'], finance_cat: 'FOOD_AND_DRINK',   range: [18.00, 42.00] },
+    { name: 'Instacart',        category_id: 3,  category: ['Food and Drink', 'Delivery'], finance_cat: 'FOOD_AND_DRINK',   range: [55.00, 110.00]},
   ],
 
   // Shopping — discretionary, variable amounts
   shopping: [
-    { name: 'Amazon',           category: ['Shops', 'Online Stores'],   finance_cat: 'GENERAL_MERCHANDISE',range: [12.00, 180.00]},
-    { name: 'Target',           category: ['Shops', 'Supermarkets'],    finance_cat: 'GENERAL_MERCHANDISE',range: [28.00, 95.00] },
-    { name: 'Walmart',          category: ['Shops', 'Supermarkets'],    finance_cat: 'GENERAL_MERCHANDISE',range: [35.00, 120.00]},
-    { name: 'Best Buy',         category: ['Shops', 'Electronics'],     finance_cat: 'GENERAL_MERCHANDISE',range: [25.00, 250.00]},
-    { name: 'Home Depot',       category: ['Shops', 'Hardware'],        finance_cat: 'HOME_IMPROVEMENT',   range: [18.00, 140.00]},
+    { name: 'Amazon',           category_id: 4,  category: ['Shops', 'Online Stores'],   finance_cat: 'GENERAL_MERCHANDISE',range: [12.00, 180.00]},
+    { name: 'Target',           category_id: 4,  category: ['Shops', 'Supermarkets'],    finance_cat: 'GENERAL_MERCHANDISE',range: [28.00, 95.00] },
+    { name: 'Walmart',          category_id: 4,  category: ['Shops', 'Supermarkets'],    finance_cat: 'GENERAL_MERCHANDISE',range: [35.00, 120.00]},
+    { name: 'Best Buy',         category_id: 4,  category: ['Shops', 'Electronics'],     finance_cat: 'GENERAL_MERCHANDISE',range: [25.00, 250.00]},
+    { name: 'Home Depot',       category_id: 4,  category: ['Shops', 'Hardware'],        finance_cat: 'HOME_IMPROVEMENT',   range: [18.00, 140.00]},
   ],
 
   // Groceries — necessary spend baseline
   grocery: [
-    { name: 'Kroger',           category: ['Shops', 'Supermarkets'],    finance_cat: 'GROCERIES',          range: [45.00, 130.00]},
-    { name: 'Aldi',             category: ['Shops', 'Supermarkets'],    finance_cat: 'GROCERIES',          range: [30.00, 85.00] },
-    { name: 'Whole Foods',      category: ['Shops', 'Supermarkets'],    finance_cat: 'GROCERIES',          range: [60.00, 155.00]},
-    { name: "Sam's Club",       category: ['Shops', 'Supermarkets'],    finance_cat: 'GROCERIES',          range: [65.00, 180.00]},
+    { name: 'Kroger',           category_id: 3,  category: ['Shops', 'Supermarkets'],    finance_cat: 'GROCERIES',          range: [45.00, 130.00]},
+    { name: 'Aldi',             category_id: 3,  category: ['Shops', 'Supermarkets'],    finance_cat: 'GROCERIES',          range: [30.00, 85.00] },
+    { name: 'Whole Foods',      category_id: 3,  category: ['Shops', 'Supermarkets'],    finance_cat: 'GROCERIES',          range: [60.00, 155.00]},
+    { name: "Sam's Club",       category_id: 3,  category: ['Shops', 'Supermarkets'],    finance_cat: 'GROCERIES',          range: [65.00, 180.00]},
   ],
 
   // Gas & transport
   transport: [
-    { name: 'Shell',            category: ['Travel', 'Gas Stations'],   finance_cat: 'GAS_AND_CONVENIENCE',range: [38.00, 75.00] },
-    { name: 'Casey\'s',         category: ['Travel', 'Gas Stations'],   finance_cat: 'GAS_AND_CONVENIENCE',range: [35.00, 68.00] },
-    { name: 'Uber',             category: ['Travel', 'Taxi'],           finance_cat: 'TRANSPORTATION',     range: [10.00, 32.00] },
-    { name: 'QuikTrip',         category: ['Travel', 'Gas Stations'],   finance_cat: 'GAS_AND_CONVENIENCE',range: [36.00, 72.00] },
+    { name: 'Shell',            category_id: 5,  category: ['Travel', 'Gas Stations'],   finance_cat: 'GAS_AND_CONVENIENCE',range: [38.00, 75.00] },
+    { name: 'Casey\'s',         category_id: 5,  category: ['Travel', 'Gas Stations'],   finance_cat: 'GAS_AND_CONVENIENCE',range: [35.00, 68.00] },
+    { name: 'Uber',             category_id: 5,  category: ['Travel', 'Taxi'],           finance_cat: 'TRANSPORTATION',     range: [10.00, 32.00] },
+    { name: 'QuikTrip',         category_id: 5,  category: ['Travel', 'Gas Stations'],   finance_cat: 'GAS_AND_CONVENIENCE',range: [36.00, 72.00] },
   ],
 
   // Occasional credits (income/refunds) — negative amounts
   credit: [
-    { name: 'Direct Deposit',   category: ['Transfer', 'Payroll'],      finance_cat: 'INCOME',             range: [-1200.00, -2800.00] },
-    { name: 'Venmo',            category: ['Transfer', 'Third Party'],  finance_cat: 'TRANSFER_IN',        range: [-20.00, -200.00]    },
-    { name: 'Zelle',            category: ['Transfer', 'Third Party'],  finance_cat: 'TRANSFER_IN',        range: [-25.00, -150.00]    },
-    { name: 'Amazon Refund',    category: ['Shops', 'Online Stores'],   finance_cat: 'GENERAL_MERCHANDISE',range: [-15.00, -80.00]     },
+    { name: 'Direct Deposit',   category_id: 23, category: ['Transfer', 'Payroll'],      finance_cat: 'INCOME',             range: [-1200.00, -2800.00] },
+    { name: 'Venmo',            category_id: 23, category: ['Transfer', 'Third Party'],  finance_cat: 'TRANSFER_IN',        range: [-20.00, -200.00]    },
+    { name: 'Zelle',            category_id: 23, category: ['Transfer', 'Third Party'],  finance_cat: 'TRANSFER_IN',        range: [-25.00, -150.00]    },
+    { name: 'Amazon Refund',    category_id: 4,  category: ['Shops', 'Online Stores'],   finance_cat: 'GENERAL_MERCHANDISE',range: [-15.00, -80.00]     },
   ],
 };
 
@@ -164,6 +165,7 @@ export function generateTransactions(
       datetime: txDate.toISOString(),
       category: merchant.category,
       personal_finance_category: merchant.finance_cat,
+      category_id: merchant.category_id,
       pending: isPending,
       is_synthetic: true,
       created_at: new Date().toISOString(),
@@ -207,6 +209,7 @@ export function generateHistoricalSeed(
         datetime: payDate.toISOString(),
         category: ['Transfer', 'Payroll'],
         personal_finance_category: 'INCOME',
+        category_id: 23,
         pending: false,
         is_synthetic: true,
         created_at: new Date().toISOString(),
@@ -234,6 +237,7 @@ export function generateHistoricalSeed(
         datetime: txDate.toISOString(),
         category: merchant.category,
         personal_finance_category: merchant.finance_cat,
+        category_id: merchant.category_id,
         pending: false,
         is_synthetic: true,
         created_at: new Date().toISOString(),

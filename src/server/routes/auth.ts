@@ -1,8 +1,5 @@
 import { Request, Response, Router } from "express";
-import crypto from "crypto";
 import { query } from "../db/db.js";
-import { seedGuestData } from "../db/seed-guest.js";
-import { setupTrialSandboxItem } from "../lib/plaid.js";
 import { getSupabase, getSupabaseAdmin, authLimiter, requireAuth } from "../middleware/security.js";
 
 const router = Router();
@@ -177,149 +174,36 @@ export const handleSignup = async (req: Request, res: Response) => {
 };
 
 export const handleGuestSignup = async (_req: Request, res: Response) => {
-  console.log("[PULSE AUTH] Initializing Guest Sandbox Protocol...");
-  const sUrl = process.env.VITE_SUPABASE_URL;
-  const sKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  console.log(`[PULSE AUTH] Diagnostics - URL: ${sUrl ? "OK" : "MISSING"}, Key: ${sKey ? "OK" : "MISSING"}`);
-  
+  const sandboxUserId = process.env.SANDBOX_USER_ID || 'ddeaa710-caf5-4b3f-949c-5e1e27b0959b';
+
   try {
     const supabaseAdmin = getSupabaseAdmin();
-    if (!supabaseAdmin) {
-       console.error("[PULSE AUTH] FATAL: supabaseAdmin is null or undefined");
-       throw new Error("Supabase Admin client initialization failed.");
-    }
 
-    // Use crypto for higher entropy and collision avoidance
-    const guestId = crypto.randomBytes(4).toString('hex'); 
-    const email = `guest_${guestId}@pulse.demo`;
-    const password = crypto.randomBytes(12).toString('base64') + "A1!"; 
-    const name = `Guest User ${guestId.toUpperCase()}`;
-
-    console.log(`[PULSE AUTH] Provisioning Supabase Auth identity: ${email}`);
-
-    // 1. Create User in Supabase Auth
-    let { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { name }
+    // Sign in as the fixed sandbox user to get a real Supabase session
+    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.createSession({
+      user_id: sandboxUserId,
     });
 
-    // Handle potential "unexpected_failure" by checking if user was actually created
-    if (authError && authError.status === 500) {
-      console.warn("[PULSE AUTH] Received 500 from Supabase, checking if user exists anyway...");
-      const { data: searchData } = await supabaseAdmin.auth.admin.listUsers();
-      const existingUser = searchData?.users.find((u: any) => u.email === email);
-      if (existingUser) {
-        console.log("[PULSE AUTH] User was successfully created despite 500 error.");
-        authData = { user: existingUser as any };
-        authError = null;
-      }
+    if (sessionError || !sessionData?.session) {
+      console.error("[PULSE AUTH] Sandbox session failed:", sessionError?.message);
+      return res.status(500).json({ message: "Sandbox login failed.", detail: sessionError?.message });
     }
 
-    if (authError) {
-      console.error("[PULSE AUTH] Supabase Auth Creation Failed:", JSON.stringify(authError, Object.getOwnPropertyNames(authError)));
-      return res.status(500).json({ 
-        message: "Sandbox Identity Failure", 
-        detail: authError.message || "Unexpected Supabase Error",
-        code: authError.status || 500
-      });
-    }
-
-    const user = authData.user;
-    if (!user) {
-        console.error("[PULSE AUTH] Auth successful but user object is missing");
-        throw new Error("User creation succeeded but no user object returned.");
-    }
-    console.log(`[PULSE AUTH] Identity confirmed: ${user.id}`);
-
-    // 2. Update the profile created by the trigger
-    console.log("[PULSE AUTH] Refining demo profile...");
-    const { error: profileError } = await supabaseAdmin
-      .from("dim_users")
-      .update({
-        is_demo: true,
-        subscription_status: 'trialing',
-        subscription_tier: 'trial',
-        trial_started_at: new Date().toISOString(),
-        trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        plaid_env: process.env.PLAID_ENV || 'sandbox',
-        onboarding_completed: true 
-      })
-      .eq("user_id", user.id);
-
-    if (profileError) {
-      console.warn("[PULSE AUTH] Profile refinement failed, attempting upsert:", profileError.message);
-      const { error: upsertError } = await supabaseAdmin.from("dim_users").upsert([{
-        user_id: user.id,
-        user_name: name,
-        email: email,
-        is_demo: true,
-        subscription_status: 'trialing',
-        subscription_tier: 'trial',
-        trial_started_at: new Date().toISOString(),
-        trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        plaid_env: process.env.PLAID_ENV || 'sandbox',
-        onboarding_completed: true
-      }]);
-      
-      if (upsertError) {
-          console.error("[PULSE AUTH] Upsert also failed:", upsertError.message);
-      }
-    }
-
-    // 3. High-Fidelity Signal Seeding
-    try {
-      console.log("[PULSE AUTH] Injecting behavioral signals...");
-      await seedGuestData(user.id);
-      
-      // Auto-Provision Plaid Sandbox for Zero-Friction Demo
-      console.log("[PULSE AUTH] Provisioning sandbox bank uplink...");
-      await setupTrialSandboxItem(user.id);
-    } catch (seedErr: any) {
-      console.warn("[PULSE AUTH] Signal/Bank seeding interrupted:", seedErr.message);
-    }
-
-    // 4. Generate REAL Supabase Session for the Guest
-    console.log("[PULSE AUTH] Generating Supabase session...");
-    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (sessionError || !sessionData.session) {
-      console.error("[PULSE AUTH] Session Generation Failed:", sessionError?.message || "No session data");
-      return res.status(500).json({ 
-        message: "Session Uplink Failed", 
-        detail: sessionError?.message || "Supabase did not return a session for the guest. Identity provisioning may have timed out.",
-        hint: "This often occurs if project configuration or database migrations are incomplete."
-      });
-    }
-
-    console.log("[PULSE AUTH] Guest Sandbox Protocol Complete.");
-    res.status(201).json({ 
+    return res.status(200).json({
       token: sessionData.session.access_token,
       refreshToken: sessionData.session.refresh_token,
-      user: { 
-        id: user.id, 
-        email: user.email, 
-        name: name, 
-        onboardingCompleted: true, 
+      user: {
+        id: sandboxUserId,
+        email: 'sandbox@pulse.demo',
+        name: 'Sandbox User',
+        onboardingCompleted: true,
         isDemo: true,
         subscriptionStatus: 'trialing',
-        trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-      } 
+        trialEndsAt: null,
+      }
     });
   } catch (err: any) {
-    console.error("[PULSE AUTH] FATAL General Failure:", err.message, err.stack);
-    
-    // TEMPORARY: Force reveal stack trace in response for terminal debugging
-    res.status(500).json({ 
-      message: "Guest Protocol Failure", 
-      detail: err.message,
-      stack: err.stack,
-      hint: "Exposing stack trace for immediate production debugging."
-    });
+    return res.status(500).json({ message: 'Sandbox login failed.', detail: err.message });
   }
 };
 
