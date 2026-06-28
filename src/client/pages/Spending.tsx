@@ -77,6 +77,8 @@ export default function SpendingPage() {
     if (c.includes("travel") || c.includes("transport")) return Car;
     if (c.includes("digital") || c.includes("tech")) return Smartphone;
     if (c.includes("coffee")) return Coffee;
+    if (c.includes("service")) return Zap;
+    if (c.includes("entertain")) return Flame;
     return CreditCard;
   };
 

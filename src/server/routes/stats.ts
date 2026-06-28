@@ -119,6 +119,7 @@ export const handleStats: RequestHandler = async (req, res) => {
           WHEN c.category_name IN ('ENTERTAINMENT','Entertainment') THEN 'Entertainment'
           WHEN c.category_name IN ('HOME_IMPROVEMENT','Housing') THEN 'Housing'
           WHEN c.category_name IN ('GENERAL_SERVICES','Service') THEN 'Services'
+          WHEN c.category_name IN ('INCOME','TRANSFER_IN','Transfer') THEN 'Income'
           ELSE 'Other'
         END as category_name,
         COALESCE(SUM(t.amount), 0) as total,
@@ -128,6 +129,7 @@ export const handleStats: RequestHandler = async (req, res) => {
       WHERE t.user_id = $1 
         AND t.purchase_date >= $2
         AND t.amount > 0
+        AND c.category_name NOT IN ('LoadTest','INCOME','TRANSFER_IN','Transfer')
       GROUP BY 1
       ORDER BY total DESC
       `,
@@ -142,6 +144,7 @@ export const handleStats: RequestHandler = async (req, res) => {
       'Entertainment': '#A855F7',
       'Housing':       '#94A3B8',
       'Services':      '#F472B6',
+      'Income':        '#10B981',
       'Other':         '#64748B',
     };
     
