@@ -84,19 +84,16 @@ export default async function handler(req: Request, res: Response) {
         count
       );
 
-      const rows = await Promise.all(transactions.map(async (tx) => {
-        const catName = tx.category?.[0] || 'Misc';
-        const categoryId = await getOrCreateCategoryId(catName);
-        return {
-          user_id: tx.user_id,
-          category_id: categoryId,
-          amount: tx.amount,
-          purchase_date: tx.datetime,
-          merchant_name: tx.merchant_name,
-          external_id: tx.plaid_transaction_id,
-          status: tx.pending ? 'pending' : 'posted',
-          is_synthetic: true,
-        };
+      const rows = transactions.map(tx => ({
+        // transaction_id is SERIAL — don't include, Postgres auto-generates it
+        user_id: tx.user_id,
+        amount: tx.amount,
+        purchase_date: tx.datetime,
+        merchant_name: tx.merchant_name,
+        external_id: tx.plaid_transaction_id,
+        status: tx.pending ? 'pending' : 'posted',
+        is_synthetic: true,
+        // category_id and trigger_id left null — add defaults if your schema requires them
       }));
 
       const { error: insertError } = await supabase
