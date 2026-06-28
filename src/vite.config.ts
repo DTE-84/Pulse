@@ -15,6 +15,14 @@ export default defineConfig({
     VitePWA({
       registerType: "prompt",
       includeAssets: ["favicon.ico", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-180.png"],
+      workbox: {
+        runtimeCaching: [
+          {
+            urlPattern: /\/api\//,
+            handler: "NetworkOnly",
+          }
+        ]
+      },
       manifest: {
         name: "Pulse Financial AI",
         short_name: "Pulse",
