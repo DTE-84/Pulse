@@ -132,8 +132,8 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
       - Conclude with a clinical yet supportive observation.
     `;
 
-    // 5. Engage Claude Sonnet
-    console.log("[Nova Chat] Engaging Claude Sonnet...");
+    // 5. Engage Nova (Claude Sonnet via Anthropic)
+    console.log("[Nova Chat] Engaging Nova uplink via Anthropic...");
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY is missing from environment.");
 
@@ -149,15 +149,28 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
 
     claudeHistory.push({ role: "user", content: String(message) });
 
-    const result = await client.messages.create({
-      model: "claude-3-5-sonnet-20241022",
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages: claudeHistory,
-    });
+    let result;
+    try {
+      result = await client.messages.create({
+        model: "claude-3-5-sonnet-20241022",
+        max_tokens: 1024,
+        system: systemPrompt,
+        messages: claudeHistory,
+      });
+    } catch (anthropicErr: any) {
+      // Surface the real Anthropic error for diagnostics
+      const status = anthropicErr?.status || 500;
+      const errBody = anthropicErr?.error || anthropicErr?.message || String(anthropicErr);
+      console.error(`[Nova Chat] Anthropic API Error (${status}):`, JSON.stringify(errBody));
+      return res.status(502).json({
+        message: "Nova Uplink Interrupted",
+        detail: `Anthropic returned ${status}: ${typeof errBody === 'object' ? errBody?.error_code || errBody?.type : errBody}`,
+        hint: "Verify ANTHROPIC_API_KEY is valid and has active billing on console.anthropic.com"
+      });
+    }
 
     const responseText = result.content[0].type === "text" ? result.content[0].text : "";
-    if (!responseText) throw new Error("Empty response from Claude.");
+    if (!responseText) throw new Error("Empty response from Nova.");
 
     console.log("[Nova Chat] Response Dispatched.");
     return res.json({

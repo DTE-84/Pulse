@@ -20,22 +20,11 @@ import {
 import { BarChart, Bar, ResponsiveContainer, Cell, XAxis } from "recharts";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { statsAPI, transactionsAPI, novaServiceAPI, plaidAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
 const WealthVault = ({ stats }: any) => {
@@ -273,9 +262,6 @@ export default function Index() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [syncing, setSyncing] = useState(false);
-  const [ingestData, setIngestData] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [triggerId, setTriggerId] = useState<string>("0"); // Default to no trigger
   const { isAuthenticated, user, loading: authLoading } = useAuth();
 
   const trialDaysLeft = user?.trialEndsAt 
@@ -311,71 +297,7 @@ export default function Index() {
     }
   };
 
-  const handleIngest = async () => {
-    if (!ingestData.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Input required",
-        description: "Please provide valid transaction data.",
-      });
-      return;
-    }
 
-    setSyncing(true);
-    setIsDialogOpen(false);
-    toast({
-      title: "Syncing data",
-      description: "Processing transactions and refreshing your dashboard...",
-    });
-
-    try {
-      let transactions;
-      try {
-        transactions = JSON.parse(ingestData);
-        if (!Array.isArray(transactions)) transactions = [transactions];
-      } catch {
-        const lines = ingestData.split("\n").filter((l) => l.trim());
-        transactions = lines.map((line) => {
-          const [date, amount, category, risk_category] = line.split(",");
-          return {
-            date,
-            amount: parseFloat(amount),
-            category,
-            risk_category,
-            trigger_id: triggerId !== "0" ? parseInt(triggerId) : undefined,
-          };
-        });
-      }
-
-      // If it was JSON, we also apply the trigger if selected
-      const dataToSync = Array.isArray(transactions)
-        ? transactions.map((t) => ({
-            ...t,
-            trigger_id:
-              t.trigger_id ||
-              (triggerId !== "0" ? parseInt(triggerId) : undefined),
-          }))
-        : transactions;
-
-      await transactionsAPI.ingest({ transactions: dataToSync });
-      const res = await statsAPI.get();
-      setStats(res.data);
-
-      toast({
-        title: "Dashboard updated",
-        description: "Your latest spending data is now reflected in Pulse.",
-      });
-      setIngestData("");
-    } catch (err) {
-      toast({
-        variant: "destructive",
-        title: "Sync failed",
-        description: "We couldn’t process that transaction data.",
-      });
-    } finally {
-      setSyncing(false);
-    }
-  };
 
   const runAnalysis = async () => {
     setAnalyzing(true);
@@ -638,9 +560,8 @@ export default function Index() {
             </div>
           </div>
         </div>
-
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          {user?.subscriptionStatus !== 'trialing' && (
+        {user?.subscriptionStatus !== 'trialing' && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <button
               onClick={runAnalysis}
               disabled={analyzing}
@@ -653,116 +574,8 @@ export default function Index() {
               )}
               {analyzing ? "Reviewing..." : "Scan Patterns"}
             </button>
-          )}
-
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <button
-                disabled={syncing}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-5 py-3 rounded-full text-[10px] font-black transition-all uppercase tracking-widest disabled:opacity-50"
-              >
-                {syncing ? (
-                  <RefreshCcw className="w-3 h-3 animate-spin" />
-                ) : (
-                  <Database className="w-3 h-3" />
-                )}
-                {syncing ? "Syncing..." : user?.subscriptionStatus === 'active' ? "Sync Bank" : "Add Transactions"}
-              </button>
-            </DialogTrigger>
-            <DialogContent className="bg-card border border-border text-foreground max-w-2xl">
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-black tracking-tighter">
-                  Transaction sync
-                </DialogTitle>
-                <DialogDescription className="text-muted-foreground font-medium">
-                  Paste JSON or CSV transaction data below to refresh your Pulse
-                  dashboard.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                    Contextual Catalyst (Trigger)
-                  </label>
-                  <select
-                    value={triggerId}
-                    onChange={(e) => setTriggerId(e.target.value)}
-                    className="w-full bg-muted border border-border rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-primary/50 text-foreground"
-                  >
-                    <option value="0">No specific trigger</option>
-                    <option value="1">Stress (High Risk)</option>
-                    <option value="2">Boredom (Medium Risk)</option>
-                    <option value="3">Social Pressure (Medium Risk)</option>
-                    <option value="4">Celebration (Low Risk)</option>
-                    <option value="5">Late Night (High Risk)</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                    Transaction Data
-                  </label>
-                  <Textarea
-                    placeholder='[{"date": "2026-03-20", "amount": 150.00, "category": "Dining", "risk_category": "Lifestyle"}]'
-                    value={ingestData}
-                    onChange={(e) => setIngestData(e.target.value)}
-                    className="min-h-[150px] bg-muted border border-border font-mono text-xs text-foreground"
-                  />
-                </div>
-                <p className="text-[10px] text-muted-foreground italic">
-                  Format: date,amount,category,risk_category (one per line) or
-                  valid JSON array.
-                </p>
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsDialogOpen(false)}
-                  className="rounded-full border-border hover:bg-muted"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleIngest}
-                  disabled={syncing}
-                  className="bg-primary text-primary-foreground hover:bg-primary/80 rounded-full font-black uppercase tracking-widest px-8"
-                >
-                  {syncing ? "Syncing..." : "Process data"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
-
-      {/* Pre-Order Banner Card */}
-      <div
-        className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-[3rem] p-8 md:p-12 relative overflow-hidden group hover:bg-primary/[0.12] transition-all cursor-pointer"
-        onClick={() => navigate("/subscription")}
-      >
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-[100px] group-hover:bg-primary/20 transition-all" />
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
-          <div className="space-y-4 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-3">
-              <Crown className="w-6 h-6 text-yellow-400 animate-bounce" />
-            </div>
-            <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tighter">
-              Pre-Order to lock in Elite at $14.99/mo for Life
-            </h2>
-            <p className="text-muted-foreground font-semibold max-w-xl leading-relaxed">
-              Lock in the{" "}
-              <span className="text-primary underline underline-offset-4 decoration-primary/30">
-                Early-Bird $14.99/mo rate
-              </span>{" "}
-               Get exclusive access to the investor network and custom
-              behavior triggers at launch.
-            </p>
           </div>
-          <button className="bg-primary text-primary-foreground px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-[0_20px_40px_-10px_rgba(45,237,156,0.3)] flex items-center gap-3">
-            Secure Your Spot
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -795,6 +608,36 @@ export default function Index() {
             </p>
           </div>
         )}
+      </div>
+
+      {/* Pre-Order Banner Card */}
+      <div
+        className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-[3rem] p-8 md:p-12 relative overflow-hidden group hover:bg-primary/[0.12] transition-all cursor-pointer mt-6"
+        onClick={() => navigate("/subscription")}
+      >
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-[100px] group-hover:bg-primary/20 transition-all" />
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+          <div className="space-y-4 text-center md:text-left">
+            <div className="flex items-center justify-center md:justify-start gap-3">
+              <Crown className="w-6 h-6 text-yellow-400 animate-bounce" />
+            </div>
+            <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tighter">
+              Pre-Order to lock in Elite at $14.99/mo for Life
+            </h2>
+            <p className="text-muted-foreground font-semibold max-w-xl leading-relaxed">
+              Lock in the{" "}
+              <span className="text-primary underline underline-offset-4 decoration-primary/30">
+                Early-Bird $14.99/mo rate
+              </span>{" "}
+               Get exclusive access to the investor network and custom
+              behavior triggers at launch.
+            </p>
+          </div>
+          <button className="bg-primary text-primary-foreground px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-[0_20px_40px_-10px_rgba(45,237,156,0.3)] flex items-center gap-3">
+            Secure Your Spot
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

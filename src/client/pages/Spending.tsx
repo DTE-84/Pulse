@@ -18,6 +18,7 @@ import {
   Database,
   EyeOff,
   History,
+  RefreshCcw,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -42,13 +43,93 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SpendingPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [_stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
+  const [isIngestDialogOpen, setIsIngestDialogOpen] = useState(false);
+  const [ingestData, setIngestData] = useState("");
+  const [triggerId, setTriggerId] = useState<string>("0");
+  const [syncing, setSyncing] = useState(false);
+  const { toast } = useToast();
+
+  const handleIngest = async () => {
+    if (!ingestData.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Input required",
+        description: "Please provide valid transaction data.",
+      });
+      return;
+    }
+
+    setSyncing(true);
+    setIsIngestDialogOpen(false);
+    toast({
+      title: "Syncing data",
+      description: "Processing transactions and refreshing your spending dashboard...",
+    });
+
+    try {
+      let transactionsData;
+      try {
+        transactionsData = JSON.parse(ingestData);
+        if (!Array.isArray(transactionsData)) transactionsData = [transactionsData];
+      } catch {
+        const lines = ingestData.split("\n").filter((l) => l.trim());
+        transactionsData = lines.map((line) => {
+          const [date, amount, category, risk_category] = line.split(",");
+          return {
+            date,
+            amount: parseFloat(amount),
+            category,
+            risk_category,
+            trigger_id: triggerId !== "0" ? parseInt(triggerId) : undefined,
+          };
+        });
+      }
+
+      const dataToSync = Array.isArray(transactionsData)
+        ? transactionsData.map((t) => ({
+            ...t,
+            trigger_id:
+              t.trigger_id ||
+              (triggerId !== "0" ? parseInt(triggerId) : undefined),
+          }))
+        : transactionsData;
+
+      await transactionsAPI.ingest({ transactions: dataToSync });
+      
+      const [txRes, statsRes] = await Promise.all([
+        transactionsAPI.getAll({ limit: 10 }),
+        statsAPI.get(),
+      ]);
+      setTransactions(txRes.data);
+      setStats(statsRes.data);
+
+      toast({
+        title: "Spending dashboard updated",
+        description: "Your latest spending data is now reflected.",
+      });
+      setIngestData("");
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Sync failed",
+        description: "We couldn’t process that transaction data.",
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const categoryData: { name: string; value: number; color: string }[] = _stats?.categoryBreakdown || [];
 
@@ -126,6 +207,81 @@ export default function SpendingPage() {
               <Download className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
+          <Dialog open={isIngestDialogOpen} onOpenChange={setIsIngestDialogOpen}>
+            <DialogTrigger asChild>
+              <button
+                disabled={syncing}
+                className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-5 py-3 rounded-full text-[10px] font-black transition-all uppercase tracking-widest disabled:opacity-50"
+              >
+                {syncing ? (
+                  <RefreshCcw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Database className="w-3.5 h-3.5" />
+                )}
+                {syncing ? "Syncing..." : "Add Transactions"}
+              </button>
+            </DialogTrigger>
+            <DialogContent className="bg-card border border-border text-foreground max-w-2xl">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-black tracking-tighter">
+                  Transaction Ingestion
+                </DialogTitle>
+                <DialogDescription className="text-muted-foreground font-medium">
+                  Paste JSON or CSV transaction data below to add transactions to your Pulse spending ledger.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                    Contextual Catalyst (Trigger)
+                  </label>
+                  <select
+                    value={triggerId}
+                    onChange={(e) => setTriggerId(e.target.value)}
+                    className="w-full bg-muted border border-border rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-primary/50 text-foreground"
+                  >
+                    <option value="0">No specific trigger</option>
+                    <option value="1">Stress (High Risk)</option>
+                    <option value="2">Boredom (Medium Risk)</option>
+                    <option value="3">Social Pressure (Medium Risk)</option>
+                    <option value="4">Celebration (Low Risk)</option>
+                    <option value="5">Late Night (High Risk)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                    Transaction Data
+                  </label>
+                  <Textarea
+                    placeholder='[{"date": "2026-03-20", "amount": 150.00, "category": "Dining", "risk_category": "Lifestyle"}]'
+                    value={ingestData}
+                    onChange={(e) => setIngestData(e.target.value)}
+                    className="min-h-[150px] bg-muted border border-border font-mono text-xs text-foreground"
+                  />
+                </div>
+                <p className="text-[10px] text-muted-foreground italic">
+                  Format: date,amount,category,risk_category (one per line) or valid JSON array.
+                </p>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsIngestDialogOpen(false)}
+                  className="rounded-full border-border hover:bg-muted"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleIngest}
+                  disabled={syncing}
+                  className="bg-primary text-primary-foreground hover:bg-primary/80 rounded-full font-black uppercase tracking-widest px-8"
+                >
+                  {syncing ? "Syncing..." : "Process data"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
