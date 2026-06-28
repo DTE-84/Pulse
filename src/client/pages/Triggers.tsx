@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Zap,
   Brain,
@@ -13,7 +13,22 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
+// framer-motion removed — animations use CSS transitions
+
+/** CSS-transition animated progress bar */
+const ProgressBar = ({ targetWidth, style, className }: { targetWidth: string; style?: React.CSSProperties; className?: string }) => {
+  const [width, setWidth] = useState("0%");
+  useEffect(() => {
+    const t = setTimeout(() => setWidth(targetWidth), 50);
+    return () => clearTimeout(t);
+  }, [targetWidth]);
+  return (
+    <div
+      className={className}
+      style={{ ...style, width, transition: "width 1.5s ease-out" }}
+    />
+  );
+};
 
 const StatCard = ({
   label,
@@ -438,10 +453,8 @@ export default function TriggersPage() {
                   </span>
                 </div>
                 <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${e.p}%` }}
-                    transition={{ duration: 1.5, ease: "easeOut" }}
+                <ProgressBar
+                    targetWidth={`${e.p}%`}
                     className="h-full rounded-full"
                     style={{ backgroundColor: e.c }}
                   />

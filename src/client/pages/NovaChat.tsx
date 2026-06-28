@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Send, Sparkles, Moon, Zap, Info, Loader2, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { BarChart, Bar, ResponsiveContainer, Cell } from "recharts";
+import { MiniBarChart } from "@/components/ui/mini-bar-chart";
 import { useAuth } from "@/contexts/AuthContext";
 import { statsAPI, novaServiceAPI } from "@/lib/api";
 import { useTheme } from "@/components/theme-provider";
@@ -67,20 +67,15 @@ const MetricRow = ({ label, value, color }: any) => (
 const GrowthChart = ({ data }: { data: any[] }) => {
   return (
     <div className="h-16 w-full mt-4">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data}>
-          <Bar dataKey="value" radius={[2, 2, 0, 0]}>
-            {data.map((_, i) => (
-              <Cell
-                key={i}
-                fill={
-                  i === data.length - 1 ? "#2DED9C" : "rgba(45,237,156,0.2)"
-                }
-              />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+      <MiniBarChart
+        data={data}
+        dataKey="value"
+        radius={2}
+        cellColor={(_datum, i) =>
+          i === data.length - 1 ? "#2DED9C" : "rgba(45,237,156,0.2)"
+        }
+        height="100%"
+      />
     </div>
   );
 };

@@ -13,8 +13,22 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: "prompt",
+      registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-180.png"],
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/.*\/api\/.*/i,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "api-cache",
+              expiration: { maxEntries: 50, maxAgeSeconds: 300 },
+              networkTimeoutSeconds: 10,
+            },
+          },
+        ],
+      },
       manifest: {
         name: "Pulse Financial AI",
         short_name: "Pulse",
@@ -46,7 +60,24 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, "dist"),
     emptyOutDir: true,
-    chunkSizeWarningLimit: 2000,
+    chunkSizeWarningLimit: 500,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          "vendor-query": ["@tanstack/react-query"],
+          "vendor-charts": ["recharts"],
+          "vendor-supabase": ["@supabase/supabase-js"],
+          "vendor-ui": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-tooltip",
+            "@radix-ui/react-select",
+            "lucide-react",
+          ],
+        },
+      },
+    },
   },
   server: {
     host: "::",
@@ -60,3 +91,4 @@ export default defineConfig({
     },
   }
 });
+

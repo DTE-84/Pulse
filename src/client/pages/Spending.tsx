@@ -195,20 +195,21 @@ export default function SpendingPage() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative group flex-1 sm:flex-none">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" aria-hidden="true" />
             <input
               id="search-transactions"
               name="search-transactions"
+              aria-label="Search transactions"
               placeholder="Search..."
               className="bg-muted border border-border pl-12 pr-6 py-3 rounded-full text-[10px] font-bold text-foreground focus:outline-none focus:border-primary/30 transition-all w-full sm:w-64"
             />
           </div>
           <div className="flex gap-2">
-            <button className="flex items-center gap-2 bg-muted border border-border p-3 rounded-full hover:bg-muted/80 transition-all">
-              <Filter className="w-4 h-4 text-muted-foreground" />
+            <button aria-label="Filter transactions" className="flex items-center gap-2 bg-muted border border-border p-3 rounded-full hover:bg-muted/80 transition-all">
+              <Filter className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
             </button>
-            <button className="flex items-center gap-2 bg-muted border border-border p-3 rounded-full hover:bg-muted/80 transition-all">
-              <Download className="w-4 h-4 text-muted-foreground" />
+            <button aria-label="Download transactions" className="flex items-center gap-2 bg-muted border border-border p-3 rounded-full hover:bg-muted/80 transition-all">
+              <Download className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
             </button>
           </div>
           <Dialog open={isIngestDialogOpen} onOpenChange={setIsIngestDialogOpen}>
@@ -236,10 +237,11 @@ export default function SpendingPage() {
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  <label htmlFor="trigger-select" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                     Contextual Catalyst (Trigger)
                   </label>
                   <select
+                    id="trigger-select"
                     value={triggerId}
                     onChange={(e) => setTriggerId(e.target.value)}
                     className="w-full bg-muted border border-border rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-primary/50 text-foreground"

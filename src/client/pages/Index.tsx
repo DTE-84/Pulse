@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -17,7 +17,7 @@ import {
   Zap,
   Crown,
 } from "lucide-react";
-import { BarChart, Bar, ResponsiveContainer, Cell, XAxis } from "recharts";
+import { MiniBarChart } from "@/components/ui/mini-bar-chart";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,9 +25,30 @@ import { Link, useNavigate } from "react-router-dom";
 import { statsAPI, transactionsAPI, novaServiceAPI, plaidAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { motion } from "framer-motion";
+// framer-motion removed — animations use CSS transitions via useEffect
+
+/** CSS-transition animated progress bar — replaces framer-motion motion.div */
+const ProgressBar = ({ targetWidth, className }: { targetWidth: string; className?: string }) => {
+  const [width, setWidth] = useState("0%");
+  useEffect(() => {
+    const t = setTimeout(() => setWidth(targetWidth), 50);
+    return () => clearTimeout(t);
+  }, [targetWidth]);
+  return (
+    <div
+      className={className}
+      style={{ width, transition: "width 2s ease-out" }}
+    />
+  );
+};
 
 const WealthVault = ({ stats }: any) => {
+  const [animated, setAnimated] = useState(false);
+  const ref = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const t = setTimeout(() => setAnimated(true), 50);
+    return () => clearTimeout(t);
+  }, []);
   const baseline = stats?.baselineSpend || 2500;
   const current = stats?.monthlyExpenses || 0;
   const progress = Math.min(100, (current / baseline) * 100);
@@ -61,7 +82,7 @@ const WealthVault = ({ stats }: any) => {
           fill="transparent"
           className="text-white/[0.03]"
         />
-        <motion.circle
+        <circle
           cx="128"
           cy="128"
           r="110"
@@ -69,12 +90,13 @@ const WealthVault = ({ stats }: any) => {
           strokeWidth="12"
           fill="transparent"
           strokeDasharray={2 * Math.PI * 110}
-          initial={{ strokeDashoffset: 2 * Math.PI * 110 }}
-          animate={{
-            strokeDashoffset: 2 * Math.PI * 110 * (1 - progress / 100),
-          }}
-          transition={{ duration: 2, ease: "easeOut" }}
+          strokeDashoffset={
+            animated
+              ? 2 * Math.PI * 110 * (1 - progress / 100)
+              : 2 * Math.PI * 110
+          }
           strokeLinecap="round"
+          style={{ transition: "stroke-dashoffset 2s ease-out" }}
         />
 
         {/* Inner Ring: Savings Velocity */}
@@ -87,7 +109,7 @@ const WealthVault = ({ stats }: any) => {
           fill="transparent"
           className="text-white/[0.02]"
         />
-        <motion.circle
+        <circle
           cx="128"
           cy="128"
           r="85"
@@ -95,24 +117,27 @@ const WealthVault = ({ stats }: any) => {
           strokeWidth="8"
           fill="transparent"
           strokeDasharray={2 * Math.PI * 85}
-          initial={{ strokeDashoffset: 2 * Math.PI * 85 }}
-          animate={{
-            strokeDashoffset: 2 * Math.PI * 85 * (1 - savingsRate / 100),
-          }}
-          transition={{ duration: 2.5, delay: 0.5, ease: "easeOut" }}
+          strokeDashoffset={
+            animated
+              ? 2 * Math.PI * 85 * (1 - savingsRate / 100)
+              : 2 * Math.PI * 85
+          }
           strokeLinecap="round"
           className="opacity-60"
+          style={{ transition: "stroke-dashoffset 2.5s 0.5s ease-out" }}
         />
       </svg>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center space-y-1">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-4xl font-black text-foreground tracking-tighter"
+        <div
+          className="text-4xl font-black text-foreground tracking-tighter transition-all duration-500"
+          style={{
+            opacity: animated ? 1 : 0,
+            transform: animated ? "scale(1)" : "scale(0.9)",
+          }}
         >
           {Math.round(savingsRate)}%
-        </motion.div>
+        </div>
         <div className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.3em]">
           Savings Velocity
         </div>
@@ -189,36 +214,19 @@ const TriggerCard = ({
     </div>
 
     <div className="h-32 mb-8 -mx-2">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={stats?.chartData || fallbackChartData}>
-          <Bar dataKey="value" radius={[6, 6, 6, 6]}>
-            {(stats?.chartData || fallbackChartData).map(
-              (_entry: any, index: number) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={
-                    index === (stats?.chartData || fallbackChartData).length - 1
-                      ? chartColor
-                      : "rgba(0,0,0,0.05)"
-                  }
-                  className="transition-all duration-500 hover:opacity-80"
-                />
-              ),
-            )}
-          </Bar>
-          <XAxis
-            dataKey="day"
-            axisLine={false}
-            tickLine={false}
-            tick={{
-              fill: "rgba(100,100,100,0.4)",
-              fontSize: 11,
-              fontWeight: 600,
-            }}
-            dy={15}
-          />
-        </BarChart>
-      </ResponsiveContainer>
+      <MiniBarChart
+        data={stats?.chartData || fallbackChartData}
+        dataKey="value"
+        labelKey="day"
+        radius={6}
+        cellColor={(_datum, index) => {
+          const chartData = stats?.chartData || fallbackChartData;
+          return index === chartData.length - 1
+            ? chartColor
+            : "rgba(0,0,0,0.05)";
+        }}
+        height="100%"
+      />
     </div>
 
     <div className="space-y-4 mt-auto">
@@ -548,11 +556,7 @@ export default function Index() {
             </p>
             <div className="pt-4">
               <div className="h-1 bg-muted rounded-full w-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: "65%" }}
-                  className="h-full bg-primary shadow-[0_0_10px_rgba(45,237,156,0.5)]"
-                />
+                <ProgressBar targetWidth="65%" className="h-full bg-primary shadow-[0_0_10px_rgba(45,237,156,0.5)]" />
               </div>
               <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.2em] mt-3">
                 Behavioral Integrity: 65%
