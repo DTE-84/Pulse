@@ -185,9 +185,9 @@ export default function AuthPage() {
         <div className="hidden lg:flex flex-col space-y-10">
           <div className="flex items-center gap-6 group">
             <div className="relative w-20 h-24 flex items-center justify-center">
-              <div className="relative z-10 w-20 h-20 flex items-center justify-center group-hover:scale-110 transition-transform filter drop-shadow-[0_0_20px_rgba(45,237,156,0.25)] overflow-hidden">
+              <div className="relative z-10 w-20 h-20 flex items-center justify-center group-hover:scale-110 transition-transform filter drop-shadow-[0_0_20px_rgba(45,237,156,0.25)]">
                 <img
-                  src={`${import.meta.env.BASE_URL}PulseNovaLogo.png`}
+                  src={`${import.meta.env.BASE_URL}PulseNovaLogoTrans.png`}
                   alt="Pulse"
                   className="w-20 h-20 object-contain"
                 />
@@ -255,9 +255,9 @@ export default function AuthPage() {
             <div className="lg:hidden flex flex-col items-center text-center mb-6 sm:mb-10">
               <div className="relative w-20 h-20 flex items-center justify-center mb-4">
                 <div className="absolute inset-0 bg-primary/20 rounded-full animate-pulse" />
-                <div className="relative z-10 w-20 h-20 flex items-center justify-center shadow-2xl overflow-hidden">
+                <div className="relative z-10 w-20 h-20 flex items-center justify-center shadow-2xl">
                   <img
-                    src={`${import.meta.env.BASE_URL}PulseNovaLogo.png`}
+                    src={`${import.meta.env.BASE_URL}PulseNovaLogoTrans.png`}
                     alt="Pulse"
                     className="w-20 h-20 object-contain"
                   />

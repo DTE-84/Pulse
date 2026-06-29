@@ -43,7 +43,7 @@ const Sidebar = () => {
             {/* LOGO CONTAINER */}
             <div className="relative z-10 w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform">
               <img
-                src={`${import.meta.env.BASE_URL}PulseNovaLogo.png`}
+                src={`${import.meta.env.BASE_URL}PulseNovaLogoTrans.png`}
                 alt="Pulse"
                 className="w-12 h-12 object-contain filter drop-shadow-[0_0_15px_rgba(45,237,156,0.3)]"
               />
@@ -353,11 +353,11 @@ export const Layout = ({ children }: LayoutProps) => {
         <header className="lg:hidden h-16 shrink-0 border-b border-border px-4 sm:px-8 flex items-center justify-between sticky top-0 bg-background/80 backdrop-blur-md z-40">
           <div className="flex items-center gap-3">
             <div className="relative w-10 h-10 flex items-center justify-center">
-              <div className="relative z-10 w-10 h-10 flex items-center justify-center overflow-hidden">
+              <div className="relative z-10 w-10 h-10 flex items-center justify-center">
                 <img
-                  src={`${import.meta.env.BASE_URL || "/"}PulseNovaLogo.png`}
+                  src={`${import.meta.env.BASE_URL || "/"}PulseNovaLogoTrans.png`}
                   alt="Pulse"
-                  className="w-10 h-10 object-contain"
+                  className="w-10 h-10 object-contain filter drop-shadow-[0_0_10px_rgba(45,237,156,0.25)]"
                 />
               </div>
             </div>

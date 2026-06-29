@@ -121,6 +121,19 @@ export default async function handler(req: Request, res: Response) {
   try {
     const users = await resolveTargetUsers();
 
+    // Delete synthetic transactions older than 7 days to keep data realistic
+    const { error: deleteError } = await supabase
+      .from('fact_transactions')
+      .delete()
+      .eq('is_synthetic', true)
+      .lt('purchase_date', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+
+    if (deleteError) {
+      console.error('[Cron] Failed to delete old synthetic transactions:', deleteError);
+    } else {
+      console.log('[Cron] Cleaned up old synthetic transactions.');
+    }
+
     if (users.length === 0) {
       return res.status(200).json({
         success: true,
