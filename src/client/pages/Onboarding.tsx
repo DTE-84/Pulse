@@ -105,7 +105,7 @@ export default function Onboarding() {
   }: any) => (
     <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="space-y-3 mb-6 shrink-0">
-        <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tighter leading-none">
+        <h1 className="text-3xl sm:text-4xl font-black text-foreground tracking-tighter leading-none">
           {title}
         </h1>
         <p className="text-muted-foreground text-base sm:text-lg font-medium leading-relaxed max-w-sm">
@@ -113,13 +113,13 @@ export default function Onboarding() {
         </p>
       </div>
       <div className="flex-1 overflow-y-auto min-h-0 pr-2 -mr-2 pb-4 scrollbar-hide">{children}</div>
-      <div className="mt-auto pt-6 shrink-0 flex gap-4 bg-[#12110F]">
+      <div className="mt-auto pt-6 shrink-0 flex gap-4 bg-card">
         {currentStep > 0 && (
           <Button
             variant="outline"
             size="lg"
             onClick={back}
-            className="rounded-2xl h-12 w-12 sm:h-16 sm:w-16 border-white/10 bg-white/5 hover:bg-white/10"
+            className="rounded-2xl h-12 w-12 sm:h-16 sm:w-16 border-border bg-muted hover:bg-muted"
           >
             <ChevronLeft className="w-6 h-6" />
           </Button>
@@ -146,8 +146,8 @@ export default function Onboarding() {
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full animate-pulse" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/5 blur-[120px] rounded-full" />
 
-      <div className="w-full max-w-[420px] min-h-[600px] h-[min(840px,90dvh)] bg-[#12110F] border border-white/5 rounded-[2.5rem] sm:rounded-[3.5rem] shadow-2xl relative z-10 flex flex-col overflow-hidden p-6 sm:p-10">
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-28 h-7 bg-background rounded-2xl border border-white/5 flex items-center justify-center">
+      <div className="w-full max-w-[420px] min-h-[600px] h-[min(840px,90dvh)] bg-card border border-border rounded-[2.5rem] sm:rounded-[3.5rem] shadow-2xl relative z-10 flex flex-col overflow-hidden p-6 sm:p-10">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-28 h-7 bg-background rounded-2xl border border-border flex items-center justify-center">
           <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
         </div>
 
@@ -158,14 +158,14 @@ export default function Onboarding() {
                 key={i}
                 className={cn(
                   "h-1 rounded-full transition-all duration-500",
-                  i <= currentStep ? "bg-primary w-8" : "bg-white/10 w-2",
+                  i <= currentStep ? "bg-primary w-8" : "bg-muted w-2",
                 )}
               />
             ))}
           </div>
           <button
             onClick={finish}
-            className="text-[10px] font-black text-muted-foreground hover:text-white uppercase tracking-widest ml-4 transition-colors"
+            className="text-[10px] font-black text-muted-foreground hover:text-foreground uppercase tracking-widest ml-4 transition-colors"
           >
             Skip
           </button>
@@ -184,11 +184,11 @@ export default function Onboarding() {
                   />
                 </div>
               </div>
-              <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tighter mb-4">
+              <h1 className="text-4xl sm:text-5xl font-black text-foreground tracking-tighter mb-4">
                 Pulse
               </h1>
               <div className="space-y-3 mb-12">
-                <p className="text-xl text-white font-bold opacity-90">
+                <p className="text-xl text-foreground font-bold opacity-90">
                   Understand your habits.
                 </p>
                 <p className="text-xl text-primary font-bold">
@@ -215,7 +215,7 @@ export default function Onboarding() {
               subtitle="Your guide inside Pulse."
             >
               <div className="space-y-6 pt-4">
-                <div className="bg-white/5 p-6 rounded-3xl border border-white/5 space-y-4 relative overflow-hidden group">
+                <div className="bg-muted p-6 rounded-3xl border border-border space-y-4 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                     <Brain size={80} className="text-primary" />
                   </div>
@@ -260,7 +260,7 @@ export default function Onboarding() {
                 ].map((item, i) => (
                   <div
                     key={i}
-                    className="flex items-start gap-4 p-5 bg-white/5 rounded-[2rem] border border-white/5"
+                    className="flex items-start gap-4 p-5 bg-muted rounded-[2rem] border border-border"
                   >
                     <div
                       className={cn(
@@ -271,7 +271,7 @@ export default function Onboarding() {
                       <item.icon size={24} className={item.color} />
                     </div>
                     <div>
-                      <p className="text-white text-sm font-bold">
+                      <p className="text-foreground text-sm font-bold">
                         {item.title}
                       </p>
                       <p className="text-muted-foreground text-xs mt-1 font-medium leading-relaxed">
@@ -306,7 +306,7 @@ export default function Onboarding() {
                       "w-full p-6 rounded-2xl border text-left transition-all flex justify-between items-center group",
                       goals.includes(goal)
                         ? "bg-primary/10 border-primary text-primary"
-                        : "bg-white/5 border-white/10 text-muted-foreground hover:border-white/20",
+                        : "bg-muted border-border text-muted-foreground hover:border-white/20",
                     )}
                   >
                     <span className="font-bold text-sm tracking-tight group-hover:translate-x-1 transition-transform">
@@ -331,7 +331,7 @@ export default function Onboarding() {
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">
                     Monthly baseline
                   </p>
-                  <p className="text-7xl font-black text-white tracking-tighter leading-none">
+                  <p className="text-7xl font-black text-foreground tracking-tighter leading-none">
                     ${monthlySpend[0]}
                   </p>
                 </div>
@@ -347,7 +347,7 @@ export default function Onboarding() {
                   <span>$500</span>
                   <span>$10,000+</span>
                 </div>
-                <div className="mt-8 p-5 bg-white/5 rounded-3xl border border-white/5 text-[11px] font-medium text-muted-foreground leading-relaxed">
+                <div className="mt-8 p-5 bg-muted rounded-3xl border border-border text-[11px] font-medium text-muted-foreground leading-relaxed">
                   Pulse uses this to spot meaningful changes — not to judge you,
                   but to give Nova better context.
                 </div>
@@ -387,12 +387,12 @@ export default function Onboarding() {
                     className={cn(
                       "w-full p-6 rounded-2xl border text-left transition-all group relative overflow-hidden",
                       novaTone === tone.id
-                        ? "bg-white/10 border-primary"
-                        : "bg-white/5 border-white/10 hover:border-white/20",
+                        ? "bg-muted border-primary"
+                        : "bg-muted border-border hover:border-white/20",
                     )}
                   >
                     <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-2xl bg-muted border border-border flex items-center justify-center">
                         <tone.icon
                           className={cn(
                             "w-5 h-5",
@@ -436,12 +436,12 @@ export default function Onboarding() {
               <div className="space-y-6 pt-4">
                 <div className="relative group">
                   <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-primary blur opacity-20 group-hover:opacity-40 transition duration-1000 animate-pulse"></div>
-                  <div className="relative bg-zinc-900 p-8 rounded-[2.5rem] border border-white/10 flex items-center gap-6">
-                    <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center shrink-0 shadow-inner">
+                  <div className="relative bg-card p-8 rounded-[2.5rem] border border-border flex items-center gap-6">
+                    <div className="w-16 h-16 rounded-3xl bg-muted flex items-center justify-center shrink-0 shadow-inner">
                       <Lock size={32} className="text-blue-400" />
                     </div>
                     <div>
-                      <p className="text-white font-black text-lg tracking-tight leading-none mb-2">
+                      <p className="text-foreground font-black text-lg tracking-tight leading-none mb-2">
                         Financial memory
                       </p>
                       <p className="text-muted-foreground text-xs font-medium leading-relaxed">
@@ -452,15 +452,15 @@ export default function Onboarding() {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-5 bg-white/5 rounded-3xl border border-white/5 flex flex-col gap-3">
+                  <div className="p-5 bg-muted rounded-3xl border border-border flex flex-col gap-3">
                     <Shield size={20} className="text-primary" />
-                    <p className="text-[10px] font-black text-white uppercase tracking-widest">
+                    <p className="text-[10px] font-black text-foreground uppercase tracking-widest">
                       Protected
                     </p>
                   </div>
-                  <div className="p-5 bg-white/5 rounded-3xl border border-white/5 flex flex-col gap-3">
+                  <div className="p-5 bg-muted rounded-3xl border border-border flex flex-col gap-3">
                     <Target size={20} className="text-blue-400" />
-                    <p className="text-[10px] font-black text-white uppercase tracking-widest">
+                    <p className="text-[10px] font-black text-foreground uppercase tracking-widest">
                       Export-ready
                     </p>
                   </div>
@@ -474,19 +474,19 @@ export default function Onboarding() {
               <div className="w-24 h-24 rounded-[2.5rem] bg-primary/10 border-2 border-primary/20 flex items-center justify-center mb-12 shadow-[0_0_40px_rgba(45,237,156,0.15)]">
                 <Check size={48} className="text-primary" strokeWidth={3} />
               </div>
-              <h2 className="text-4xl font-black text-white tracking-tighter mb-6">
+              <h2 className="text-4xl font-black text-foreground tracking-tighter mb-6">
                 Ready.
               </h2>
               <p className="text-muted-foreground font-semibold text-lg leading-snug mb-12 max-w-[280px]">
                 Pulse is ready. Nova will meet you on the dashboard with your
                 first guidance.
               </p>
-              <div className="w-full p-8 bg-zinc-900/50 rounded-[2.5rem] border border-white/5 space-y-6 mb-12">
+              <div className="w-full p-8 bg-card/50 rounded-[2.5rem] border border-border space-y-6 mb-12">
                 <div className="flex justify-between items-center">
                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                     Baseline
                   </span>
-                  <span className="text-xl font-black text-white tracking-tight">
+                  <span className="text-xl font-black text-foreground tracking-tight">
                     ${monthlySpend[0]}
                   </span>
                 </div>

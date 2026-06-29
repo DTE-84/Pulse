@@ -12,24 +12,24 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 
 const CampaignCard = ({ title, status, recipients, openRate, clickRate }: any) => (
-  <div className="bg-[#0A0907] border border-white/[0.03] rounded-3xl p-6 transition-all hover:bg-[#11100D] hover:border-white/10 group">
+  <div className="bg-card border border-border rounded-3xl p-6 transition-all hover:bg-[#11100D] hover:border-border group">
     <div className="flex justify-between items-start mb-6">
       <div className="space-y-1">
-        <h3 className="text-lg font-bold text-white tracking-tight">{title}</h3>
+        <h3 className="text-lg font-bold text-foreground tracking-tight">{title}</h3>
         <div className="flex items-center gap-2">
           <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", status === 'Active' ? 'bg-primary' : 'bg-muted-foreground/30')} />
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{status}</span>
         </div>
       </div>
-      <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-white/5 bg-white/5 text-muted-foreground">
+      <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-border bg-muted text-muted-foreground">
         {recipients} Leads
       </Badge>
     </div>
 
-    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
+    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
       <div>
         <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Open Rate</div>
-        <div className="text-xl font-black text-white">{openRate}%</div>
+        <div className="text-xl font-black text-foreground">{openRate}%</div>
       </div>
       <div>
         <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Click Rate</div>
@@ -101,7 +101,7 @@ export default function Outreach() {
           <ChevronRight className="w-3 h-3 opacity-30" />
           <span className="text-primary">Outreach</span>
         </div>
-        <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white">Broadcast Command</h1>
+        <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground">Broadcast Command</h1>
         <p className="text-muted-foreground font-semibold text-sm">
           Deploy high-fidelity messaging to your niche audience via Nova.
         </p>
@@ -110,7 +110,7 @@ export default function Outreach() {
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Left: Tactical Editor */}
         <div className="lg:col-span-2 space-y-8">
-          <div className="bg-[#0A0907] border border-white/[0.03] rounded-[2.5rem] p-8 space-y-8 shadow-2xl relative overflow-hidden group">
+          <div className="bg-card border border-border rounded-[2.5rem] p-8 space-y-8 shadow-2xl relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-8 opacity-5">
               <Sparkles size={100} className="text-primary" />
             </div>
@@ -125,7 +125,7 @@ export default function Outreach() {
                   placeholder="e.g., Exclusive Opportunity: High-Fidelity Solutions"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-2xl py-5 px-6 focus:outline-none focus:border-primary/40 transition-all font-bold text-white placeholder:text-muted-foreground/30"
+                  className="w-full bg-muted/50 border border-border rounded-2xl py-5 px-6 focus:outline-none focus:border-primary/40 transition-all font-bold text-foreground placeholder:text-muted-foreground/30"
                 />
               </div>
 
@@ -138,19 +138,19 @@ export default function Outreach() {
                   placeholder="Draft your high-sophistication message here..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-3xl py-6 px-6 focus:outline-none focus:border-primary/40 transition-all font-medium text-white placeholder:text-muted-foreground/30 resize-none leading-relaxed"
+                  className="w-full bg-muted/50 border border-border rounded-3xl py-6 px-6 focus:outline-none focus:border-primary/40 transition-all font-medium text-foreground placeholder:text-muted-foreground/30 resize-none leading-relaxed"
                 />
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t border-white/5">
+            <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t border-border">
               <div className="flex-1 relative group">
                 <input 
                   type="file" 
                   onChange={handleFileUpload}
                   className="absolute inset-0 opacity-0 cursor-pointer z-20" 
                 />
-                <button className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover:bg-white/10 transition-all">
+                <button className="w-full bg-muted border border-border rounded-2xl py-4 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover:bg-muted transition-all">
                   <Upload className="w-4 h-4" />
                   {leadsCount > 0 ? `${leadsCount} Leads Ready` : 'Upload Leads (.csv)'}
                 </button>
@@ -181,8 +181,8 @@ export default function Outreach() {
 
         {/* Right: Campaigns & Stats */}
         <div className="space-y-8">
-          <div className="bg-[#0A0907] border border-white/[0.03] rounded-[2.5rem] p-8 space-y-6">
-            <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
+          <div className="bg-card border border-border rounded-[2.5rem] p-8 space-y-6">
+            <h3 className="text-sm font-black text-foreground uppercase tracking-widest flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-primary" />
               Global Telemetry
             </h3>
@@ -192,9 +192,9 @@ export default function Outreach() {
                 { label: "Open Frequency", value: "32.4%" },
                 { label: "Conversion Lift", value: "+18%" }
               ].map((stat, i) => (
-                <div key={i} className="flex justify-between items-center py-3 border-b border-white/5 last:border-0">
+                <div key={i} className="flex justify-between items-center py-3 border-b border-border last:border-0">
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{stat.label}</span>
-                  <span className="text-sm font-black text-white">{stat.value}</span>
+                  <span className="text-sm font-black text-foreground">{stat.value}</span>
                 </div>
               ))}
             </div>
