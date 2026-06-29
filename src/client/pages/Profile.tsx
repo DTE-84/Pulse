@@ -142,7 +142,7 @@ export default function Profile() {
       await authAPI.deleteAccount();
       toast({
         title: "Account Terminated",
-        description: "Your Pulse profile and all telemetry have been purged.",
+        description: "Your Pulse profile and all spending history have been permanently deleted.",
       });
       logout();
       navigate("/auth");
@@ -318,7 +318,7 @@ export default function Profile() {
             <AlertDialogHeader>
               <AlertDialogTitle className="text-white font-black uppercase tracking-tighter text-xl">Confirm Termination</AlertDialogTitle>
               <AlertDialogDescription className="text-muted-foreground font-medium">
-                This will permanently delete your Pulse profile, all historical spending telemetry, and cancel any active Nova guidance subscriptions. This action cannot be undone.
+                This will permanently delete your Pulse profile, all historical spending data, and cancel any active Nova guidance subscriptions. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="gap-3">

@@ -66,8 +66,8 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
     if (currentSpend === 0 && lastMonthSpend === 0) {
       console.warn(`[Nova Analysis] Insufficient telemetry for User: ${userId}`);
       return res.status(400).json({ 
-        message: "Insufficient telemetry for a deep scan. Please sync your transaction data to initialize high-fidelity analysis.",
-        hint: "Use the 'Sync Data' node on the dashboard."
+        message: "Not enough spending data yet. Add a few transactions first and then run the deep scan.",
+        hint: "Use the 'Sync Data' option on the dashboard."
       });
     }
 
@@ -129,32 +129,30 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
 
     // 5.1 Personality & Tone Logic
     const toneInstructions = {
-      gentle: "Use calm, encouraging language. Soften clinical terms with warmth. Lead with positive signals before addressing drift.",
-      balanced: "Maintain clarity and consistency. Clinical but approachable. Balance data with human context.",
-      driven: "Push with stronger accountability. Be direct and challenge complacency. Name patterns that need correction."
+      gentle: "Be warm, patient, and encouraging. Lead with what's going well before gently surfacing anything to watch. Use conversational, supportive language — you're a coach in their corner, not a scorekeeper.",
+      balanced: "Be real with them — honest about the numbers, but always human about it. You're a sharp advisor who happens to care. Don't lecture; have a conversation.",
+      driven: "Be direct, no fluff. You respect their intelligence and their goals too much to sugarcoat. Call out patterns clearly, celebrate wins briefly, and push them toward the next move."
     };
 
     const toneGuidance = toneInstructions[(user.nova_tone as string || "balanced").toLowerCase() as keyof typeof toneInstructions]
       || toneInstructions.balanced;
 
     const systemPrompt = `
-      You are Nova, the Senior Behavioral Analyst.
-      Analyze this telemetry with precision:
-      - Subject: ${user?.user_name || 'Anonymous Subject'}
-      - Monthly Income: ${hasIncome ? `$${income.toFixed(2)}` : "Not provided"}
-      - Current Spend: $${currentSpend.toFixed(2)}
-      - Last Month Spend: $${lastMonthSpend.toFixed(2)}
-      - Savings Improvement: ${hasIncome ? `$${savingsImprovement.toFixed(2)}` : "Calculating..."}
-      - Top Catalyst: ${topTrigger ? topTrigger.trigger_name : 'Stable Rhythm'}
-      - Goal Logic: ${goalInsight || 'Deterministic trajectory maintained.'}
+      You are Nova — a financial advisor who's sharp, human, and genuinely invested in the people you work with.
 
-      Coaching Tone: ${toneGuidance}
+      You're doing a monthly check-in for ${user?.user_name || 'this person'}. You have their real numbers. Use them naturally — like you'd speak them in a room, not paste them in a report.
 
-      Report Requirements:
-      1. Use clinical, high-fidelity terminology (Behavioral Velocity, Spending Drift).
-      2. Keep it to 4 concise sentences.
-      3. Suggest one "Brain Defrag" protocol to optimize velocity.
-      4. Honor the coaching tone in the report.
+      Here's what you're working with:
+      - Income: ${hasIncome ? `$${income.toFixed(2)}/month` : "not on file"}
+      - Spent this month: $${currentSpend.toFixed(2)}
+      - Spent last month: $${lastMonthSpend.toFixed(2)}
+      - Savings movement: ${hasIncome ? `$${savingsImprovement.toFixed(2)} ${savingsImprovement >= 0 ? 'improvement' : 'decline'} vs last month` : 'income not on file'}
+      - Biggest emotional spending driver: ${topTrigger ? topTrigger.trigger_name : 'nothing significant flagged'}
+      - Goal momentum: ${goalInsight || 'goals are on a steady trajectory'}
+
+      Coaching style: ${toneGuidance}
+
+      Write a concise check-in — 4 sentences max. Sound like yourself. Don't use headers or bullet points. Reference the actual numbers conversationally. Close with one concrete thing they can do this week to keep the momentum going or course-correct — call it a "Brain Defrag" moment.
     `;
 
     console.log("[Nova Analysis] Engaging Claude Sonnet...");
@@ -210,17 +208,19 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
  * when the AI service is unreachable.
  */
 function generateFallbackReport(
-  name: string = "Subject", 
+  name: string = "you", 
   spend: number, 
   savings: number, 
   trigger: string | null, 
   goal: string
 ): string {
-  const trend = savings >= 0 ? "positive" : "concerning";
-  const velocity = spend > 0 ? "active" : "dormant";
+  const trend = savings >= 0 ? "in the right direction" : "something worth addressing";
+  const triggerNote = trigger 
+    ? `Your biggest spending driver this month has been ${trigger} — worth being mindful of that pattern.`
+    : "No major spending triggers flagged this period, which is a good sign.";
   
-  return `Telemetry scan for ${name} complete. Your current spending velocity is ${velocity} at $${spend.toFixed(2)}. ` +
-         `We've detected a ${trend} savings delta of $${Math.abs(savings).toFixed(2)} compared to last month. ` +
-         `${trigger ? `Primary catalyst identified: ${trigger}.` : "Behavioral rhythm remains stable."} ` +
-         `${goal || "No immediate goal drift detected."} Protocol: Initiate 'Brain Defrag' to optimize monthly trajectory.`;
+  return `Here's where things stand, ${name}: you've spent $${spend.toFixed(2)} this month, and the trend is ${trend} — ` +
+         `${savings >= 0 ? `you're $${Math.abs(savings).toFixed(2)} ahead of where you were last month` : `you're $${Math.abs(savings).toFixed(2)} behind last month's pace`}. ` +
+         `${triggerNote} ` +
+         `${goal || "Your goals are on track."} Brain Defrag for this week: take 10 minutes to review last week's spending and identify one category you can pull back on — small adjustments compound fast.`;
 }

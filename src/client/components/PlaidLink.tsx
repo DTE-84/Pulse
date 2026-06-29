@@ -32,8 +32,8 @@ export const PlaidLinkButton: React.FC<PlaidLinkButtonProps> = ({ onSuccess, cla
     try {
       await plaidAPI.exchangeToken(public_token, metadata.institution?.name || "Bank");
       toast({
-        title: "Telemetry Linked",
-        description: "Your bank account is now part of the Pulse analytical network.",
+        title: "Bank Account Connected",
+        description: "Your account is now linked and Pulse is ready to track your spending.",
       });
       if (onSuccess) onSuccess();
     } catch (err: any) {

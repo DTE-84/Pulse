@@ -78,7 +78,7 @@ export default function ReportsPage() {
         <div className="flex items-center gap-3">
           <button className="flex items-center gap-3 bg-white/5 border border-white/5 px-6 py-3 rounded-full text-[10px] font-black transition-all hover:bg-white/10 uppercase tracking-widest text-muted-foreground group">
             <Download className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
-            Export Telemetry
+            Export Report
           </button>
         </div>
       </div>
@@ -162,7 +162,7 @@ export default function ReportsPage() {
                   <div className="space-y-2">
                      <h4 className="text-lg font-black text-white leading-none">Nova Deep-Scan Report</h4>
                      <p className="text-sm font-semibold text-muted-foreground leading-relaxed italic whitespace-pre-wrap">
-                       "{analysis?.report || "Insufficient telemetry for a deep scan. Sync more data to initialize synthesis."}"
+                       "{analysis?.report || "Not enough spending data yet for a deep scan. Add more transactions to get started."}"
                      </p>
                   </div>
                 </div>
@@ -213,7 +213,7 @@ export default function ReportsPage() {
              
              <div className="space-y-2">
                 <h3 className="text-2xl font-black text-white">Nova Advisor</h3>
-                <p className="text-xs font-black text-primary uppercase tracking-[0.2em]">Live Telemetry Sink</p>
+                <p className="text-xs font-black text-primary uppercase tracking-[0.2em]">Live Data Feed</p>
              </div>
 
              <div className="space-y-4 pt-6 flex-1 text-left">
