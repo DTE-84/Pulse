@@ -384,6 +384,35 @@ export default function Index() {
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 md:space-y-10 text-foreground">
       <h1 className="sr-only">Financial Dashboard</h1>
+
+      {/* Sandbox Mode Strip — guest/demo users only */}
+      {user?.isDemo && (
+        <div
+          onClick={() => navigate("/subscription")}
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl px-5 py-4 cursor-pointer hover:bg-yellow-500/[0.15] transition-all group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-yellow-500/15 flex items-center justify-center shrink-0 border border-yellow-500/20">
+              <Database className="w-4 h-4 text-yellow-400" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-yellow-400 uppercase tracking-[0.2em] mb-0.5">
+                You're in Sandbox Mode
+              </p>
+              <p className="text-xs text-muted-foreground font-medium">
+                You're viewing demo data. Pre-Order Pro to unlock real,
+                live-synced accounts.
+              </p>
+            </div>
+          </div>
+          <button className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-2 bg-yellow-400 text-black px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(250,204,21,0.25)]">
+            <Crown className="w-3.5 h-3.5" />
+            Pre-Order Pro
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
+      )}
+
       {/* Empty State Banner for New Users */}
       {(!stats || stats?.totalBalance === 0) && user?.subscriptionStatus === 'trialing' && (
         <div className="bg-primary/10 border border-primary/20 rounded-[1.5rem] p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden group">
