@@ -187,7 +187,7 @@ export default function AuthPage() {
             <div className="relative w-20 h-24 flex items-center justify-center">
               <div className="relative z-10 w-20 h-20 flex items-center justify-center group-hover:scale-110 transition-transform filter drop-shadow-[0_0_20px_rgba(45,237,156,0.25)] overflow-hidden">
                 <img
-                  src={`${import.meta.env.BASE_URL}PulseNovaLogoTrans.png`}
+                  src={`${import.meta.env.BASE_URL}PulseNovaLogo.png`}
                   alt="Pulse"
                   className="w-20 h-20 object-contain"
                 />
@@ -236,9 +236,9 @@ export default function AuthPage() {
                     <feature.icon className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <h4 className="text-foreground font-bold text-lg mb-1 tracking-tight">
+                    <h3 className="text-foreground font-bold text-lg mb-1 tracking-tight">
                       {feature.title}
-                    </h4>
+                    </h3>
                     <p className="text-muted-foreground leading-relaxed text-sm">
                       {feature.desc}
                     </p>
@@ -257,7 +257,7 @@ export default function AuthPage() {
                 <div className="absolute inset-0 bg-primary/20 rounded-full animate-pulse" />
                 <div className="relative z-10 w-20 h-20 flex items-center justify-center shadow-2xl overflow-hidden">
                   <img
-                    src={`${import.meta.env.BASE_URL}PulseNovaLogoTrans.png`}
+                    src={`${import.meta.env.BASE_URL}PulseNovaLogo.png`}
                     alt="Pulse"
                     className="w-20 h-20 object-contain"
                   />
@@ -273,9 +273,9 @@ export default function AuthPage() {
             </div>
 
             <div className="mb-6 sm:mb-10 text-center lg:text-left">
-              <h3 className="text-2xl font-bold text-foreground mb-2 tracking-tight">
+              <h2 className="text-2xl font-bold text-foreground mb-2 tracking-tight">
                 {isLogin ? "Welcome Back" : "Initialize Profile"}
-              </h3>
+              </h2>
               <p className="text-muted-foreground font-medium text-sm">
                 {isLogin
                   ? "Access your intelligence hub."

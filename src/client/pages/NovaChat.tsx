@@ -209,12 +209,13 @@ export default function NovaChat() {
           </div>
           <div className="flex items-center gap-3">
             <button
+              aria-label="Toggle theme"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="p-2 hover:bg-muted rounded-full transition-colors"
             >
               <Moon className="w-5 h-5 text-muted-foreground" />
             </button>
-            <button className="p-2 hover:bg-muted rounded-full transition-colors">
+            <button aria-label="Information" className="p-2 hover:bg-muted rounded-full transition-colors">
               <Info className="w-5 h-5 text-muted-foreground" />
             </button>
           </div>

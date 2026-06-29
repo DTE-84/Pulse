@@ -162,10 +162,10 @@ export default function GrowthPage() {
           
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
             <div>
-              <h3 className="text-lg font-black text-white uppercase tracking-widest flex items-center gap-3">
+              <h2 className="text-lg font-black text-white uppercase tracking-widest flex items-center gap-3">
                 <LineChartIcon className="w-5 h-5 text-primary" />
                 Wealth Trajectory
-              </h3>
+              </h2>
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
                 Predictive Forecast based on current velocity
               </p>
@@ -237,10 +237,10 @@ export default function GrowthPage() {
         {/* Goals & AI Insights */}
         <div className="lg:col-span-1 space-y-6 flex flex-col h-full">
           <div className="bg-[#12110F] border border-white/5 rounded-[1.5rem] md:rounded-[2.5rem] p-6 md:p-8 space-y-6 sm:space-y-8 flex-1 flex flex-col">
-            <h3 className="text-lg font-black text-white uppercase tracking-widest mb-4 flex items-center gap-3">
+            <h2 className="text-lg font-black text-white uppercase tracking-widest mb-4 flex items-center gap-3">
               <Target className="w-5 h-5 text-primary" />
               Active Goals
-            </h3>
+            </h2>
             <div className="space-y-8 flex-1 overflow-y-auto max-h-[400px] scrollbar-hide">
               {goals.map((goal) => {
                 const Icon = getGoalIcon(goal.name);
@@ -383,9 +383,9 @@ export default function GrowthPage() {
               <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/20 shrink-0 shadow-[0_0_20px_rgba(45,237,156,0.2)]">
                 <Sparkles className="w-5 h-5 text-primary animate-pulse" />
               </div>
-              <h4 className="text-xs font-black text-primary uppercase tracking-widest">
+              <h3 className="text-xs font-black text-primary uppercase tracking-widest">
                 Nova Intelligence
-              </h4>
+              </h3>
             </div>
             <p className="text-sm font-semibold text-white/90 leading-relaxed italic relative z-10">
               {stats?.novaInsight ||
@@ -411,7 +411,7 @@ export default function GrowthPage() {
                 {node.label}
               </p>
               <div className="flex items-end justify-between gap-2 mb-2">
-                <h4 className="text-xl md:text-2xl font-black text-white">{node.value}</h4>
+                <h3 className="text-xl md:text-2xl font-black text-white">{node.value}</h3>
                 <Badge variant="outline" className={cn(
                   "text-[8px] md:text-[9px] px-1.5 py-0 border-0 bg-transparent font-black",
                   node.trend === "up" ? "text-primary" : "text-red-400"

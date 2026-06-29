@@ -524,7 +524,7 @@ export default function SpendingPage() {
 
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-muted rounded-xl transition-colors shrink-0">
+                        <button aria-label="More actions" className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-muted rounded-xl transition-colors shrink-0">
                           <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                         </button>
                       </DropdownMenuTrigger>

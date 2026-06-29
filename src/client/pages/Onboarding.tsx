@@ -105,9 +105,9 @@ export default function Onboarding() {
   }: any) => (
     <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="space-y-3 mb-6 shrink-0">
-        <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tighter leading-none">
+        <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tighter leading-none">
           {title}
-        </h2>
+        </h1>
         <p className="text-muted-foreground text-base sm:text-lg font-medium leading-relaxed max-w-sm">
           {subtitle}
         </p>
@@ -178,7 +178,7 @@ export default function Onboarding() {
                 <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150 animate-pulse" />
                 <div className="w-24 h-24 flex items-center justify-center relative z-10 drop-shadow-[0_0_20px_rgba(45,237,156,0.3)]">
                   <img 
-                    src={`${import.meta.env.BASE_URL}PulseNovaLogoTrans.png`} 
+                    src={`${import.meta.env.BASE_URL}PulseNovaLogo.png`} 
                     alt="Logo" 
                     className="w-24 h-24 object-contain" 
                   />

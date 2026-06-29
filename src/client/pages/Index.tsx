@@ -383,6 +383,7 @@ export default function Index() {
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 md:space-y-10 text-foreground">
+      <h1 className="sr-only">Financial Dashboard</h1>
       {/* Empty State Banner for New Users */}
       {(!stats || stats?.totalBalance === 0) && user?.subscriptionStatus === 'trialing' && (
         <div className="bg-primary/10 border border-primary/20 rounded-[1.5rem] p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden group">
@@ -409,13 +410,13 @@ export default function Index() {
          <div className="bg-card border border-border rounded-2xl md:rounded-[1.5rem] p-4 md:p-5 relative overflow-hidden group hover:border-primary/20 transition-all">
             <div className="absolute top-0 left-0 w-1 h-full bg-primary opacity-20" />
             <p className="text-[8px] md:text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Total Balance</p>
-            <h4 className="text-xl md:text-2xl font-black text-foreground tracking-tighter font-jura">${stats?.totalBalance?.toLocaleString() || "0"}</h4>
+            <h2 className="text-xl md:text-2xl font-black text-foreground tracking-tighter font-jura">${stats?.totalBalance?.toLocaleString() || "0"}</h2>
             <p className="text-[7px] md:text-[8px] font-bold text-primary uppercase tracking-widest mt-1">Live Account</p>
          </div>
          <div className="bg-card border border-border rounded-2xl md:rounded-[1.5rem] p-4 md:p-5 relative overflow-hidden group hover:border-primary/20 transition-all">
             <div className="absolute top-0 left-0 w-1 h-full bg-blue-500 opacity-20" />
             <p className="text-[8px] md:text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Monthly Spend</p>
-            <h4 className="text-xl md:text-2xl font-black text-foreground tracking-tighter font-jura">${stats?.monthlyExpenses?.toLocaleString() || "0"}</h4>
+            <h2 className="text-xl md:text-2xl font-black text-foreground tracking-tighter font-jura">${stats?.monthlyExpenses?.toLocaleString() || "0"}</h2>
             <p className={cn(
               "text-[7px] md:text-[8px] font-bold uppercase tracking-widest mt-1",
               (stats?.spendingDeltaPct || 0) > 0 ? "text-red-400" : "text-emerald-400"
@@ -426,13 +427,13 @@ export default function Index() {
          <div className="bg-card border border-border rounded-2xl md:rounded-[1.5rem] p-4 md:p-5 relative overflow-hidden group hover:border-primary/20 transition-all">
             <div className="absolute top-0 left-0 w-1 h-full bg-muted-foreground opacity-20" />
             <p className="text-[8px] md:text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Target Limit</p>
-            <h4 className="text-xl md:text-2xl font-black text-foreground tracking-tighter font-jura">${stats?.baselineSpend?.toLocaleString() || "0"}</h4>
+            <h2 className="text-xl md:text-2xl font-black text-foreground tracking-tighter font-jura">${stats?.baselineSpend?.toLocaleString() || "0"}</h2>
             <p className="text-[7px] md:text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest mt-1">Monthly Goal</p>
          </div>
          <div className="bg-card border border-border rounded-2xl md:rounded-[1.5rem] p-4 md:p-5 relative overflow-hidden group hover:border-primary/20 transition-all">
             <div className="absolute top-0 left-0 w-1 h-full bg-yellow-500 opacity-20" />
             <p className="text-[8px] md:text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Risk Triggers</p>
-            <h4 className="text-xl md:text-2xl font-black text-foreground tracking-tighter font-jura">{stats?.activeSignals || "12"}</h4>
+            <h2 className="text-xl md:text-2xl font-black text-foreground tracking-tighter font-jura">{stats?.activeSignals || "12"}</h2>
             <p className="text-[7px] md:text-[8px] font-bold text-yellow-500 uppercase tracking-widest mt-1">Active Alerts</p>
          </div>
       </div>
@@ -486,9 +487,9 @@ export default function Index() {
             <WealthVault stats={stats} />
             <div className="flex-1 space-y-6">
               <div>
-                <h3 className="text-2xl font-black text-foreground tracking-tighter mb-2">
+                <h2 className="text-2xl font-black text-foreground tracking-tighter mb-2">
                   Vault Trajectory
-                </h3>
+                </h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Nova is measuring your{" "}
                   <span className="text-foreground font-bold">Savings Velocity</span>{" "}
