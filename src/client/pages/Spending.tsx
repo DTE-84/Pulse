@@ -353,7 +353,7 @@ export default function SpendingPage() {
                   className="group bg-muted/30 border border-border p-4 md:p-6 rounded-2xl md:rounded-[2rem] flex flex-col items-center text-center gap-3 md:gap-4 cursor-pointer hover:bg-muted hover:border-primary/30 transition-all hover:-translate-y-1 last:col-span-2 lg:last:col-span-1"
                 >
                   <div 
-                    className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg transition-transform group-hover:scale-110"
+                    className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center text-foreground shadow-lg transition-transform group-hover:scale-110"
                     style={{ backgroundColor: cat.color }}
                   >
                     <Icon className="w-4 h-4 md:w-5 md:h-5" />

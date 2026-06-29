@@ -38,7 +38,7 @@ const StatCard = ({
   icon: Icon,
   colorClass,
 }: any) => (
-  <div className="bg-[#0A0907] border border-white/[0.03] rounded-3xl p-4 md:p-6 relative overflow-hidden group hover:bg-[#11100D] transition-all hover:border-white/10 shadow-2xl flex flex-col h-full">
+  <div className="bg-card border border-border rounded-3xl p-4 md:p-6 relative overflow-hidden group hover:bg-muted/50 transition-all hover:border-border shadow-2xl flex flex-col h-full">
     <div
       className={cn(
         "absolute top-0 left-0 w-1 h-full opacity-30 group-hover:opacity-100 transition-opacity",
@@ -59,14 +59,14 @@ const StatCard = ({
         <Icon className="w-4 h-4 text-primary opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all" />
       )}
     </div>
-    <div className="text-2xl md:text-3xl font-black mb-3 tracking-tighter text-white flex items-baseline gap-1">
+    <div className="text-2xl md:text-3xl font-black mb-3 tracking-tighter text-foreground flex items-baseline gap-1">
       {value}
     </div>
     <div className="mt-auto pt-2 flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest">
       <span
         className={cn(
           trend === "up" ? "text-red-400" : "text-primary",
-          "flex items-center gap-0.5 bg-white/5 px-2 py-0.5 rounded-full",
+          "flex items-center gap-0.5 bg-muted px-2 py-0.5 rounded-full",
         )}
       >
         {trend === "up" ? (
@@ -94,7 +94,7 @@ const TriggerCard = ({
   novaSuggestion,
   colorClass,
 }: any) => (
-  <div className="bg-[#0A0907] border border-white/[0.03] rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 flex flex-col h-full group hover:border-white/10 transition-all hover:bg-[#0E0D0B] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden">
+  <div className="bg-card border border-border rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 flex flex-col h-full group hover:border-border transition-all hover:bg-muted/50 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden">
     {/* High-Fidelity Severity Glow */}
     <div className={cn(
       "absolute -top-24 -right-24 w-48 h-48 rounded-full blur-[80px] opacity-0 group-hover:opacity-10 transition-opacity pointer-events-none",
@@ -107,14 +107,14 @@ const TriggerCard = ({
     <div className="flex items-start gap-4 mb-8 relative z-10">
       <div
         className={cn(
-          "w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 bg-white/[0.02] border border-white/5 shadow-2xl transition-all group-hover:scale-105 group-hover:border-primary/20",
+          "w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 bg-muted/50 border border-border shadow-2xl transition-all group-hover:scale-105 group-hover:border-primary/20",
           colorClass,
         )}
       >
         {emoji}
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="text-xl font-black text-white mb-1 tracking-tighter uppercase leading-tight">
+        <h3 className="text-xl font-black text-foreground mb-1 tracking-tighter uppercase leading-tight">
           {name}
         </h3>
         <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest leading-tight opacity-70">
@@ -140,9 +140,9 @@ const TriggerCard = ({
     </div>
 
     {/* Stats row */}
-    <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8 pt-6 border-t border-white/5 relative z-10">
+    <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8 pt-6 border-t border-border relative z-10">
       {[
-        { val: `$${amount}`, label: "Cycle Spend", color: "text-white" },
+        { val: `$${amount}`, label: "Cycle Spend", color: "text-foreground" },
         { val: `${count}×`, label: "Frequency", color: "text-primary" },
         { val: peak, label: "Peak Window", color: "text-blue-400" },
       ].map(({ val, label, color }) => (
@@ -195,7 +195,7 @@ const TriggerCard = ({
     </div>
 
     {/* Brain insight */}
-    <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 relative hover:bg-white/[0.04] transition-all mb-4 mt-auto group/insight">
+    <div className="bg-muted/50 border border-border rounded-2xl p-5 relative hover:bg-white/[0.04] transition-all mb-4 mt-auto group/insight">
       <div className="flex items-start gap-4">
         <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-0.5 border border-primary/10 group-hover/insight:border-primary/30 transition-colors">
           <Brain className="w-4 h-4 text-primary" />
@@ -218,7 +218,7 @@ const TriggerCard = ({
             Nova Protocol Suggestion
           </p>
           <p
-            className="text-[12px] font-black text-white group-hover/nova:text-primary transition-colors tracking-tight"
+            className="text-[12px] font-black text-foreground group-hover/nova:text-primary transition-colors tracking-tight"
             dangerouslySetInnerHTML={{ __html: novaSuggestion }}
           />
         </div>

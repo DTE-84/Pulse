@@ -162,17 +162,17 @@ export default function Profile() {
       <div className="flex items-center gap-4">
         <button 
           onClick={() => navigate("/settings")}
-          className="w-10 h-10 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+          className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center hover:bg-muted transition-colors"
         >
-          <ChevronLeft className="w-5 h-5 text-white" />
+          <ChevronLeft className="w-5 h-5 text-foreground" />
         </button>
         <div>
-          <h1 className="text-3xl font-black tracking-tighter text-white uppercase">Account Details</h1>
+          <h1 className="text-3xl font-black tracking-tighter text-foreground uppercase">Account Details</h1>
           <p className="text-xs text-muted-foreground font-black uppercase tracking-widest mt-1">Identity & Baseline Configuration</p>
         </div>
       </div>
 
-      <div className="bg-[#12110F] border border-white/5 rounded-[2.5rem] p-8 md:p-10 space-y-8 shadow-2xl">
+      <div className="bg-card border border-border rounded-[2.5rem] p-8 md:p-10 space-y-8 shadow-2xl">
         <div className="space-y-6">
           <div className="space-y-3">
             <Label htmlFor="profile-name" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Full Name</Label>
@@ -183,7 +183,7 @@ export default function Profile() {
                 name="profile-name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-white/[0.02] border-white/5 rounded-2xl py-6 pl-12 focus:border-primary/40 transition-all font-semibold"
+                className="bg-muted/50 border-border rounded-2xl py-6 pl-12 focus:border-primary/40 transition-all font-semibold"
               />
             </div>
           </div>
@@ -197,7 +197,7 @@ export default function Profile() {
                 name="profile-email"
                 value={formData.email}
                 disabled
-                className="bg-white/[0.01] border-white/5 rounded-2xl py-6 pl-12 font-semibold"
+                className="bg-white/[0.01] border-border rounded-2xl py-6 pl-12 font-semibold"
               />
             </div>
           </div>
@@ -212,7 +212,7 @@ export default function Profile() {
                 type="number"
                 value={formData.baselineSpend}
                 onChange={(e) => setFormData({ ...formData, baselineSpend: parseFloat(e.target.value) })}
-                className="bg-white/[0.02] border-white/5 rounded-2xl py-6 pl-12 focus:border-primary/40 transition-all font-semibold"
+                className="bg-muted/50 border-border rounded-2xl py-6 pl-12 focus:border-primary/40 transition-all font-semibold"
               />
             </div>
             <p className="text-[10px] text-muted-foreground italic ml-1">This is the 'Pulse' Nova uses to detect spending drift.</p>
@@ -235,13 +235,13 @@ export default function Profile() {
         </button>
       </div>
 
-      <div className="bg-[#12110F] border border-white/5 rounded-[2.5rem] p-8 md:p-10 space-y-8 shadow-2xl">
+      <div className="bg-card border border-border rounded-[2.5rem] p-8 md:p-10 space-y-8 shadow-2xl">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
             <ShieldCheck className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h3 className="text-lg font-black text-white uppercase tracking-tight">Security Protocol</h3>
+            <h3 className="text-lg font-black text-foreground uppercase tracking-tight">Security Protocol</h3>
             <p className="text-xs text-muted-foreground font-semibold">Rotate credentials and manage access nodes.</p>
           </div>
         </div>
@@ -258,7 +258,7 @@ export default function Profile() {
                 placeholder="••••••••"
                 value={passwordData.newPassword}
                 onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                className="bg-white/[0.02] border-white/5 rounded-2xl py-6 pl-12 focus:border-primary/40 transition-all font-semibold"
+                className="bg-muted/50 border-border rounded-2xl py-6 pl-12 focus:border-primary/40 transition-all font-semibold"
               />
             </div>
           </div>
@@ -274,7 +274,7 @@ export default function Profile() {
                 placeholder="••••••••"
                 value={passwordData.confirmPassword}
                 onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                className="bg-white/[0.02] border-white/5 rounded-2xl py-6 pl-12 focus:border-primary/40 transition-all font-semibold"
+                className="bg-muted/50 border-border rounded-2xl py-6 pl-12 focus:border-primary/40 transition-all font-semibold"
               />
             </div>
           </div>
@@ -283,7 +283,7 @@ export default function Profile() {
         <button 
           onClick={handleUpdatePassword}
           disabled={isUpdatingPassword || !passwordData.newPassword}
-          className="w-full py-5 bg-muted border border-white/5 text-white font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-white/5 transition-all uppercase tracking-[0.2em] text-xs disabled:opacity-50"
+          className="w-full py-5 bg-muted border border-border text-foreground font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-muted transition-all uppercase tracking-[0.2em] text-xs disabled:opacity-50"
         >
           {isUpdatingPassword ? (
             <Loader2 className="w-5 h-5 animate-spin" />
@@ -302,7 +302,7 @@ export default function Profile() {
             <AlertTriangle className="w-6 h-6 text-red-500" />
           </div>
           <div>
-            <h3 className="text-lg font-black text-white uppercase tracking-tight">Danger Zone</h3>
+            <h3 className="text-lg font-black text-foreground uppercase tracking-tight">Danger Zone</h3>
             <p className="text-xs text-muted-foreground font-semibold">Irreversible account operations.</p>
           </div>
         </div>
@@ -314,19 +314,19 @@ export default function Profile() {
               Terminate Account & Purge Data
             </button>
           </AlertDialogTrigger>
-          <AlertDialogContent className="bg-[#0A0908] border-white/10 rounded-[2rem]">
+          <AlertDialogContent className="bg-card border-border rounded-[2rem]">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-white font-black uppercase tracking-tighter text-xl">Confirm Termination</AlertDialogTitle>
+              <AlertDialogTitle className="text-foreground font-black uppercase tracking-tighter text-xl">Confirm Termination</AlertDialogTitle>
               <AlertDialogDescription className="text-muted-foreground font-medium">
                 This will permanently delete your Pulse profile, all historical spending data, and cancel any active Nova guidance subscriptions. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="gap-3">
-              <AlertDialogCancel className="bg-white/5 border-white/5 text-white hover:bg-white/10 rounded-xl font-black uppercase tracking-widest text-[10px]">Cancel</AlertDialogCancel>
+              <AlertDialogCancel className="bg-muted border-border text-foreground hover:bg-muted rounded-xl font-black uppercase tracking-widest text-[10px]">Cancel</AlertDialogCancel>
               <AlertDialogAction 
                 onClick={handleTerminate}
                 disabled={isDeleting}
-                className="bg-red-500 text-white hover:bg-red-600 rounded-xl font-black uppercase tracking-widest text-[10px]"
+                className="bg-red-500 text-foreground hover:bg-red-600 rounded-xl font-black uppercase tracking-widest text-[10px]"
               >
                 {isDeleting ? "Purging..." : "Purge Data"}
               </AlertDialogAction>

@@ -250,7 +250,7 @@ const MobileNav = () => {
 
       {/* Primary tab bar */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 z-50 pointer-events-none">
-        <div className="bg-background/95 backdrop-blur-2xl border border-border flex items-center justify-around px-2 sm:px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 min-h-[4.5rem] rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-white/5 pointer-events-auto max-w-[600px] mx-auto">
+        <div className="bg-background/95 backdrop-blur-2xl border border-border flex items-center justify-around px-2 sm:px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 min-h-[4.5rem] rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] pointer-events-auto max-w-[600px] mx-auto">
           {primaryNav.map((item) => {
           const isActive =
             location.pathname === item.href ||

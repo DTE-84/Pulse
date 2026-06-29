@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 
 const CampaignCard = ({ title, status, recipients, openRate, clickRate }: any) => (
-  <div className="bg-card border border-border rounded-3xl p-6 transition-all hover:bg-[#11100D] hover:border-border group">
+  <div className="bg-card border border-border rounded-3xl p-6 transition-all hover:bg-muted/50 hover:border-border group">
     <div className="flex justify-between items-start mb-6">
       <div className="space-y-1">
         <h3 className="text-lg font-bold text-foreground tracking-tight">{title}</h3>

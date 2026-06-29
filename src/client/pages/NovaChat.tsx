@@ -35,7 +35,7 @@ const SpendingRing = ({ value }: { value: number }) => {
 const MiniBar = ({ label, value, color }: any) => (
   <div className="flex items-center justify-between mb-3">
     <span className="text-[11px] text-muted-foreground font-medium w-28 shrink-0">{label}</span>
-    <div className="flex-1 mx-3 h-1.5 bg-white/5 rounded-full overflow-hidden">
+    <div className="flex-1 mx-3 h-1.5 bg-muted rounded-full overflow-hidden">
       <div className={cn("h-full rounded-full transition-all duration-1000", color)} style={{ width: `${value}%` }} />
     </div>
     <span className="text-[10px] font-bold text-muted-foreground w-8 text-right">{Math.round(value)}%</span>

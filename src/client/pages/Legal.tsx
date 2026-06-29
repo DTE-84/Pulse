@@ -12,12 +12,12 @@ export default function Legal() {
   const LegalSection = ({ title, icon: Icon, children }: any) => (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-2xl bg-muted border border-border flex items-center justify-center">
           <Icon className="w-6 h-6 text-primary" />
         </div>
-        <h2 className="text-2xl font-black text-white uppercase tracking-tighter">{title}</h2>
+        <h2 className="text-2xl font-black text-foreground uppercase tracking-tighter">{title}</h2>
       </div>
-      <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-8 md:p-10 text-muted-foreground leading-relaxed text-sm space-y-4 font-medium">
+      <div className="bg-muted/50 border border-border rounded-[2.5rem] p-8 md:p-10 text-muted-foreground leading-relaxed text-sm space-y-4 font-medium">
         {children}
       </div>
     </div>
@@ -28,12 +28,12 @@ export default function Legal() {
       <div className="flex items-center gap-4">
         <button 
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+          className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center hover:bg-muted transition-colors"
         >
-          <ChevronLeft className="w-5 h-5 text-white" />
+          <ChevronLeft className="w-5 h-5 text-foreground" />
         </button>
         <div>
-          <h1 className="text-4xl font-black tracking-tighter text-white uppercase">Legal Protocol</h1>
+          <h1 className="text-4xl font-black tracking-tighter text-foreground uppercase">Legal Protocol</h1>
           <p className="text-[10px] text-primary font-black uppercase tracking-[0.3em] mt-1">DTE Solutions LLC • Behavioral Integrity Standards</p>
         </div>
       </div>
@@ -71,7 +71,7 @@ export default function Legal() {
       </LegalSection>
 
       <LegalSection title="Regulatory Disclaimer" icon={AlertCircle}>
-        <p className="text-white font-bold italic">Pulse is a behavioral intelligence tool, not a licensed financial advisory service.</p>
+        <p className="text-foreground font-bold italic">Pulse is a behavioral intelligence tool, not a licensed financial advisory service.</p>
         <p>
           Nova provides behavioral financial insights based on your spending rhythm. It does not provide regulated financial, 
           investment, tax, or legal advice. Pulse should not be used as the sole basis for high-stakes capital decisions.
@@ -82,7 +82,7 @@ export default function Legal() {
         </p>
       </LegalSection>
 
-      <div className="pt-12 border-t border-white/5 flex flex-col items-center gap-4">
+      <div className="pt-12 border-t border-border flex flex-col items-center gap-4">
         <div className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">
           © 2026 DTE Solutions LLC
         </div>

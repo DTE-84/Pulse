@@ -120,7 +120,7 @@ export default function GrowthPage() {
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 md:space-y-12">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="space-y-3">
-          <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-white uppercase leading-tight">
+          <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase leading-tight">
             Financial Growth
           </h1>
           <p className="text-muted-foreground font-semibold text-base md:text-lg max-w-lg leading-snug">
@@ -135,7 +135,7 @@ export default function GrowthPage() {
             rate.
           </p>
         </div>
-        <div className="flex items-center gap-1 bg-white/5 border border-white/10 p-1.5 rounded-2xl shrink-0 flex-wrap">
+        <div className="flex items-center gap-1 bg-muted border border-border p-1.5 rounded-2xl shrink-0 flex-wrap">
           {["1m", "3m", "6m", "ALL"].map((t) => (
             <button
               key={t}
@@ -144,7 +144,7 @@ export default function GrowthPage() {
                 "px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
                 timeframe === t
                   ? "bg-primary text-background shadow-lg"
-                  : "text-muted-foreground hover:text-white",
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {t}
@@ -155,14 +155,14 @@ export default function GrowthPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Main Growth Chart */}
-        <div className="lg:col-span-3 bg-[#12110F] border border-white/5 rounded-[1.5rem] md:rounded-[2.5rem] p-5 md:p-10 space-y-6 sm:space-y-8 flex flex-col min-h-[350px] sm:min-h-[500px] relative overflow-hidden group">
+        <div className="lg:col-span-3 bg-card border border-border rounded-[1.5rem] md:rounded-[2.5rem] p-5 md:p-10 space-y-6 sm:space-y-8 flex flex-col min-h-[350px] sm:min-h-[500px] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
              <TrendingUp size={200} className="text-primary" />
           </div>
           
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
             <div>
-              <h2 className="text-lg font-black text-white uppercase tracking-widest flex items-center gap-3">
+              <h2 className="text-lg font-black text-foreground uppercase tracking-widest flex items-center gap-3">
                 <LineChartIcon className="w-5 h-5 text-primary" />
                 Wealth Trajectory
               </h2>
@@ -173,7 +173,7 @@ export default function GrowthPage() {
             <div className="flex items-center gap-4">
                <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-primary" />
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest">Actual</span>
+                  <span className="text-[10px] font-black text-foreground uppercase tracking-widest">Actual</span>
                </div>
                <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-primary/30 border border-primary/50" />
@@ -236,8 +236,8 @@ export default function GrowthPage() {
 
         {/* Goals & AI Insights */}
         <div className="lg:col-span-1 space-y-6 flex flex-col h-full">
-          <div className="bg-[#12110F] border border-white/5 rounded-[1.5rem] md:rounded-[2.5rem] p-6 md:p-8 space-y-6 sm:space-y-8 flex-1 flex flex-col">
-            <h2 className="text-lg font-black text-white uppercase tracking-widest mb-4 flex items-center gap-3">
+          <div className="bg-card border border-border rounded-[1.5rem] md:rounded-[2.5rem] p-6 md:p-8 space-y-6 sm:space-y-8 flex-1 flex flex-col">
+            <h2 className="text-lg font-black text-foreground uppercase tracking-widest mb-4 flex items-center gap-3">
               <Target className="w-5 h-5 text-primary" />
               Active Goals
             </h2>
@@ -256,12 +256,12 @@ export default function GrowthPage() {
                       <div className="flex items-center gap-3">
                         <div
                           className={cn(
-                            "w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center group-hover:scale-110 group-hover:border-primary/30 transition-all shadow-inner text-primary",
+                            "w-10 h-10 rounded-xl bg-muted border border-border flex items-center justify-center group-hover:scale-110 group-hover:border-primary/30 transition-all shadow-inner text-primary",
                           )}
                         >
                           <Icon className="w-5 h-5" />
                         </div>
-                        <span className="text-sm font-bold text-white group-hover:text-primary transition-colors">
+                        <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
                           {goal.name}
                         </span>
                       </div>
@@ -276,7 +276,7 @@ export default function GrowthPage() {
                           Target: ${target.toLocaleString()}
                         </span>
                       </div>
-                      <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                          <div
                             className={cn(
                               "h-full rounded-full transition-all bg-primary shadow-[0_0_10px_rgba(45,237,156,0.5)]",
@@ -308,7 +308,7 @@ export default function GrowthPage() {
                   <Plus className="w-3.5 h-3.5 group-hover:rotate-90 transition-transform" />
                 </button>
               </DialogTrigger>
-              <DialogContent className="bg-[#0A0908] border-white/10 text-white rounded-[2.5rem] p-8">
+              <DialogContent className="bg-card border-border text-foreground rounded-[2.5rem] p-8">
                 <DialogHeader className="space-y-2">
                   <DialogTitle className="text-2xl font-black tracking-tighter uppercase">
                     Goal Engineering
@@ -330,7 +330,7 @@ export default function GrowthPage() {
                       onChange={(e) =>
                         setNewGoal({ ...newGoal, name: e.target.value })
                       }
-                      className="bg-white/[0.03] border-white/5 rounded-xl h-12 font-bold focus:border-primary/40 transition-all"
+                      className="bg-muted/50 border-border rounded-xl h-12 font-bold focus:border-primary/40 transition-all"
                     />
                   </div>
                   <div className="space-y-2 group">
@@ -346,7 +346,7 @@ export default function GrowthPage() {
                       onChange={(e) =>
                         setNewGoal({ ...newGoal, target: e.target.value })
                       }
-                      className="bg-white/[0.03] border-white/5 rounded-xl h-12 font-bold focus:border-primary/40 transition-all"
+                      className="bg-muted/50 border-border rounded-xl h-12 font-bold focus:border-primary/40 transition-all"
                     />
                   </div>
                   <div className="space-y-2 group">
@@ -361,7 +361,7 @@ export default function GrowthPage() {
                       onChange={(e) =>
                         setNewGoal({ ...newGoal, deadline: e.target.value })
                       }
-                      className="bg-white/[0.03] border-white/5 rounded-xl h-12 font-bold focus:border-primary/40 transition-all text-white/50"
+                      className="bg-muted/50 border-border rounded-xl h-12 font-bold focus:border-primary/40 transition-all text-white/50"
                     />
                   </div>
                 </div>
@@ -403,7 +403,7 @@ export default function GrowthPage() {
            { label: "Data Status", value: "99.8%", drift: "Secure", trend: "up", desc: "Your data is secure and up to date." },
            { label: "Goal Acceleration", value: "2.4 Mo", drift: "+0.8", trend: "up", desc: "Months gained via behavioral shifts." }
          ].map((node, i) => (
-           <div key={i} className="bg-[#12110F] border border-white/5 rounded-2xl md:rounded-3xl p-4 md:p-6 group hover:border-primary/20 transition-all relative overflow-hidden">
+           <div key={i} className="bg-card border border-border rounded-2xl md:rounded-3xl p-4 md:p-6 group hover:border-primary/20 transition-all relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                 {node.trend === "up" ? <ArrowUpRight className="w-12 h-12 text-primary" /> : <ArrowDownRight className="w-12 h-12 text-red-400" />}
               </div>
@@ -411,7 +411,7 @@ export default function GrowthPage() {
                 {node.label}
               </p>
               <div className="flex items-end justify-between gap-2 mb-2">
-                <h3 className="text-xl md:text-2xl font-black text-white">{node.value}</h3>
+                <h3 className="text-xl md:text-2xl font-black text-foreground">{node.value}</h3>
                 <Badge variant="outline" className={cn(
                   "text-[8px] md:text-[9px] px-1.5 py-0 border-0 bg-transparent font-black",
                   node.trend === "up" ? "text-primary" : "text-red-400"
