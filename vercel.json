@@ -3,6 +3,7 @@
   "cleanUrls": true,
   "redirects": [
     { "source": "/privacy-policy", "destination": "/privacy-policy.html", "permanent": true },
+    { "source": "/terms", "destination": "/terms.html", "permanent": true },
     { "source": "/data-retention-policy", "destination": "/data-retention-policy.html", "permanent": true },
     { "source": "/information-security-policy", "destination": "/information-security-policy.html", "permanent": true }
   ],
