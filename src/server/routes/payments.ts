@@ -84,6 +84,9 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
         },
       ],
       mode: "subscription",
+      subscription_data: {
+        trial_period_days: 7,
+      },
       success_url: `${process.env.APP_BASE_URL || "http://localhost:5173"}/subscription?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.APP_BASE_URL || "http://localhost:5173"}/subscription?canceled=true`,
       client_reference_id: userId,

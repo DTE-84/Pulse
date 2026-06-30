@@ -58,11 +58,13 @@ export const authAPI = {
     const { token, refreshToken } = response.data;
     
     if (token) {
-      // Synchronize with Supabase Client to enable RLS and session persistence
-      await supabase.auth.setSession({
-        access_token: token,
-        refresh_token: refreshToken || "",
-      });
+      if (refreshToken) {
+        // Synchronize with Supabase Client to enable RLS and session persistence
+        await supabase.auth.setSession({
+          access_token: token,
+          refresh_token: refreshToken,
+        });
+      }
       localStorage.setItem("token", token);
     }
     

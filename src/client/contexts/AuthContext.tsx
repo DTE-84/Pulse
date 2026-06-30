@@ -116,13 +116,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             localStorage.setItem('user', JSON.stringify(userData));
           }
         } else {
-          // If no session but we had local state, clear it (it was stale)
-          if (token || user) {
+          // If no session but we had local state, clear it (unless it's a demo/sandbox user)
+          if ((token || user) && !user?.isDemo) {
             console.log("[PulseAi] Stale session detected, clearing local storage.");
             setToken(null);
             setUser(null);
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+          } else if (user?.isDemo) {
+            console.log("[PulseAi] Demo user session retained locally.");
           }
         }
       } catch (err) {
@@ -146,6 +148,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setToken(session.access_token);
         localStorage.setItem('token', session.access_token);
       } else {
+        try {
+          const savedUser = localStorage.getItem('user');
+          if (savedUser) {
+            const parsedUser = JSON.parse(savedUser);
+            if (parsedUser.isDemo) {
+              console.log("[PulseAi] Demo user session retained locally despite auth event.");
+              return;
+            }
+          }
+        } catch (e) {
+          // ignore parse errors
+        }
         setToken(null);
         setUser(null);
         localStorage.removeItem('token');
