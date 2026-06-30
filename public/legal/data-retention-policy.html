@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Retention and Disposal Policy | DTE Solutions LLC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300;700&family=Bebas+Neue&family=Inter:wght@400;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --obsidian: #000000;
+            --kinetic-teal: #00ffcc;
+            --charcoal: #080808;
+        }
+        body {
+            background-color: var(--obsidian);
+            color: #ffffff;
+            font-family: "Inter", sans-serif;
+            line-height: 1.6;
+        }
+        .font-display { font-family: "Bebas Neue", cursive; }
+        .font-tech { font-family: "Jura", sans-serif; }
+        .legal-container {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 80px 24px;
+        }
+        h1 { font-size: 3.5rem; margin-bottom: 2rem; }
+        h2 { font-family: "Bebas Neue", cursive; font-size: 2rem; color: var(--kinetic-teal); margin-top: 3rem; margin-bottom: 1rem; letter-spacing: 0.1em; }
+        h3 { font-family: "Jura", sans-serif; font-size: 1.2rem; color: #ffffff; margin-top: 2rem; margin-bottom: 0.8rem; font-weight: 700; }
+        p { margin-bottom: 1.5rem; color: rgba(255, 255, 255, 0.7); font-weight: 300; }
+        ul { margin-bottom: 1.5rem; list-style-type: disc; padding-left: 1.5rem; color: rgba(255, 255, 255, 0.6); }
+        ol { margin-bottom: 1.5rem; list-style-type: decimal; padding-left: 1.5rem; color: rgba(255, 255, 255, 0.6); }
+        li { margin-bottom: 0.5rem; }
+        .last-updated { font-family: "Jura", sans-serif; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.4em; color: var(--kinetic-teal); margin-bottom: 4rem; opacity: 0.8; }
+        a { color: var(--kinetic-teal); text-decoration: none; border-bottom: 1px solid transparent; transition: all 0.3s; }
+        a:hover { border-bottom-color: var(--kinetic-teal); }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 40px;
+            margin-top: 40px;
+        }
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .meta-item {
+            font-family: "Jura", sans-serif;
+            font-size: 0.85rem;
+        }
+        .meta-label {
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.7rem;
+            margin-bottom: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        th {
+            font-family: "Jura", sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--kinetic-teal);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 16px;
+            font-weight: 700;
+        }
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.01);
+        }
+        .signature-block {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 30px;
+            margin-top: 50px;
+            font-family: "Jura", sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="legal-container">
+        <a href="../index.html" class="font-tech text-[10px] uppercase tracking-[0.4em] mb-12 inline-block">← Return to Nexus</a>
+        
+        <h1 class="font-display tracking-tighter leading-none">DATA RETENTION & <span class="text-[#00ffcc]">DISPOSAL POLICY</span></h1>
+        <div class="last-updated">Effective Date: June 28, 2026</div>
+
+        <div class="glass-panel">
+            <div class="meta-grid">
+                <div class="meta-item">
+                    <div class="meta-label">Document Version</div>
+                    <div>1.0</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Owner</div>
+                    <div>Drew Thomas Ernst, Owner / Systems Engineer</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Contact</div>
+                    <div>dte.solutions.llc@gmail.com</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Review Cycle</div>
+                    <div>Annual or upon material change</div>
+                </div>
+            </div>
+
+            <h2>1. Purpose and Scope</h2>
+            <p>This Data Retention and Disposal Policy defines the minimum and maximum periods for which DTE Solutions LLC retains consumer data, and the standards by which data is securely disposed of when retention periods expire or when consumers request deletion.</p>
+            <p>This policy applies to all consumer data processed by DTE Solutions LLC through the Pulse AI platform, including financial data received from the Plaid API, account metadata, transaction history, and behavioral analytics.</p>
+
+            <h2>2. Legal and Regulatory Basis</h2>
+            <p>Data retention and disposal practices comply with the following applicable frameworks and regulations:</p>
+            <div class="overflow-x-auto my-6 border border-white/10 rounded-2xl bg-white/[0.02]">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="text-left">Regulation</th>
+                            <th class="text-left">Applicability</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-bold text-white">CCPA / CPRA</td>
+                            <td>California Consumer Privacy Act — consumers have the right to deletion</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-white">GDPR (where applicable)</td>
+                            <td>EU General Data Protection Regulation — right to erasure</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-white">GLBA</td>
+                            <td>Gramm-Leach-Bliley Act — data safeguarding for financial information</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-white">COPPA</td>
+                            <td>DTE does not knowingly collect data from users under 13</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>3. Data Categories and Retention Periods</h2>
+            <div class="overflow-x-auto my-6 border border-white/10 rounded-2xl bg-white/[0.02]">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="text-left">Data Category</th>
+                            <th class="text-left">Description</th>
+                            <th class="text-left">Retention Period</th>
+                            <th class="text-left">Legal Basis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-bold text-white">Consumer Account Data</td>
+                            <td>Name, email address, authentication credentials</td>
+                            <td>Duration of account + 30 days post-deletion</td>
+                            <td>Service delivery</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-white">Financial Transaction Data</td>
+                            <td>Transaction records retrieved from Plaid API</td>
+                            <td>24 months from date of ingestion</td>
+                            <td>Service delivery / behavioral analysis</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-white">Behavioral Analytics</td>
+                            <td>Spending velocity, drift, baseline metrics</td>
+                            <td>24 months or until account deletion</td>
+                            <td>Service delivery</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-white">Access / Audit Logs</td>
+                            <td>Server-side API request logs, authentication events</td>
+                            <td>90 days</td>
+                            <td>Security and incident response</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-white">Session Tokens</td>
+                            <td>JWT session tokens</td>
+                            <td>Expiry defined in token (short-lived)</td>
+                            <td>Authentication</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-white">Plaid Access Tokens</td>
+                            <td>OAuth tokens used to retrieve consumer financial data</td>
+                            <td>Duration of active Plaid connection or until consumer revokes</td>
+                            <td>Plaid integration</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-white">Support Communications</td>
+                            <td>Any communications with consumers for support purposes</td>
+                            <td>12 months</td>
+                            <td>Legitimate interest</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-white">Marketing / Pre-Order Data</td>
+                            <td>Email addresses collected for early-access programs</td>
+                            <td>Until opt-out or program conclusion, max 24 months</td>
+                            <td>Consent</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>4. Data Deletion Procedures</h2>
+            
+            <h3>4.1 Consumer-Initiated Deletion</h3>
+            <p>Consumers may request deletion of their data at any time by:</p>
+            <ul>
+                <li>Submitting a deletion request to <a href="mailto:dte.solutions.llc@gmail.com">dte.solutions.llc@gmail.com</a> with the subject line "Data Deletion Request"</li>
+                <li>Using any in-app account deletion functionality where available</li>
+            </ul>
+            <p>Upon receiving a verified deletion request:</p>
+            <ol>
+                <li>All personal data, financial data, and behavioral analytics associated with the consumer's account are permanently deleted from the production database (Supabase PostgreSQL) within 30 days.</li>
+                <li>Plaid access tokens associated with the consumer are revoked via the Plaid API.</li>
+                <li>Any residual data in backups is overwritten or purged within the next scheduled backup rotation cycle (maximum 90 days from request).</li>
+                <li>Confirmation of deletion is sent to the consumer's registered email address.</li>
+            </ol>
+
+            <h3>4.2 Automated Retention Enforcement</h3>
+            <ul>
+                <li>Consumer data that has exceeded its defined retention period is flagged for deletion through periodic data hygiene reviews.</li>
+                <li>Retention enforcement is reviewed at minimum quarterly.</li>
+                <li>Automated deletion pipelines are implemented where technically feasible.</li>
+            </ul>
+
+            <h3>4.3 Secure Disposal Standards</h3>
+            <p>All data disposal follows these standards:</p>
+            <div class="overflow-x-auto my-6 border border-white/10 rounded-2xl bg-white/[0.02]">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="text-left">Storage Medium</th>
+                            <th class="text-left">Disposal Method</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-bold text-white">PostgreSQL Database Records</td>
+                            <td>Hard DELETE with no soft-delete shadow; row is permanently removed</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-white">Backups</td>
+                            <td>Encrypted backups are purged on schedule; no recovery of deleted data is possible after the backup rotation cycle completes</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-white">Plaid Tokens</td>
+                            <td>Revoked via Plaid <code class="text-xs bg-white/10 px-1.5 py-0.5 rounded text-[#00ffcc] font-tech">/item/remove</code> API endpoint</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-white">Server Logs</td>
+                            <td>Log files are rotated and permanently deleted after 90-day retention period</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>5. Data Minimization</h2>
+            <p>DTE Solutions LLC collects only the data necessary to provide the Pulse AI behavioral finance service. Financial data received from the Plaid API is:</p>
+            <ul>
+                <li>Not sold to third parties</li>
+                <li>Not used for advertising or profiling beyond the direct service</li>
+                <li>Not shared with any party except as required to deliver the service (e.g., the authenticated consumer's own data displayed in the Pulse UI)</li>
+            </ul>
+
+            <h2>6. Cross-Border Data Transfers</h2>
+            <p>Consumer data is stored on Supabase's PostgreSQL infrastructure and processed on Vercel's globally distributed edge network. Where data may transit or be processed outside the consumer's jurisdiction, DTE Solutions LLC relies on the data transfer mechanisms and compliance certifications maintained by these providers (Supabase and Vercel, both SOC 2 Type II compliant).</p>
+
+            <h2>7. Policy Review</h2>
+            <p>This policy is reviewed:</p>
+            <ul>
+                <li>Annually at minimum</li>
+                <li>Upon any material change to DTE's data processing activities, technology stack, or applicable law</li>
+                <li>Following any data incident that implicates retention or disposal practices</li>
+            </ul>
+
+            <h2>8. Contact for Data Requests</h2>
+            <p>All data retention and deletion requests should be directed to:</p>
+            <p class="font-tech text-sm text-[#00ffcc]">
+                Drew Thomas Ernst, Owner, DTE Solutions LLC<br>
+                Email: <a href="mailto:dte.solutions.llc@gmail.com">dte.solutions.llc@gmail.com</a> | <a href="mailto:drew.t.ernst@gmail.com">drew.t.ernst@gmail.com</a>
+            </p>
+
+            <div class="signature-block">
+                <div class="text-[9px] uppercase tracking-widest text-white/30 mb-2">Authorized Signature</div>
+                <div class="font-bold text-white text-lg">Drew Thomas Ernst</div>
+                <div class="text-xs text-[#00ffcc]">Owner, DTE Solutions LLC</div>
+                <div class="text-[10px] text-white/40 mt-1">June 28, 2026</div>
+            </div>
+        </div>
+
+        <footer class="mt-20 text-center font-tech text-[10px] tracking-[0.5em] text-white/20 uppercase">
+            © 2026 DTE Solutions LLC // Engineered with Intention
+        </footer>
+    </div>
+</body>
+</html>

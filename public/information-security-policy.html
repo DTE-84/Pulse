@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Information Security Policy | DTE Solutions LLC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300;700&family=Bebas+Neue&family=Inter:wght@400;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --obsidian: #000000;
+            --kinetic-teal: #00ffcc;
+            --charcoal: #080808;
+        }
+        body {
+            background-color: var(--obsidian);
+            color: #ffffff;
+            font-family: "Inter", sans-serif;
+            line-height: 1.6;
+        }
+        .font-display { font-family: "Bebas Neue", cursive; }
+        .font-tech { font-family: "Jura", sans-serif; }
+        .legal-container {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 80px 24px;
+        }
+        h1 { font-size: 3.5rem; margin-bottom: 2rem; }
+        h2 { font-family: "Bebas Neue", cursive; font-size: 2rem; color: var(--kinetic-teal); margin-top: 3rem; margin-bottom: 1rem; letter-spacing: 0.1em; }
+        h3 { font-family: "Jura", sans-serif; font-size: 1.2rem; color: #ffffff; margin-top: 2rem; margin-bottom: 0.8rem; font-weight: 700; }
+        p { margin-bottom: 1.5rem; color: rgba(255, 255, 255, 0.7); font-weight: 300; }
+        ul { margin-bottom: 1.5rem; list-style-type: disc; padding-left: 1.5rem; color: rgba(255, 255, 255, 0.6); }
+        ol { margin-bottom: 1.5rem; list-style-type: decimal; padding-left: 1.5rem; color: rgba(255, 255, 255, 0.6); }
+        li { margin-bottom: 0.5rem; }
+        .last-updated { font-family: "Jura", sans-serif; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.4em; color: var(--kinetic-teal); margin-bottom: 4rem; opacity: 0.8; }
+        a { color: var(--kinetic-teal); text-decoration: none; border-bottom: 1px solid transparent; transition: all 0.3s; }
+        a:hover { border-bottom-color: var(--kinetic-teal); }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 40px;
+            margin-top: 40px;
+        }
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .meta-item {
+            font-family: "Jura", sans-serif;
+            font-size: 0.85rem;
+        }
+        .meta-label {
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.7rem;
+            margin-bottom: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        th {
+            font-family: "Jura", sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--kinetic-teal);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 16px;
+            font-weight: 700;
+        }
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.01);
+        }
+        .signature-block {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 30px;
+            margin-top: 50px;
+            font-family: "Jura", sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="legal-container">
+        <a href="index.html" class="font-tech text-[10px] uppercase tracking-[0.4em] mb-12 inline-block">← Return to Nexus</a>
+        
+        <h1 class="font-display tracking-tighter leading-none">INFORMATION <span class="text-[#00ffcc]">SECURITY POLICY</span></h1>
+        <div class="last-updated">Effective Date: June 28, 2026</div>
+
+        <div class="glass-panel">
+            <div class="meta-grid">
+                <div class="meta-item">
+                    <div class="meta-label">Document Version</div>
+                    <div>1.0</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Owner</div>
+                    <div>Drew Thomas Ernst, Owner / Systems Engineer</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Contact</div>
+                    <div>dte.solutions.llc@gmail.com</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Review Cycle</div>
+                    <div>Annual or upon material change</div>
+                </div>
+            </div>
+
+            <h2>1. Purpose and Scope</h2>
+            <p>This Information Security Policy establishes the principles, requirements, and responsibilities that DTE Solutions LLC ("DTE" or "the Organization") follows to protect the confidentiality, integrity, and availability of all information assets — including consumer financial data accessed via the Plaid API and processed within the Pulse AI platform.</p>
+            <p>This policy applies to:</p>
+            <ul>
+                <li>All internal systems, applications, and infrastructure operated by DTE Solutions LLC</li>
+                <li>All data collected from or on behalf of consumers, including financial data retrieved via the Plaid API</li>
+                <li>All third-party integrations, service providers, and API partners handling DTE data</li>
+            </ul>
+
+            <h2>2. Governing Principles</h2>
+            <p>DTE Solutions LLC operates under the following foundational security principles:</p>
+            <div class="overflow-x-auto my-6 border border-white/10 rounded-2xl bg-white/[0.02]">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="text-left">Principle</th>
+                            <th class="text-left">Application</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-bold text-white">Zero Trust Architecture</td>
+                            <td>No system or identity is trusted by default; all access is verified continuously</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-white">Least Privilege</td>
+                            <td>Access rights are granted to the minimum level required to perform a function</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-white">Data Integrity</td>
+                            <td>Consumer financial data is treated as high-fidelity, immutable telemetry requiring strict access controls</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-white">Defense in Depth</td>
+                            <td>Multiple layers of security controls are applied across infrastructure, application, and access layers</td>
+                        </tr>
+                        <tr>
+                            <td class="font-bold text-white">Continuous Improvement</td>
+                            <td>Security posture is continuously monitored and matured</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>3. Information Security Program</h2>
+            
+            <h3>3.1 Governance and Risk Management</h3>
+            <ul>
+                <li>Drew Thomas Ernst serves as the sole information security owner and is responsible for all security policy decisions, risk assessments, and incident response.</li>
+                <li>Information security risks are identified through continuous monitoring, third-party service provider alerts (Supabase, Vercel, GitHub), and periodic self-assessments.</li>
+                <li>Risk mitigation actions are tracked and operationalized within the system architecture.</li>
+            </ul>
+
+            <h3>3.2 Access Control</h3>
+            <ul>
+                <li><strong>Non-Human Authentication:</strong> All service-to-service and API integrations use OAuth 2.0 tokens or TLS certificates. No static passwords are used for machine-to-machine communication.</li>
+                <li><strong>Zero Trust Model:</strong> The Pulse AI platform is deployed on Vercel's serverless infrastructure with network-level isolation. All API routes are authenticated via JWT tokens validated server-side before any data access.</li>
+                <li><strong>Consumer Authentication:</strong> Consumers authenticate via Supabase Auth using email/password with session-based JWT tokens. Access to financial data is scoped strictly to the authenticated user's identity.</li>
+                <li><strong>Secrets Management:</strong> All API keys, database credentials, and third-party integration secrets are stored as encrypted environment variables in Vercel and are never committed to version control.</li>
+            </ul>
+
+            <h3>3.3 Encryption</h3>
+            <ul>
+                <li><strong>Data in Transit:</strong> All communications between clients and servers use TLS 1.2 or higher. HTTPS is enforced across all endpoints via Vercel's edge infrastructure.</li>
+                <li><strong>Data at Rest:</strong> Consumer financial data retrieved from the Plaid API is stored in a Supabase-managed PostgreSQL database. Supabase enforces AES-256 encryption at rest for all database storage.</li>
+            </ul>
+
+            <h3>3.4 Development Security</h3>
+            <ul>
+                <li><strong>Secure SDLC:</strong> Code is version-controlled via GitHub with branch protections. All production deployments are triggered through automated CI/CD pipelines (GitHub Actions → Vercel).</li>
+                <li><strong>Secrets Exclusion:</strong> <code class="text-xs bg-white/10 px-1.5 py-0.5 rounded text-[#00ffcc] font-tech">.gitignore</code> files are maintained across all repositories to prevent <code class="text-xs bg-white/10 px-1.5 py-0.5 rounded text-[#00ffcc] font-tech">.env</code> files and credentials from being committed.</li>
+                <li><strong>Dependency Management:</strong> <code class="text-xs bg-white/10 px-1.5 py-0.5 rounded text-[#00ffcc] font-tech">npm audit</code> is run on dependency updates. End-of-life (EOL) packages are identified and upgraded on a defined schedule.</li>
+                <li><strong>Vulnerability Management:</strong> Vulnerability scanning is performed against production assets through Vercel's infrastructure monitoring and Supabase's platform security controls. Identified vulnerabilities are patched within a defined SLA:
+                    <ul class="list-none pl-4 mt-2">
+                        <li>• Critical/High: ≤ 7 days</li>
+                        <li>• Medium: ≤ 30 days</li>
+                        <li>• Low: ≤ 90 days</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>3.5 Infrastructure and Network Security</h3>
+            <ul>
+                <li><strong>Cloud-Native Architecture:</strong> The Pulse AI platform runs on Vercel's globally distributed serverless infrastructure. No self-managed servers are in scope. Vercel maintains SOC 2 Type II compliance on the infrastructure layer.</li>
+                <li><strong>Database Security:</strong> The production PostgreSQL database is hosted on Supabase with Row-Level Security (RLS) policies enforced at the database layer. All database connections require SSL.</li>
+                <li><strong>API Gateway:</strong> All API requests pass through Vercel's edge network and are authenticated before reaching application logic.</li>
+            </ul>
+
+            <h3>3.6 Third-Party and Vendor Management</h3>
+            <p>DTE Solutions LLC utilizes best-in-class, SOC 2 compliant platforms to deliver secure services:</p>
+            <ul>
+                <li><strong>Plaid:</strong> Financial data link provider. Plaid API tokens are handled server-side only and are never exposed to the client.</li>
+                <li><strong>Supabase:</strong> Database and authentication provider. Supabase is SOC 2 Type II compliant.</li>
+                <li><strong>Vercel:</strong> Hosting and serverless infrastructure. Vercel is SOC 2 Type II compliant.</li>
+                <li><strong>Anthropic:</strong> AI inference provider for the Nova Behavioral AI Consultant. Communications are server-side only via HTTPS.</li>
+            </ul>
+
+            <h3>3.7 Incident Response</h3>
+            <p>In the event of a security incident involving consumer data:</p>
+            <ol>
+                <li>The incident is immediately triaged by Drew Thomas Ernst.</li>
+                <li>Affected services are isolated to prevent further data exposure.</li>
+                <li>The incident is documented including root cause, impact scope, and remediation actions.</li>
+                <li>Affected consumers are notified within the timeframe required by applicable law.</li>
+                <li>Plaid's security team is notified if a Plaid integration is implicated, per Plaid's incident reporting requirements.</li>
+            </ol>
+
+            <h2>4. Privacy and Data Handling</h2>
+            <ul>
+                <li>DTE Solutions LLC maintains a published Privacy Policy accessible at <a href="privacy-policy.html">dte-solutions.icu/privacy-policy</a>.</li>
+                <li>Consumer consent is obtained prior to data collection, processing, and storage via explicit consent flows within the Pulse AI onboarding experience and Plaid Link.</li>
+                <li>Consumer financial data received from the Plaid API is used solely for the purpose of providing the Pulse AI behavioral finance features to the authenticated consumer.</li>
+                <li>Data is not sold, shared, or used for advertising purposes.</li>
+            </ul>
+
+            <h2>5. Policy Compliance</h2>
+            <p>Compliance with this policy is mandatory. Violations will result in immediate review and remediation. This policy is reviewed at minimum annually and upon any material change to the organization's technology stack, data handling practices, or applicable regulatory requirements.</p>
+
+            <div class="signature-block">
+                <div class="text-[9px] uppercase tracking-widest text-white/30 mb-2">Authorized Signature</div>
+                <div class="font-bold text-white text-lg">Drew Thomas Ernst</div>
+                <div class="text-xs text-[#00ffcc]">Owner, DTE Solutions LLC</div>
+                <div class="text-[10px] text-white/40 mt-1">June 28, 2026</div>
+            </div>
+        </div>
+
+        <footer class="mt-20 text-center font-tech text-[10px] tracking-[0.5em] text-white/20 uppercase">
+            © 2026 DTE Solutions LLC // Engineered with Intention
+        </footer>
+    </div>
+</body>
+</html>
