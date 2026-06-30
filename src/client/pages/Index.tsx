@@ -15,7 +15,6 @@ import {
   Wallet,
   ArrowRight,
   Zap,
-  Crown,
 } from "lucide-react";
 import { MiniBarChart } from "@/components/ui/mini-bar-chart";
 import { cn } from "@/lib/utils";
@@ -644,7 +643,7 @@ export default function Index() {
         )}
       </div>
 
-      {/* Pre-Order Banner Card */}
+      {/* Founding Member Banner */}
       <div
         className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-[3rem] p-8 md:p-12 relative overflow-hidden group hover:bg-primary/[0.12] transition-all cursor-pointer mt-6"
         onClick={() => navigate("/subscription")}
@@ -652,23 +651,23 @@ export default function Index() {
         <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-[100px] group-hover:bg-primary/20 transition-all" />
         <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
           <div className="space-y-4 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-3">
-              <Crown className="w-6 h-6 text-yellow-400 animate-bounce" />
+            <div className="flex items-center justify-center md:justify-start gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Founding Member — Limited Window</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tighter">
-              Pre-Order to lock in Elite at $14.99/mo for Life
+              Lock in $14.99/mo — rate frozen for life.
             </h2>
             <p className="text-muted-foreground font-semibold max-w-xl leading-relaxed">
-              Lock in the{" "}
+              Early members get{" "}
               <span className="text-primary underline underline-offset-4 decoration-primary/30">
-                Early-Bird $14.99/mo rate
-              </span>{" "}
-               Get exclusive access to the investor network and custom
-              behavior triggers at launch.
+                price-locked access
+              </span>
+              , a direct line to the product roadmap, and first access to every feature that ships — all for 7 days free.
             </p>
           </div>
-          <button className="bg-primary text-primary-foreground px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-[0_20px_40px_-10px_rgba(45,237,156,0.3)] flex items-center gap-3">
-            Secure Your Spot
+          <button className="bg-primary text-primary-foreground px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-[0_20px_40px_-10px_rgba(45,237,156,0.3)] flex items-center gap-3 shrink-0">
+            Start Free Trial
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
