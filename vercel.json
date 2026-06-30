@@ -1,14 +1,16 @@
 {
   "version": 2,
   "cleanUrls": true,
+  "redirects": [
+    { "source": "/privacy-policy", "destination": "/privacy-policy.html", "permanent": true },
+    { "source": "/data-retention-policy", "destination": "/data-retention-policy.html", "permanent": true },
+    { "source": "/information-security-policy", "destination": "/information-security-policy.html", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/api/ping", "destination": "/api/ping.ts" },
     { "source": "/api/status-check", "destination": "/api/ping.ts" },
     { "source": "/api/debug/system", "destination": "/api/index.ts" },
     { "source": "/api/:path*", "destination": "/api/index.ts" },
-    { "source": "/privacy-policy", "destination": "/privacy-policy.html" },
-    { "source": "/data-retention-policy", "destination": "/data-retention-policy.html" },
-    { "source": "/information-security-policy", "destination": "/information-security-policy.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
