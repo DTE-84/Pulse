@@ -7,9 +7,8 @@ import {
   TrendingUp,
   Zap,
   Settings,
-  LogOut,
-  Crown,
   Sparkles,
+  LogOut,
   Loader2,
 } from "lucide-react";
 
@@ -26,7 +25,7 @@ const menuItems = [
   { icon: Zap, label: "Triggers", href: "/triggers" },
   { icon: CreditCard, label: "Spending", href: "/spending" },
   { icon: TrendingUp, label: "Growth", href: "/growth" },
-  { icon: Crown, label: "Elite Access", href: "/subscription" },
+  { icon: Sparkles, label: "Membership", href: "/subscription" },
   { icon: Settings, label: "Settings", href: "/settings" },
 ];
 
@@ -105,12 +104,12 @@ const Sidebar = () => {
               </span>
             </div>
             <p className="text-[11px] font-bold text-foreground leading-relaxed">
-              Secure your{" "}
-              <span className="text-primary underline">Pre-Order Elite</span>{" "}
-              membership today.
+              Lock in your{" "}
+              <span className="text-primary underline">Founding Member</span>{" "}
+              rate — $14.99/mo, price-locked for life.
             </p>
             <button className="w-full py-2 bg-primary text-primary-foreground border border-primary/20 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">
-              Pre-Order Now
+              Start Free Trial
             </button>
           </div>
         </div>

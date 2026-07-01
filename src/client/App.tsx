@@ -1,5 +1,5 @@
-import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { lazy, Suspense, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -27,6 +27,16 @@ const TriggersPage   = lazy(() => import("./pages/Triggers"));
 const NotFound       = lazy(() => import("./pages/NotFound"));
 
 import { Layout } from "./components/Layout";
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
 
 const PageLoader = () => (
   <div style={{
@@ -79,6 +89,7 @@ const App = () => {
                 v7_relativeSplatPath: true,
               }}
             >
+              <ScrollToTop />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   {/* Public Routes */}
