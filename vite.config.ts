@@ -16,6 +16,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-180.png"],
       workbox: {
+        clientsClaim: true,
+        skipWaiting: true,
         globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
         runtimeCaching: [
           {
