@@ -15,6 +15,7 @@ import {
   Wallet,
   ArrowRight,
   Zap,
+  Crown,
 } from "lucide-react";
 import { MiniBarChart } from "@/components/ui/mini-bar-chart";
 import { cn } from "@/lib/utils";
