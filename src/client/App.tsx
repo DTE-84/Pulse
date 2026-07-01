@@ -10,21 +10,42 @@ import ErrorBoundary from "./components/ErrorBoundary";
 
 import "./global.css";
 
+// A helper function to retry lazy loading if it fails due to a network/deployment error
+const lazyWithRetry = (componentImport: () => Promise<any>) => 
+  lazy(async () => {
+    const pageHasAlreadyBeenForceRefreshed = JSON.parse(
+      window.sessionStorage.getItem('page-has-been-force-refreshed') || 'false'
+    );
+
+    try {
+      const component = await componentImport();
+      window.sessionStorage.setItem('page-has-been-force-refreshed', 'false');
+      return component;
+    } catch (error) {
+      if (!pageHasAlreadyBeenForceRefreshed) {
+        // Refresh the page once to get the latest assets from the server
+        window.sessionStorage.setItem('page-has-been-force-refreshed', 'true');
+        window.location.reload();
+      }
+      throw error;
+    }
+  });
+
 // Lazy-loaded page chunks — each route loads its JS only when visited
-const Index          = lazy(() => import("./pages/Index"));
-const NovaChat       = lazy(() => import("./pages/NovaChat"));
-const SpendingPage   = lazy(() => import("./pages/Spending"));
-const GrowthPage     = lazy(() => import("./pages/Growth"));
-const ReportsPage    = lazy(() => import("./pages/Reports"));
-const AuthPage       = lazy(() => import("./pages/Auth"));
-const OnboardingPage = lazy(() => import("./pages/Onboarding"));
-const SubscriptionPage = lazy(() => import("./pages/Subscription"));
-const SettingsPage   = lazy(() => import("./pages/Settings"));
-const ProfilePage    = lazy(() => import("./pages/Profile"));
-const LegalPage      = lazy(() => import("./pages/Legal"));
-const OutreachPage   = lazy(() => import("./pages/Outreach"));
-const TriggersPage   = lazy(() => import("./pages/Triggers"));
-const NotFound       = lazy(() => import("./pages/NotFound"));
+const Index          = lazyWithRetry(() => import("./pages/Index"));
+const NovaChat       = lazyWithRetry(() => import("./pages/NovaChat"));
+const SpendingPage   = lazyWithRetry(() => import("./pages/Spending"));
+const GrowthPage     = lazyWithRetry(() => import("./pages/Growth"));
+const ReportsPage    = lazyWithRetry(() => import("./pages/Reports"));
+const AuthPage       = lazyWithRetry(() => import("./pages/Auth"));
+const OnboardingPage = lazyWithRetry(() => import("./pages/Onboarding"));
+const SubscriptionPage = lazyWithRetry(() => import("./pages/Subscription"));
+const SettingsPage   = lazyWithRetry(() => import("./pages/Settings"));
+const ProfilePage    = lazyWithRetry(() => import("./pages/Profile"));
+const LegalPage      = lazyWithRetry(() => import("./pages/Legal"));
+const OutreachPage   = lazyWithRetry(() => import("./pages/Outreach"));
+const TriggersPage   = lazyWithRetry(() => import("./pages/Triggers"));
+const NotFound       = lazyWithRetry(() => import("./pages/NotFound"));
 
 import { Layout } from "./components/Layout";
 
