@@ -169,7 +169,7 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
           model: "claude-sonnet-4-6",
           max_tokens: 1000,
           system: systemPrompt,
-          messages: [{ role: "user", content: "Generate the deep scan report based on the telemetry above." }]
+          messages: [{ role: "user", content: "Hey Nova, let's do my monthly check-in." }]
         });
 
         report = response.content[0].type === "text" ? response.content[0].text : "";

@@ -8,5 +8,11 @@
     { "source": "/information-security-policy", "destination": "/information-security-policy.html" },
     { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/generate-transactions",
+      "schedule": "0 * * * *"
+    }
   ]
 }
