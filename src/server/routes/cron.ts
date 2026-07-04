@@ -14,9 +14,17 @@ const supabase = createClient(supabaseUrl || '', serviceRoleKey || '');
 const TABLE_NAME = 'fact_transactions';
 
 function getTxCount(): number {
+  // If the cron runs every 10 minutes, that's 144 times a day.
+  // To keep daily transactions realistic (around 4-8 a day), 
+  // most cron runs should return 0.
+  if (Math.random() > 0.05) return 0; // 95% chance of no transactions
+
   const hour = new Date().getHours();
-  if (hour >= 17 && hour <= 21) return Math.floor(Math.random() * 3) + 3;
-  return Math.floor(Math.random() * 2) + 2;
+  // Slightly higher chance for 2 transactions during evening hours
+  if (hour >= 17 && hour <= 21 && Math.random() > 0.7) {
+    return 2; 
+  }
+  return 1;
 }
 
 const categoryCache = new Map<string, number>();
