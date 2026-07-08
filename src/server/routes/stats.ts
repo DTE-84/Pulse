@@ -91,14 +91,14 @@ export const handleStats: RequestHandler = async (req, res) => {
     const chartRes = await query(
       `
       SELECT 
-        TO_CHAR(purchase_date, 'DY') as day,
+        TO_CHAR(DATE(purchase_date), 'DY') as day,
         SUM(amount) as value
       FROM fact_transactions
       WHERE user_id = $1 
         AND purchase_date >= NOW() - INTERVAL '7 days'
         AND amount > 0
-      GROUP BY TO_CHAR(purchase_date, 'DY'), EXTRACT(DOW FROM purchase_date)
-      ORDER BY EXTRACT(DOW FROM purchase_date)
+      GROUP BY DATE(purchase_date), TO_CHAR(DATE(purchase_date), 'DY')
+      ORDER BY DATE(purchase_date) ASC
     `,
       [userId]
     );
