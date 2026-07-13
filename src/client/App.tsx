@@ -45,6 +45,7 @@ const ProfilePage    = lazyWithRetry(() => import("./pages/Profile"));
 const LegalPage      = lazyWithRetry(() => import("./pages/Legal"));
 const OutreachPage   = lazyWithRetry(() => import("./pages/Outreach"));
 const TriggersPage   = lazyWithRetry(() => import("./pages/Triggers"));
+const IamAdminPage   = lazyWithRetry(() => import("./pages/IamAdmin"));
 const NotFound       = lazyWithRetry(() => import("./pages/NotFound"));
 
 import { Layout } from "./components/Layout";
@@ -133,6 +134,7 @@ const App = () => {
                           <Route path="/triggers" element={<TriggersPage />} />
                           <Route path="/reports" element={<ReportsPage />} />
                           <Route path="/subscription" element={<SubscriptionPage />} />
+                          <Route path="/admin/iam" element={<IamAdminPage />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </Layout>

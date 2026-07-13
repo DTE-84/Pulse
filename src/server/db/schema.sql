@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS "dim_users" (
     initial_balance DECIMAL(10, 2) DEFAULT 15000.00,
     nova_tone VARCHAR(50) DEFAULT 'Balanced',
     avatar_url TEXT,
+    system_role VARCHAR(50) DEFAULT 'user',
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -150,5 +151,18 @@ CREATE TABLE IF NOT EXISTS public.plaid_secrets (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- 8. Dimension: Audit Logs (Centralized IAM Monitoring)
+CREATE TABLE IF NOT EXISTS audit_logs (
+    log_id SERIAL PRIMARY KEY,
+    user_id UUID REFERENCES dim_users(user_id) ON DELETE SET NULL,
+    action VARCHAR(100) NOT NULL,
+    ip_address VARCHAR(45),
+    details JSONB DEFAULT '{}',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at);
 
 COMMIT;

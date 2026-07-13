@@ -19,6 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { useTheme } from "@/components/theme-provider";
 import { PlaidLinkButton } from "@/components/PlaidLink";
+import { MfaSetup } from "@/components/MfaSetup";
 
 const SettingGroup = ({ title, description, children }: any) => (
   <div className="space-y-6">
@@ -265,6 +266,13 @@ export default function Settings() {
             }
             border={false}
           />
+        </SettingGroup>
+
+        <SettingGroup
+          title="Multi-Factor Authentication"
+          description="Enhance the security of your account with a secondary verification step."
+        >
+          <MfaSetup />
         </SettingGroup>
 
         <SettingGroup

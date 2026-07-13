@@ -12,6 +12,8 @@ import { handleAnalysis } from "./routes/analysis.js";
 import { handleGetTransactions } from "./routes/transactions.js";
 import { handleGetGoals, handleCreateGoal } from "./routes/goals.js";
 import { handleStripeWebhook } from "./routes/webhooks.js";
+import { handleHrWebhook } from "./routes/hr.js";
+import { handleGetUsers, handleUpdateUserRole, handleGetAuditLogs } from "./routes/iam.js";
 import { createCheckoutSession } from "./routes/payments.js";
 import { 
   createLinkToken, 
@@ -24,6 +26,7 @@ import handleCronGenerateTransactions from "./routes/cron.js";
 import {
   securityHeaders,
   requireAuth,
+  requireRole,
   ingestLimiter,
   apiLimiter,
 } from "./middleware/security.js";
@@ -51,6 +54,9 @@ export function createServer() {
 
   // Stripe Webhook needs raw body before express.json()
   app.post("/api/webhooks/stripe", express.raw({ type: 'application/json' }), handleStripeWebhook as any);
+  
+  // HR Webhook
+  app.post("/api/webhooks/hr", express.json(), handleHrWebhook as any);
 
   app.use(express.json({ limit: "1mb" }));
   app.use(express.urlencoded({ extended: true, limit: "1mb" }));
@@ -108,6 +114,11 @@ export function createServer() {
   app.post("/api/finance/goals", apiLimiter, requireAuth, handleCreateGoal as any);
   app.get("/api/finance/transactions", apiLimiter, requireAuth, handleGetTransactions as any);
   app.post("/api/finance/ingest", ingestLimiter, requireAuth, handleIngest as any);
+
+  // IAM Routes (RBAC Enforced)
+  app.get("/api/iam/users", requireAuth, requireRole(['admin', 'auditor']), handleGetUsers as any);
+  app.patch("/api/iam/users/:id/role", requireAuth, requireRole(['admin']), handleUpdateUserRole as any);
+  app.get("/api/iam/audit", requireAuth, requireRole(['admin', 'auditor']), handleGetAuditLogs as any);
 
   // Unified Auth Nexus
   app.use("/api/auth", authRouter);

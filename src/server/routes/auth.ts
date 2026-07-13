@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
 import jwt from "jsonwebtoken";
 import { query } from "../db/db.js";
-import { getSupabase, getSupabaseAdmin, authLimiter, requireAuth } from "../middleware/security.js";
+import { getSupabase, getSupabaseAdmin, authLimiter, requireAuth, logAuditAction } from "../middleware/security.js";
 
 const router = Router();
 
@@ -84,6 +84,10 @@ export const handleLogin = async (req: Request, res: Response) => {
       [user.id]
     );
     const profile = result.rows[0];
+
+    // Log the audit event
+    const ip = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.socket.remoteAddress || "unknown";
+    await logAuditAction(user.id, "LOGIN", ip, { user_email: user.email });
 
     res.json({ 
       token: session.access_token,

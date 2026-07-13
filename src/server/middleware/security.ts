@@ -61,7 +61,9 @@ export function getSupabaseAdmin() {
 }
 
 // 2. AUTH MIDDLEWARE — multi-protocol JWT verifier (Local + Supabase)
-declare global { namespace Express { interface Request { userId?: string; userEmail?: string; } } }
+declare global { namespace Express { interface Request { userId?: string; userEmail?: string; userRole?: string; } } }
+
+import { query } from "../db/db.js";
 
 export const requireAuth: RequestHandler = async (req, res, next) => {
   const h = req.headers.authorization;
@@ -70,10 +72,13 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
   const token = h.split(" ")[1];
   
   // Strategy A: Try local JWT (custom auth routes)
+  let resolvedUserId: string | undefined;
+  let resolvedUserEmail: string | undefined;
+
   try {
     const d = jwt.verify(token, JWT_SECRET) as { id: string; email: string };
-    req.userId = d.id; req.userEmail = d.email;
-    return next();
+    resolvedUserId = d.id;
+    resolvedUserEmail = d.email;
   } catch (err) {
     // Strategy B: Fallback to Supabase verification
     try {
@@ -81,17 +86,52 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
       const { data: { user }, error } = await supabase.auth.getUser(token);
       
       if (user && !error) {
-        req.userId = user.id;
-        req.userEmail = user.email;
-        return next();
+        resolvedUserId = user.id;
+        resolvedUserEmail = user.email;
       }
     } catch (sErr: any) {
       console.error("[PULSE AUTH] Supabase client error:", sErr.message);
     }
-    
-    res.status(401).json({ message: "Invalid or expired session." });
   }
+
+  if (resolvedUserId) {
+    req.userId = resolvedUserId;
+    req.userEmail = resolvedUserEmail;
+    
+    // Optionally fetch the role to attach to the request
+    try {
+      const dbRes = await query("SELECT system_role FROM dim_users WHERE user_id = $1", [resolvedUserId]);
+      if (dbRes.rows.length > 0) {
+        req.userRole = dbRes.rows[0].system_role;
+      }
+    } catch (dbErr) {
+      // ignore
+    }
+    return next();
+  }
+    
+  res.status(401).json({ message: "Invalid or expired session." });
 };
+
+export const requireRole = (allowedRoles: string[]) => {
+  return (req: any, res: any, next: any) => {
+    if (!req.userRole || !allowedRoles.includes(req.userRole)) {
+      return res.status(403).json({ message: "Access Denied: Insufficient role privileges." });
+    }
+    return next();
+  };
+};
+
+export async function logAuditAction(userId: string, action: string, ipAddress: string, details: any = {}) {
+  try {
+    await query(
+      "INSERT INTO audit_logs (user_id, action, ip_address, details) VALUES ($1, $2, $3, $4)",
+      [userId, action, ipAddress, JSON.stringify(details)]
+    );
+  } catch (err: any) {
+    console.error("[PULSE AUDIT] Failed to log action:", err.message);
+  }
+}
 
 // 3. RATE LIMITER — in-memory, no external package needed
 interface RLE { count: number; resetAt: number; }

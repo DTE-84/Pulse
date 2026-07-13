@@ -16,6 +16,7 @@ import { authAPI } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/supabase";
+import { MfaChallenge } from "@/components/MfaChallenge";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -24,6 +25,10 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [pendingToken, setPendingToken] = useState("");
+  const [pendingUser, setPendingUser] = useState<any>(null);
 
   const { login, isAuthenticated, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -134,6 +139,17 @@ export default function AuthPage() {
         if (!res.data.token) {
           throw new Error("Authentication succeeded but no session token was issued.");
         }
+        
+        // Check for MFA Requirement
+        const { data: aalData, error: aalError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (!aalError && aalData?.nextLevel === "aal2" && aalData?.currentLevel === "aal1") {
+          setPendingToken(res.data.token);
+          setPendingUser(res.data.user);
+          setMfaRequired(true);
+          setLoading(false);
+          return;
+        }
+
         await login(res.data.token, res.data.user);
         toast({
           title: "Access Granted",
@@ -272,18 +288,41 @@ export default function AuthPage() {
               </p>
             </div>
 
-            <div className="mb-6 sm:mb-10 text-center lg:text-left">
-              <h2 className="text-2xl font-bold text-foreground mb-2 tracking-tight">
-                {isLogin ? "Welcome Back" : "Initialize Profile"}
-              </h2>
-              <p className="text-muted-foreground font-medium text-sm">
-                {isLogin
-                  ? "Access your intelligence hub."
-                  : "Begin your journey into behavioral intelligence."}
-              </p>
-            </div>
+            {mfaRequired ? (
+              <MfaChallenge
+                onVerified={async () => {
+                  setMfaRequired(false);
+                  setLoading(true);
+                  // Now that we are aal2, get the updated session token
+                  const { data } = await supabase.auth.getSession();
+                  const newToken = data.session?.access_token || pendingToken;
+                  
+                  await login(newToken, pendingUser);
+                  toast({
+                    title: "Access Granted",
+                    description: "Welcome back to the Intelligence Hub.",
+                  });
+                  navigate(pendingUser?.onboardingCompleted ? "/" : "/onboarding");
+                }}
+                onCancel={() => {
+                  setMfaRequired(false);
+                  supabase.auth.signOut();
+                }}
+              />
+            ) : (
+              <>
+                <div className="mb-6 sm:mb-10 text-center lg:text-left">
+                  <h2 className="text-2xl font-bold text-foreground mb-2 tracking-tight">
+                    {isLogin ? "Welcome Back" : "Initialize Profile"}
+                  </h2>
+                  <p className="text-muted-foreground font-medium text-sm">
+                    {isLogin
+                      ? "Access your intelligence hub."
+                      : "Begin your journey into behavioral intelligence."}
+                  </p>
+                </div>
 
-            <form onSubmit={handleAuth} className="space-y-6">
+                <form onSubmit={handleAuth} className="space-y-6">
               {!isLogin && (
                 <div className="relative group">
                   <User className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -425,6 +464,8 @@ export default function AuthPage() {
             <p className="mt-4 text-[8px] text-muted-foreground/40 text-center leading-relaxed">
               Pulse is not a registered financial advisor. Financial data aggregation is securely powered by Plaid. Payment processing is secured by Stripe.
             </p>
+            </>
+            )}
           </div>
         </div>
       </div>
