@@ -132,9 +132,6 @@ const Sidebar = () => {
             <div className="text-xs font-black truncate text-foreground uppercase tracking-widest">
               Logout
             </div>
-            <div className="text-[9px] text-primary/80 truncate font-bold uppercase tracking-tight">
-              Terminate Session
-            </div>
           </div>
         </div>
 
