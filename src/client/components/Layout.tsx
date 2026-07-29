@@ -316,16 +316,10 @@ export const Layout = ({ children }: LayoutProps) => {
     const isAuthPage = location.pathname === "/auth" || location.pathname.endsWith("/auth");
     const isOnboardingPage = location.pathname === "/onboarding" || location.pathname.endsWith("/onboarding");
     
-    console.log("[PulseAi] Layout Guard Check:", { 
-      isAuthenticated, 
-      loading, 
-      path: location.pathname,
-      isAuthPage,
-      isOnboardingPage
-    });
+
 
     if (!loading && !isAuthenticated && !isAuthPage && !isOnboardingPage) {
-      console.log("[PulseAi] Not authenticated, redirecting to /auth");
+
       navigate("/auth");
     }
   }, [isAuthenticated, loading, navigate, location.pathname]);
@@ -338,7 +332,7 @@ export const Layout = ({ children }: LayoutProps) => {
     );
   }
 
-  console.log("[PulseAi] Rendering Layout Content", { path: location.pathname });
+
 
   return (
     <div className="flex min-h-screen bg-background text-foreground font-sans selection:bg-primary/30">

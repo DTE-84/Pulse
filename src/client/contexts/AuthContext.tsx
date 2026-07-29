@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           // Self-healing: If profile missing, create it
           if (!finalProfile) {
-            console.log("[PulseAi] Profile missing during init, creating...");
+
             const { data: newProfile, error: insertError } = await supabase
               .from('dim_users')
               .insert([
@@ -118,13 +118,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
           // If no session but we had local state, clear it (unless it's a demo/sandbox user)
           if ((token || user) && !user?.isDemo) {
-            console.log("[PulseAi] Stale session detected, clearing local storage.");
+
             setToken(null);
             setUser(null);
             localStorage.removeItem('token');
             localStorage.removeItem('user');
           } else if (user?.isDemo) {
-            console.log("[PulseAi] Demo user session retained locally.");
+
           }
         }
       } catch (err) {
@@ -143,7 +143,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // 2. Listen for Auth Changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("[PulseAi] Auth Event:", _event);
+
       if (session) {
         setToken(session.access_token);
         localStorage.setItem('token', session.access_token);
@@ -153,7 +153,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           if (savedUser) {
             const parsedUser = JSON.parse(savedUser);
             if (parsedUser.isDemo) {
-              console.log("[PulseAi] Demo user session retained locally despite auth event.");
+
               return;
             }
           }
@@ -177,11 +177,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     let tokenToUse = newToken;
     
     if (!tokenToUse) {
-      console.log("[PulseAi] No explicit token provided to login(), checking session...");
+
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session) {
-        console.log("[PulseAi] Session found, synchronizing...");
+
         tokenToUse = session.access_token;
       }
     }
@@ -230,17 +230,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     hasActiveSubscription
   }), [user, token, loading, hasActiveSubscription]);
 
-  useEffect(() => {
-    if (import.meta.env.MODE !== 'production') {
-      console.log("[PulseAi] Auth V2.2 State Updated:", { 
-        hasUser: !!user, 
-        hasToken: !!token, 
-        loading, 
-        isAuthenticated: !!token && !!user,
-        subscription: user?.subscriptionStatus
-      });
-    }
-  }, [user, token, loading]);
+
 
   return (
     <AuthContext.Provider value={contextValue}>

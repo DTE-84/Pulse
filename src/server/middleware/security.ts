@@ -1,4 +1,4 @@
-import { RequestHandler } from "express";
+import { RequestHandler, Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { createClient } from "@supabase/supabase-js";
 
@@ -18,7 +18,7 @@ export const JWT_SECRET: string = (() => {
 })();
 
 // Initialize Supabase Admin for token verification
-let _supabase: any;
+let _supabase: ReturnType<typeof createClient> | null = null;
 
 export function getSupabase() {
   const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
@@ -40,7 +40,7 @@ export function getSupabase() {
 }
 
 // Initialize Supabase Admin (RLS Bypass)
-let _supabaseAdmin: any;
+let _supabaseAdmin: ReturnType<typeof createClient> | null = null;
 
 export function getSupabaseAdmin() {
   const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
@@ -114,7 +114,7 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
 };
 
 export const requireRole = (allowedRoles: string[]) => {
-  return (req: any, res: any, next: any) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     if (!req.userRole || !allowedRoles.includes(req.userRole)) {
       return res.status(403).json({ message: "Access Denied: Insufficient role privileges." });
     }
@@ -122,7 +122,7 @@ export const requireRole = (allowedRoles: string[]) => {
   };
 };
 
-export async function logAuditAction(userId: string, action: string, ipAddress: string, details: any = {}) {
+export async function logAuditAction(userId: string, action: string, ipAddress: string, details: Record<string, unknown> = {}) {
   try {
     await query(
       "INSERT INTO audit_logs (user_id, action, ip_address, details) VALUES ($1, $2, $3, $4)",

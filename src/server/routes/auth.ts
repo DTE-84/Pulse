@@ -1,4 +1,4 @@
-import { Request, Response, Router } from "express";
+import { Request, Response, Router, RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 import { query } from "../db/db.js";
 import { getSupabase, getSupabaseAdmin, authLimiter, requireAuth, logAuditAction } from "../middleware/security.js";
@@ -213,7 +213,7 @@ export const handleDebug = async (_req: Request, res: Response) => {
     return res.status(404).json({ message: "Node not found." });
   }
 
-  const telemetry: any = {
+  const telemetry: Record<string, unknown> = {
     status: "Initializing",
     timestamp: new Date().toISOString(),
     env: {
@@ -313,11 +313,11 @@ export const handleDeleteAccount = async (req: Request, res: Response) => {
 };
 
 // Route Definitions
-router.post("/login", authLimiter, handleLogin as any);
-router.post("/signup", authLimiter, handleSignup as any);
-router.post("/guest", authLimiter, handleGuestSignup as any);
-router.get("/me", requireAuth, handleMe as any);
-router.patch("/update", requireAuth, handleUpdateProfile as any);
-router.delete("/delete", requireAuth, handleDeleteAccount as any);
+router.post("/login", authLimiter, handleLogin as RequestHandler);
+router.post("/signup", authLimiter, handleSignup as RequestHandler);
+router.post("/guest", authLimiter, handleGuestSignup as RequestHandler);
+router.get("/me", requireAuth, handleMe as RequestHandler);
+router.patch("/update", requireAuth, handleUpdateProfile as RequestHandler);
+router.delete("/delete", requireAuth, handleDeleteAccount as RequestHandler);
 
 export default router;

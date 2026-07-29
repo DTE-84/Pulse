@@ -1,6 +1,6 @@
 import pkg from 'pg';
 
-let _pool: any = null;
+let _pool: pkg.Pool | null = null;
 
 /**
  * High-Fidelity Database Uplink
@@ -34,7 +34,7 @@ function getPool() {
   return _pool;
 }
 
-export const query = async (text: string, params?: any[]) => {
+export const query = async (text: string, params?: unknown[]) => {
   const pool = getPool();
   return pool.query(text, params);
 };
