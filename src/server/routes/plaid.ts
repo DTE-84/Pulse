@@ -100,6 +100,10 @@ export const sandboxSeed = async (req: Request, res: Response) => {
   try {
     console.log(`[Plaid] Initializing direct sandbox seed for user: ${userId}`);
     
+    // 0. Clear previous sandbox data to prevent it from piling up and breaking metrics
+    await query("DELETE FROM fact_transactions WHERE user_id = $1", [userId]);
+    await query("DELETE FROM plaid_items WHERE user_id = $1 AND institution_name = 'Chase Sandbox'", [userId]);
+
     // 1. Provision Sandbox Item
     const { success, itemId } = await setupTrialSandboxItem(userId);
     
