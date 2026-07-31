@@ -386,10 +386,9 @@ export default function Index() {
       <h1 className="sr-only">Financial Dashboard</h1>
 
       {/* Sandbox Mode Strip — guest/demo users only */}
-      {user?.isDemo && (
+      {(user?.isDemo || user?.subscriptionStatus === 'trialing') && (
         <div
-          onClick={() => navigate("/subscription")}
-          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl px-5 py-4 cursor-pointer hover:bg-yellow-500/[0.15] transition-all group"
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl px-5 py-4 transition-all group"
         >
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-yellow-500/15 flex items-center justify-center shrink-0 border border-yellow-500/20">
@@ -405,11 +404,26 @@ export default function Index() {
               </p>
             </div>
           </div>
-          <button className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-2 bg-yellow-400 text-black px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(250,204,21,0.25)]">
-            <Crown className="w-3.5 h-3.5" />
-            Pre-Order Pro
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-          </button>
+          <div className="w-full sm:w-auto shrink-0 flex items-center gap-2">
+            {stats?.totalBalance > 0 && (
+              <button 
+                onClick={handleSeedSandbox}
+                disabled={syncing}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-transparent border border-yellow-500/50 text-yellow-400 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-yellow-500/10 active:scale-95 transition-all"
+              >
+                {syncing ? <RefreshCcw className="w-3.5 h-3.5 animate-spin" /> : <RefreshCcw className="w-3.5 h-3.5" />}
+                {syncing ? "Resetting..." : "Reset Data"}
+              </button>
+            )}
+            <button 
+              onClick={() => navigate("/subscription")}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-yellow-400 text-black px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(250,204,21,0.25)]"
+            >
+              <Crown className="w-3.5 h-3.5" />
+              Pre-Order Pro
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
         </div>
       )}
 
