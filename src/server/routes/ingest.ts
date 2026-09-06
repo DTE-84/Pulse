@@ -5,6 +5,7 @@ import { spawn } from "child_process";
 import { query } from "../db/db.js";
 import { sanitizeCsvField, validateTransaction } from "../middleware/security.js";
 import Anthropic from "@anthropic-ai/sdk";
+import { createClaudeMessageWithRetry } from "../lib/ai.js";
 
 const __dirname = path.resolve();
 
@@ -62,7 +63,7 @@ export const handleIngest = async (req: Request, res: Response) => {
           Transactions: ${JSON.stringify(transactions)}
         `;
 
-        const result = await client.messages.create({
+        const result = await createClaudeMessageWithRetry(client, {
           model: "claude-sonnet-4-6",
           max_tokens: 2048,
           system: "You are Nova's Behavioral Data Wrangler. Always return valid JSON. Categories: Dining, Groceries, Transport, Entertainment, Utilities, Rent, Shopping, Healthcare, Misc. Risk Levels: Essential, Lifestyle, Impulse, Critical.",

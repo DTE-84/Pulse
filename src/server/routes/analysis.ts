@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import { query } from "../db/db.js";
 import Anthropic from "@anthropic-ai/sdk";
+import { createClaudeMessageWithRetry } from "../lib/ai.js";
 
 export const handleAnalysis: RequestHandler = async (req, res) => {
   const userId = req.userId;
@@ -165,7 +166,7 @@ export const handleAnalysis: RequestHandler = async (req, res) => {
     } else {
       try {
         const client = new Anthropic({ apiKey });
-        const response = await client.messages.create({
+        const response = await createClaudeMessageWithRetry(client, {
           model: "claude-sonnet-4-6",
           max_tokens: 1000,
           system: systemPrompt,

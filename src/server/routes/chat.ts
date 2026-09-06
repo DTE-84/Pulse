@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import Anthropic from "@anthropic-ai/sdk";
 import { query } from "../db/db.js";
+import { createClaudeMessageWithRetry } from "../lib/ai.js";
 
 export const handleNovaChat: RequestHandler = async (req, res) => {
   const userId = req.userId;
@@ -157,7 +158,7 @@ export const handleNovaChat: RequestHandler = async (req, res) => {
     try {
       const MODEL = "claude-sonnet-4-6";
       console.log(`[Nova Chat] Using model: ${MODEL}`);
-      result = await client.messages.create({
+      result = await createClaudeMessageWithRetry(client, {
         model: MODEL,
         max_tokens: 1024,
         system: systemPrompt,
