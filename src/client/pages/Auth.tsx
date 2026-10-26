@@ -18,8 +18,14 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/supabase";
 import { MfaChallenge } from "@/components/MfaChallenge";
 
-export default function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
+export default function AuthPage({ defaultIsLogin = true }: { defaultIsLogin?: boolean }) {
+  const [isLogin, setIsLogin] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("mode") === "signup" || window.location.pathname.endsWith("/signup")) {
+      return false;
+    }
+    return defaultIsLogin;
+  });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -464,6 +470,13 @@ export default function AuthPage() {
             <p className="mt-4 text-[8px] text-muted-foreground/40 text-center leading-relaxed">
               Pulse is not a registered financial advisor. Financial data aggregation is securely powered by Plaid. Payment processing is secured by Stripe.
             </p>
+            <div className="mt-3 flex items-center justify-center gap-3 text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+              <a href="/privacy-policy" className="hover:text-primary transition-colors">Privacy Policy</a>
+              <span>•</span>
+              <a href="/terms" className="hover:text-primary transition-colors">Terms</a>
+              <span>•</span>
+              <a href="mailto:dte.solutions.llc@outlook.com" className="hover:text-primary transition-colors">Support</a>
+            </div>
             </>
             )}
           </div>

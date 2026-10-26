@@ -28,6 +28,8 @@
     <link rel="apple-touch-icon" href="icons/icon-180.png" />
 
     <!-- OpenGraph / Social -->
+    <link rel="canonical" href="https://app.pulse.dte-solutions.icu/" />
+    <meta property="og:url" content="https://app.pulse.dte-solutions.icu/" />
     <meta property="og:title" content="Pulse - Ai Financial Coach and Tracker" />
     <meta property="og:description" content="Detecting the rhythm of your financial behavior." />
     <meta property="og:image" content="/PulseNovaLogoTrans.png" />
@@ -49,7 +51,34 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main style="background:#050505;color:#ffffff;font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;">
+        <div style="max-width:560px;width:100%;background:#0c0f12;border:1px solid rgba(0,255,204,0.18);border-radius:24px;padding:32px;">
+          <h1 style="font-size:28px;font-weight:900;letter-spacing:-0.03em;margin:0 0 8px 0;text-transform:uppercase;">Pulse AI — Behavioral Financial Intelligence</h1>
+          <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.6;margin:0 0 20px 0;">
+            Engineering precision into your financial behavior. Connect accounts securely via Plaid read-only telemetry, track your real-time Financial Stress Index, and receive behavioral coaching from Nova AI.
+          </p>
+          <h2 style="font-size:16px;font-weight:800;color:#00ffcc;margin:0 0 8px 0;text-transform:uppercase;">Authentication, Registration &amp; Billing Portal</h2>
+          <p style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;margin:0 0 16px 0;">
+            Sign in to your existing Pulse Intelligence Hub, initialize a new profile, launch the live Sandbox Demo, or manage your Pulse Pro Founding Member subscription ($14.99/month with a 7-day free trial, secured by Stripe).
+          </p>
+          <nav aria-label="Primary Links" style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);">
+            <a href="/auth" style="color:#00ffcc;text-decoration:none;font-weight:700;">Sign In</a>
+            <a href="/signup" style="color:#00ffcc;text-decoration:none;font-weight:700;">Sign Up Free</a>
+            <a href="/auth?guest=true" style="color:#00ffcc;text-decoration:none;font-weight:700;">Launch Sandbox</a>
+            <a href="/billing" style="color:#00ffcc;text-decoration:none;font-weight:700;">Billing &amp; Plans</a>
+            <a href="/privacy-policy" style="color:rgba(255,255,255,0.6);text-decoration:none;">Privacy Policy</a>
+            <a href="/terms" style="color:rgba(255,255,255,0.6);text-decoration:none;">Terms of Service</a>
+            <a href="/data-retention-policy" style="color:rgba(255,255,255,0.6);text-decoration:none;">Data Retention</a>
+            <a href="/information-security-policy" style="color:rgba(255,255,255,0.6);text-decoration:none;">Information Security</a>
+            <a href="mailto:dte.solutions.llc@outlook.com" style="color:rgba(255,255,255,0.6);text-decoration:none;">dte.solutions.llc@outlook.com</a>
+          </nav>
+          <p style="font-size:11px;color:rgba(255,255,255,0.35);margin:16px 0 0 0;">
+            © 2026 DTE Solutions LLC. Pulse is not a registered financial advisor.
+          </p>
+        </div>
+      </main>
+    </div>
     <script type="module" src="src/client/main.tsx"></script>
   </body>
 </html>

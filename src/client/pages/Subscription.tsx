@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { 
   Check, 
   Sparkles, 
@@ -63,9 +63,10 @@ export default function SubscriptionPage() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const { user, hasActiveSubscription, updateUser } = useAuth();
+  const { user, isAuthenticated, hasActiveSubscription, updateUser } = useAuth();
   const { toast } = useToast();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const monthlyPrice = 14.99;
   const annualPrice = Math.round(monthlyPrice * 0.8 * 12);
@@ -90,6 +91,15 @@ export default function SubscriptionPage() {
     : 0;
 
   const handleStripeRedirect = async () => {
+    if (!isAuthenticated) {
+      setDialogOpen(false);
+      toast({
+        title: "Profile Required",
+        description: "Create your account first to activate your 7-day free trial.",
+      });
+      navigate("/signup");
+      return;
+    }
     setIsCheckingOut(true);
     try {
       const { url = "" } = await paymentsAPI.createSession("Pro", isAnnual);
@@ -110,6 +120,21 @@ export default function SubscriptionPage() {
 
   return (
     <div className="p-5 md:p-12 max-w-5xl mx-auto space-y-10 text-foreground font-inter">
+      {!isAuthenticated && (
+        <div className="flex items-center justify-between pb-4 border-b border-border">
+          <a href="https://pulse.dte-solutions.icu" className="text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">
+            ← Pulse Overview
+          </a>
+          <div className="flex items-center gap-4">
+            <button onClick={() => navigate("/auth")} className="text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
+              Sign In
+            </button>
+            <button onClick={() => navigate("/signup")} className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-black uppercase tracking-widest">
+              Sign Up Free
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <div className="space-y-4">

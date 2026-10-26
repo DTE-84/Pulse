@@ -38,6 +38,18 @@ const SpendingPage   = lazyWithRetry(() => import("./pages/Spending"));
 const GrowthPage     = lazyWithRetry(() => import("./pages/Growth"));
 const ReportsPage    = lazyWithRetry(() => import("./pages/Reports"));
 const AuthPage       = lazyWithRetry(() => import("./pages/Auth"));
+const SignupRoute    = () => <AuthPage defaultIsLogin={false} />;
+const BillingRoute   = () => {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return <PageLoader />;
+  return isAuthenticated ? (
+    <Layout>
+      <SubscriptionPage />
+    </Layout>
+  ) : (
+    <SubscriptionPage />
+  );
+};
 const OnboardingPage = lazyWithRetry(() => import("./pages/Onboarding"));
 const SubscriptionPage = lazyWithRetry(() => import("./pages/Subscription"));
 const SettingsPage   = lazyWithRetry(() => import("./pages/Settings"));
@@ -116,6 +128,8 @@ const App = () => {
                 <Routes>
                   {/* Public Routes */}
                   <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/signup" element={<SignupRoute />} />
+                  <Route path="/billing" element={<BillingRoute />} />
                   <Route path="/legal" element={<LegalPage />} />
                   
                   {/* Protected Routes Wrapper */}

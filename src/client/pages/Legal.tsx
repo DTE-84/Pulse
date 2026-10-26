@@ -66,7 +66,7 @@ export default function Legal() {
           exclusive property of DTE Solutions LLC. Reverse-engineering of our behavioral mapping protocols is strictly prohibited.
         </p>
         <p>
-          <strong>Governing Law:</strong> These terms are governed by the laws of the State of Missouri, United States.
+          <strong>Governing Law:</strong> These terms are governed by the laws of the State of Illinois, United States. Contact: <a href="mailto:dte.solutions.llc@outlook.com" className="text-primary underline">dte.solutions.llc@outlook.com</a>.
         </p>
       </LegalSection>
 
