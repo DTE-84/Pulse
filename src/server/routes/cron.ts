@@ -13,11 +13,14 @@ const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(supabaseUrl || '', serviceRoleKey || '');
 const TABLE_NAME = 'fact_transactions';
 
+// How often the cron endpoint is called per day (currently every 15 minutes).
+// Update this if the schedule changes so daily volume stays realistic.
+const RUNS_PER_DAY = 96;
+const TARGET_TX_PER_DAY = 6;
+
 function getTxCount(): number {
-  // If the cron runs every 10 minutes, that's 144 times a day.
-  // To keep daily transactions realistic (around 4-8 a day), 
-  // most cron runs should return 0.
-  if (Math.random() > 0.05) return 0; // 95% chance of no transactions
+  // Most runs insert nothing; on average a user gets ~TARGET_TX_PER_DAY a day.
+  if (Math.random() > TARGET_TX_PER_DAY / RUNS_PER_DAY) return 0;
 
   const hour = new Date().getHours();
   // Slightly higher chance for 2 transactions during evening hours
@@ -65,15 +68,15 @@ async function getOrCreateCategoryId(categoryName: string): Promise<number> {
 
 /**
  * Resolves the list of users to generate synthetic transactions for.
- * Queries dim_users for all onboarded users and pairs each with their
- * Plaid account ID (if any).
+ * Queries dim_users for demo users only (real users never get synthetic data)
+ * and pairs each with their Plaid account ID (if any).
  */
 async function resolveTargetUsers(): Promise<{ user_id: string; plaid_account_id: string }[]> {
-  // 1. Fetch all users who have completed onboarding
+  // 1. Fetch demo users
   const { data: dbUsers, error: userError } = await supabase
     .from('dim_users')
     .select('user_id')
-    .eq('onboarding_completed', true);
+    .eq('is_demo', true);
 
   if (userError) {
     console.error('[Cron] Failed to fetch users from dim_users:', userError);
@@ -81,7 +84,7 @@ async function resolveTargetUsers(): Promise<{ user_id: string; plaid_account_id
   }
 
   if (!dbUsers || dbUsers.length === 0) {
-    console.warn('[Cron] No onboarded users found in dim_users.');
+    console.warn('[Cron] No demo users found in dim_users.');
     return [];
   }
 
@@ -100,8 +103,8 @@ async function resolveTargetUsers(): Promise<{ user_id: string; plaid_account_id
     }
   }
 
-  // 3. Build final user list — every onboarded user gets a transaction batch,
-  //    with their real Plaid account ID or a stable fallback.
+  // 3. Build final user list — every demo user gets a transaction batch,
+  //    with their Plaid account ID or a stable fallback.
   return userIds.map(userId => ({
     user_id: userId,
     plaid_account_id: plaidMap.get(userId) ?? `sandbox_auto_${userId.slice(0, 8)}`,
@@ -142,7 +145,7 @@ export default async function handleCronGenerateTransactions(req: Request, res: 
         success: true,
         generated: 0,
         users: 0,
-        message: 'No onboarded users to generate transactions for.',
+        message: 'No demo users to generate transactions for.',
         timestamp: new Date().toISOString(),
       });
     }
